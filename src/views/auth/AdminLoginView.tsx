@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Building2, Shield, AlertCircle } from 'lucide-react';
 import axios from 'axios';
-import { useAuthContext } from './useAuthContext.tsx';
+import { useAuthContext } from './useAuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export function AdminLoginView() {
@@ -18,26 +18,33 @@ export function AdminLoginView() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
       const response = await axios.post(
         'https://epg-backend.onrender.com/api/admin/login',
         formData
       );
-      if (response.status === 200) {
-        const { email, role } = response.data;
-        localStorage.setItem('userRole', role);
-        login(email, role); // Ensure login is called with email and role
-        navigate('/admin'); // Redirect to the admin dashboard
+  
+      if (response.data && response.data.user) {
+        const { email, role } = response.data.user;
+  
+        // Log the user in
+        login(email, role);
+  
+        setLoading(false);
+        navigate('/admin');
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'An error occurred');
-    } finally {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Invalid credentials');
       setLoading(false);
     }
   };
+  
 
-  return (
+    return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex flex-col items-center">

@@ -1,43 +1,63 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+interface User {
+  email: string;
+  role: string;
+}
 
 interface AuthContextType {
-  user: string | null;
-  role: string | null;
+  user: User | null;
   login: (email: string, role: string) => void;
   logout: () => void;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   const login = (email: string, role: string) => {
-    setUser(email);
-    setRole(role);
+    if (!email || !role) {
+      console.error('Invalid login data:', { email, role });
+      return;
+    }
+    
+    const userData = { email, role };
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    setRole(null);
+    localStorage.removeItem('user');
+  };
+
+  useEffect(() => {
+    console.log('Auth state changed:', { user, isAuthenticated: !!user });
+  }, [user]);
+
+  const value = {
+    user,
+    login,
+    logout,
+    isAuthenticated: !!user && !!user.email && !!user.role
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuthContext = (): AuthContextType => {
+export function useAuthContext() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
-};
+}

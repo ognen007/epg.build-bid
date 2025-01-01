@@ -27,9 +27,14 @@ export function LoginView() {
 
       if (response.status === 200) {
         const { email, role } = response.data;
-        localStorage.setItem('userRole', role);
-        login(email, role); // Ensure login is called with email and role
-        navigate('/contractor'); // Redirect to the appropriate page
+        login(email, role);
+        
+        // Navigate based on role
+        if (role === 'CLIENT') {
+          navigate('/client');
+        } else if (role === 'CONTRACTOR') {
+          navigate('/contractor');
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'An error occurred');
@@ -37,8 +42,7 @@ export function LoginView() {
       setLoading(false);
     }
   };
-
-  return (
+ return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">

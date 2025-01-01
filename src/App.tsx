@@ -1,64 +1,76 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-// Layouts and Views
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './views/auth/useAuthContext';
 import { AdminLoginView } from './views/auth/AdminLoginView';
+import { LoginView } from './views/auth/LoginView';
+import { RegisterView } from './views/auth/RegisterView';
 import { AdminLayout } from './layouts/AdminLayout';
 import { ClientLayout } from './layouts/ClientLayout';
 import { ContractorLayout } from './layouts/ContractorLayout';
-import { RegisterView } from './views/auth/RegisterView';
-import { LoginView } from './views/auth/LoginView';
-import { AuthProvider } from './views/auth/useAuthContext';
 import { ProtectedRoute } from './views/auth/ProtectedRoute';
-
-// Cleanup Service Workers
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    registrations.forEach((registration) => {
-      registration.unregister();
-    });
-  });
-}
+import { PublicRoute } from './views/auth/PublicRoute';
 
 export function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login/admin" element={<AdminLoginView />} />
-          <Route path="/" element={<RegisterView />} />
-          <Route path="/login" element={<LoginView />} />
-
-          {/* Protected Admin Routes */}
-          <Route
-            path="/admin/*"
+      <Routes>
+  {/* Public Routes */}
+  <Route
+            path="/login/admin"
             element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'VA', 'SALES']}>
-                <AdminLayout />
-              </ProtectedRoute>
+              <PublicRoute>
+                <AdminLoginView />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginView />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <RegisterView />
+              </PublicRoute>
             }
           />
 
-          {/* Client Routes */}
-          <Route
-            path="/client/*"
-            element={
-              <ProtectedRoute allowedRoles={['CLIENT']}>
-                <ClientLayout />
-              </ProtectedRoute>
-            }
-          />
 
-          {/* Contractor Routes */}
-          <Route
-            path="/contractor/*"
-            element={
-              <ProtectedRoute allowedRoles={['CONTRACTOR']}>
-                <ContractorLayout />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+  {/* Protected Routes */}
+  <Route
+    path="/admin/*"
+    element={
+      <ProtectedRoute allowedRoles={['ADMIN', 'VA', 'SALES']}>
+        <AdminLayout />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/client/*"
+    element={
+      <ProtectedRoute allowedRoles={['CLIENT']}>
+        <ClientLayout />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/contractor/*"
+    element={
+      <ProtectedRoute allowedRoles={['CONTRACTOR']}>
+        <ContractorLayout />
+      </ProtectedRoute>
+    }
+  />
+
+  {/* Fallback for undefined routes */}
+  <Route path="*" element={<Navigate to="/login" replace />} />
+</Routes>
+
       </Router>
     </AuthProvider>
   );

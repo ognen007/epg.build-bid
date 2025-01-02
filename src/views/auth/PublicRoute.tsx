@@ -7,7 +7,7 @@ export function PublicRoute({ children }: { children: React.ReactNode }) {
   // Redirect based on user role if authenticated
   if (isAuthenticated) {
     const userRole = user?.role?.toUpperCase() ?? "";
-    if (['ADMIN', 'VA', 'SALES'].includes(userRole)) {
+    if (['ADMIN', 'CSM', 'PROJECTSPECIALIST'].includes(userRole)) {
       return <Navigate to="/admin" replace />;
     }
     if (userRole === 'CONTRACTOR') {

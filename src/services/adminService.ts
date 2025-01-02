@@ -42,7 +42,7 @@ export async function getAdminUsers() {
 export async function createAdminUser(userData: {
   email: string;
   full_name: string;
-  role: 'ADMIN' | 'SALES' | 'VA';
+  role: 'ADMIN' | 'PROJECTSPECIALIST' | 'CSM';
 }) {
   try {
     const response = await axios.post(

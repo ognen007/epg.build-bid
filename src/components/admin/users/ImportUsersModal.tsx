@@ -126,7 +126,7 @@ function validateAndTransformData(data: any[]): ImportUserData[] {
       }
     }
 
-    if (!['admin', 'manager', 'sales', 'va'].includes(row.userType)) {
+    if (!['admin', 'manager', 'projectspecialist', 'csm'].includes(row.userType)) {
       throw new Error(`Invalid user type in row ${index + 1}`);
     }
 

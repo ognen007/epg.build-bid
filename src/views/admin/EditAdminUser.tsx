@@ -6,7 +6,7 @@ interface User {
   id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'sales' | 'va';
+  role: 'admin' | 'projectspecialist' | 'csm';
   createdAt: string;
 }
 

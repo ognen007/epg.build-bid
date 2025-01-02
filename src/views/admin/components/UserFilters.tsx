@@ -43,8 +43,8 @@ export function UserFilters({
         >
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
-          <option value="sales">Sales</option>
-          <option value="va">VA</option>
+          <option value="projectspecialist">Project Specialist</option>
+          <option value="csm">CSM</option>
         </select>
       </div>
     </div>

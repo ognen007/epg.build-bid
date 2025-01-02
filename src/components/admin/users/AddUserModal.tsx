@@ -12,7 +12,7 @@ export function AddUserModal({ isOpen, onClose, onAdd }: AddUserModalProps) {
     fullName: '',
     email: '',
     password: '',
-    role: 'ADMIN' as 'ADMIN' | 'SALES' | 'VA',
+    role: 'ADMIN' as 'ADMIN' | 'PROJECTSPECIALIST' | 'CSM',
   });
 
   if (!isOpen) return null;
@@ -83,13 +83,13 @@ export function AddUserModal({ isOpen, onClose, onAdd }: AddUserModalProps) {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    role: e.target.value as 'admin' | 'sales' | 'va',
+                    role: e.target.value as 'admin' | 'projectspecialist' | 'csm',
                   })
                 }
               >
                 <option value="admin">Admin</option>
-                <option value="sales">Sales</option>
-                <option value="va">VA</option>
+                <option value="projectspecialist">Project Specialist</option>
+                <option value="csm">CSM</option>
               </select>
             </div>
 

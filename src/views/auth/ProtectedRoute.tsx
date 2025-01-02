@@ -23,7 +23,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   if (!allowedUpperRoles.includes(userRole)) {
     console.log('Unauthorized role:', userRole, 'Allowed roles:', allowedUpperRoles);
 
-    if (['ADMIN', 'VA', 'SALES'].includes(userRole)) {
+    if (['ADMIN', 'CSM', 'PROJECTSPECIALIST'].includes(userRole)) {
       return <Navigate to="/admin" replace />;
     }
 

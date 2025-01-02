@@ -8,34 +8,98 @@ interface AddProjectModalProps {
   onAdd: (project: Omit<ProjectType, 'id'>) => void;
 }
 
+const contractorOptions = ['Contractor 1', 'Contractor 2', 'Contractor 3'];
+
 export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     client: '',
     contractor: '',
     status: 'pending' as ProjectType['status'],
-    deadline: ''
+    deadline: '',
+    dropboxLink: '',
+    description: '',
   });
+
+  const [filteredContractors, setFilteredContractors] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd(formData);
-    setFormData({
-      name: '',
-      client: '',
-      contractor: '',
-      status: 'pending',
-      deadline: ''
-    });
+
+    // Show loading state
+    setLoading(true);
+    setError(null); // Reset any previous errors
+
+    try {
+      // Send the data to your backend
+      const response = await fetch('/api/project/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create project');
+      }
+
+      // Parse response and trigger the onAdd callback
+      const data = await response.json();
+      onAdd(formData); // Notify the parent that the project was added
+
+      // Reset form data
+      setFormData({
+        name: '',
+        client: '',
+        contractor: '',
+        status: 'pending',
+        deadline: '',
+        dropboxLink: '',
+        description: '',
+      });
+      setShowDropdown(false);
+
+      // Close modal after successful submission
+      onClose();
+    } catch (err) {
+      setError('Failed to create project. Please try again.');
+      console.error(err);
+    } finally {
+      // Hide loading state
+      setLoading(false);
+    }
+  };
+
+  const handleContractorInputChange = (input: string) => {
+    setFormData({ ...formData, contractor: input });
+    if (input.trim() === '') {
+      setShowDropdown(false);
+      return;
+    }
+
+    const matches = contractorOptions.filter((option) =>
+      option.toLowerCase().includes(input.toLowerCase())
+    );
+    setFilteredContractors(matches);
+    setShowDropdown(matches.length > 0);
+  };
+
+  const handleSelectContractor = (contractor: string) => {
+    setFormData({ ...formData, contractor });
+    setShowDropdown(false);
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-        
+
         <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Add New Project</h2>
@@ -56,25 +120,29 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Client</label>
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700">Contractor</label>
               <input
                 type="text"
                 required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.client}
-                onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Contractor (Optional)</label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.contractor}
-                onChange={(e) => setFormData({ ...formData, contractor: e.target.value || null })}
+                onChange={(e) => handleContractorInputChange(e.target.value)}
+                onFocus={() => setShowDropdown(filteredContractors.length > 0)}
               />
+              {showDropdown && (
+                <ul className="absolute z-10 mt-1 max-h-40 w-full overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg">
+                  {filteredContractors.map((contractor) => (
+                    <li
+                      key={contractor}
+                      className="cursor-pointer px-4 py-2 hover:bg-orange-100"
+                      onClick={() => handleSelectContractor(contractor)}
+                    >
+                      {contractor}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div>
@@ -102,6 +170,30 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Attach Dropbox link</label>
+              <input
+                type="url"
+                placeholder="https://example.com"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.dropboxLink}
+                onChange={(e) => setFormData({ ...formData, dropboxLink: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                placeholder="Enter project description..."
+                rows={4}
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
@@ -112,9 +204,10 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               </button>
               <button
                 type="submit"
+                disabled={loading}
                 className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600"
               >
-                Add Project
+                {loading ? 'Adding Project...' : 'Add Project'}
               </button>
             </div>
           </form>

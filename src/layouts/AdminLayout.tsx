@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { AdminSidebar } from '../components/navigation/AdminSidebar';
 import { Header } from '../components/Header';
@@ -18,12 +18,43 @@ import { AdminSettings } from '../views/admin/AdminSettings';
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [fullName, setFullName] = useState('');
+
+  useEffect(() => {
+    const fetchFullNameByEmail = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) return setFullName("Admin User");
+  
+        const { email } = JSON.parse(storedUser);
+  
+        const response = await fetch(
+          `https://epg-backend.onrender.com/api/admin/name-by-email?email=${email}`
+        );
+  
+        if (response.ok) {
+          const data = await response.json();
+          setFullName(data.fullName || "Admin User");
+        } else {
+          console.error("Error fetching full name:", response.statusText);
+          setFullName("Admin User");
+        }
+      } catch (error) {
+        console.error("Error fetching full name:", error);
+        setFullName("Admin User");
+      }
+    };
+  
+    fetchFullNameByEmail();
+  }, []);
+  
+
 
   return (
     <div className="flex h-screen bg-gray-50">
       {showWelcome && (
         <WelcomePopup 
-          fullName="Admin User" 
+        fullName={fullName} 
           onComplete={() => setShowWelcome(false)} 
         />
       )}

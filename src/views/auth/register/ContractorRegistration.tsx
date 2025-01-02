@@ -44,8 +44,8 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
     address: '',
     
     // Documents
-    businessLicense: null as File | null,
-    insuranceCertificate: null as File | null,
+    businessLicense: '',
+    insuranceCertificate: '',
     
     // Terms
     termsAccepted: false
@@ -258,48 +258,23 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
               <h3 className="text-lg font-medium text-gray-900">Verification Documents</h3>
               <div className="mt-4 space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business License</label>
-                  <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500 transition-colors">
-                    <div className="space-y-1 text-center">
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
-                          <span>Upload a file</span>
-                          <input
-                            type="file"
-                            className="sr-only"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            onChange={(e) => setFormData({ ...formData, businessLicense: e.target.files?.[0] || null })}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Insurance Certificate</label>
-                  <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500 transition-colors">
-                    <div className="space-y-1 text-center">
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
-                          <span>Upload a file</span>
-                          <input
-                            type="file"
-                            className="sr-only"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            onChange={(e) => setFormData({ ...formData, insuranceCertificate: e.target.files?.[0] || null })}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                    </div>
-                  </div>
-                </div>
+              <label className="block text-sm font-medium text-gray-700">Business License</label>
+              <input
+                type="url"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="https://"
+                value={formData.portfolioUrl}
+                onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+              />
+            </div>
+              <label className="block text-sm font-medium text-gray-700">Insurance Certificate</label>
+              <input
+                type="url"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="https://"
+                value={formData.portfolioUrl}
+                onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+              />
               </div>
             </div>
 

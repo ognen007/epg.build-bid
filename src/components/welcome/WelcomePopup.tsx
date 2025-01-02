@@ -3,9 +3,10 @@ import { ProgressBar } from './ProgressBar';
 
 interface WelcomePopupProps {
   onComplete: () => void;
+  fullName: string;
 }
 
-export function WelcomePopup({ onComplete }: WelcomePopupProps) {
+export function WelcomePopup({ onComplete, fullName }: WelcomePopupProps) {
   const [progress, setProgress] = useState(0);
   
   useEffect(() => {
@@ -37,7 +38,7 @@ export function WelcomePopup({ onComplete }: WelcomePopupProps) {
     >
       <div className="text-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">
-          Welcome, {'User'}!
+          Welcome, {fullName}!
         </h2>
       </div>
       <ProgressBar progress={progress} />

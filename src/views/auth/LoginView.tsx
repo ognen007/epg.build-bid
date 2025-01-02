@@ -18,17 +18,19 @@ export function LoginView() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
       const response = await axios.post(
-        'https://epg-backend.onrender.com/api/contractor/login',
+        'https://epg-backend.onrender.com/api/login',
         formData
       );
-
+  
+      console.log(response.data); // Log the response data
+  
       if (response.status === 200) {
         const { email, role } = response.data;
         login(email, role);
-        
+  
         // Navigate based on role
         if (role === 'CLIENT') {
           navigate('/client');
@@ -42,6 +44,8 @@ export function LoginView() {
       setLoading(false);
     }
   };
+  
+  
  return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

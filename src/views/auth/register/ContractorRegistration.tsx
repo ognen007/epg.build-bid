@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Building2, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../../../services/auth';
+import axios from 'axios';
 
 interface ContractorRegistrationProps {
   onBack: () => void;
@@ -36,7 +36,7 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
     companyName: '',
     licenseNumber: '',
     specialty: '',
-    yearsExperience: '',
+    yearsExperience: 0,
     portfolioUrl: '',
     
     // Contact Information
@@ -55,34 +55,56 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
       return;
     }
-
+  
+    const contractorData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.password,
+      companyName: formData.companyName,
+      licenseNumber: formData.licenseNumber,
+      specialty: formData.specialty,
+      yearsOfExperience: formData.yearsExperience,
+      portfolioLink: formData.portfolioUrl,
+      phoneNumber: formData.phone,
+      officeAddress: formData.address,
+      businessLicenseUrl: formData.businessLicense,
+      insuranceCertUrl: formData.insuranceCertificate,
+      termsAccepted: formData.termsAccepted, // Ensure this is `true` or `false`
+    };
+  
+    console.log('Request payload:', contractorData);
+  
     try {
-      const { user, error: registerError } = await register({
-        email: formData.email,
-        password: formData.password,
-        userType: 'contractor',
-        fullName: formData.fullName
-      });
-
-      if (registerError) {
-        setError(registerError);
-        return;
+      const response = await axios.post(
+        'https://epg-backend.onrender.com/api/contractors/register',
+        JSON.stringify(contractorData), // Convert to JSON string
+        {
+          headers: {
+            'Content-Type': 'application/json', // Ensure proper content type
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        // Assuming registration is successful, redirect to the login page
+        navigate('/login');
+      } else {
+        throw new Error('Invalid response from server');
       }
-
-      if (user) {
-      }
-    } catch (err) {
-      setError('An error occurred during registration');
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -203,13 +225,14 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
                   <input
-                    type="number"
-                    required
-                    min="0"
-                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                    value={formData.yearsExperience}
-                    onChange={(e) => setFormData({ ...formData, yearsExperience: e.target.value })}
-                  />
+  type="number"
+  required
+  min="0"
+  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+  value={formData.yearsExperience}
+  onChange={(e) => setFormData({ ...formData, yearsExperience: Number(e.target.value) })}
+/>
+
                 </div>
 
                 <div>
@@ -263,8 +286,8 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
                 type="url"
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="https://"
-                value={formData.portfolioUrl}
-                onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+                value={formData.businessLicense}
+                onChange={(e) => setFormData({ ...formData, businessLicense: e.target.value })}
               />
             </div>
               <label className="block text-sm font-medium text-gray-700">Insurance Certificate</label>
@@ -272,8 +295,8 @@ export function ContractorRegistration({ onBack }: ContractorRegistrationProps) 
                 type="url"
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 placeholder="https://"
-                value={formData.portfolioUrl}
-                onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+                value={formData.insuranceCertificate}
+                onChange={(e) => setFormData({ ...formData, insuranceCertificate: e.target.value })}
               />
               </div>
             </div>

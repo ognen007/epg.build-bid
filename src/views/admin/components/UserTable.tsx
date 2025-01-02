@@ -21,7 +21,7 @@ export function UserTable({ users, onRefresh, onEdit }: UserTableProps) {
 
     try {
       const response = await axios.delete(
-        `https://epg-backend.onrender.com/api/admin/delete/${id}`
+        `https://epg-build-bid.onrender.com/api/admin/delete/${id}`
       );
       if (response.status === 200) {
         alert('User deleted successfully');

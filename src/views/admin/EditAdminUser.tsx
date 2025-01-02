@@ -26,7 +26,7 @@ export function EditAdminUser({ user, onClose }: EditAdminUserProps) {
     try {
       // Send the current and new password to the backend
       const response = await axios.put(
-        `https://epg-backend.onrender.com/api/admin/edit-password/${user.id}`,
+        `https://epg-build-bid.onrender.com/api/admin/edit-password/${user.id}`,
         { currentPassword, newPassword }
       );
 

@@ -21,7 +21,7 @@ export function AdminLoginView() {
   
     try {
       const response = await axios.post(
-        'https://epg-backend.onrender.com/api/admin/login',
+        'https://epg-build-bid.onrender.com/api/admin/login',
         formData
       );
   

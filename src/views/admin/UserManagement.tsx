@@ -33,7 +33,7 @@ export function UserManagement() {
     setError('');
     try {
       const response = await axios.get<User[]>(
-        'https://epg-backend.onrender.com/api/admin/users'
+        'https://epg-build-bid.onrender.com/api/admin/users'
       );
       setUsers(response.data);
     } catch (err) {
@@ -55,7 +55,7 @@ export function UserManagement() {
   }) => {
     setError('');
     try {
-      await axios.post('https://epg-backend.onrender.com/api/admin/register', {
+      await axios.post('https://epg-build-bid.onrender.com/api/admin/register', {
         fullName: userData.fullName,
         email: userData.email,
         role: userData.role.toUpperCase(),

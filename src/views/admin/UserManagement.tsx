@@ -8,10 +8,10 @@ import { EditAdminUser } from './EditAdminUser';
 
 interface User {
   id: string;
-  full_name: string;
+  fullName: string;
   email: string;
   role: 'admin' | 'sales' | 'va';
-  created_at: string;
+  createdAt: string;
 }
 
 export function UserManagement() {
@@ -91,7 +91,7 @@ export function UserManagement() {
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
       if (
-        !user.full_name.toLowerCase().includes(searchLower) &&
+        !user.fullName.toLowerCase().includes(searchLower) &&
         !user.email.toLowerCase().includes(searchLower)
       ) {
         return false;

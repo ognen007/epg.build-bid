@@ -29,7 +29,7 @@ export function AdminLayout() {
         const { email } = JSON.parse(storedUser);
   
         const response = await fetch(
-          `https://epg-build-bid.onrender.com/api/admin/name-by-email?email=${email}`
+          `https://epg-backend.onrender.com/api/admin/name-by-email?email=${email}`
         );
   
         if (response.ok) {

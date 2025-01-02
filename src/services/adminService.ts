@@ -3,7 +3,7 @@ import axios from 'axios';
 export async function loginAdmin(email: string) {
   try {
     const response = await axios.post(
-      'https://epg-build-bid.onrender.com/api/admin/login',
+      'https://epg-backend.onrender.com/api/admin/login',
       {
         email,
       }
@@ -31,7 +31,7 @@ export async function loginAdmin(email: string) {
 export async function getAdminUsers() {
   try {
     const response = await axios.get(
-      'https://epg-build-bid.onrender.com/api/users'
+      'https://epg-backend.onrender.com/api/users'
     );
     return { users: response.data, error: null };
   } catch (error) {
@@ -46,7 +46,7 @@ export async function createAdminUser(userData: {
 }) {
   try {
     const response = await axios.post(
-      'https://epg-build-bid.onrender.com/api/admin/register',
+      'https://epg-backend.onrender.com/api/admin/register',
       userData
     );
 

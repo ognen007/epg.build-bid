@@ -1,4 +1,3 @@
-import React from 'react';
 import { PlatformStats } from '../../components/admin/dashboard/PlatformStats';
 import { QuickActions } from '../../components/admin/dashboard/QuickActions';
 import { RecentActivities } from '../../components/admin/dashboard/RecentActivities';

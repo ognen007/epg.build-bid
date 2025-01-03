@@ -88,21 +88,19 @@ export function UserManagement() {
   };
 
   const filteredUsers = users.filter((user) => {
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      if (
-        !user.fullName.toLowerCase().includes(searchLower) &&
-        !user.email.toLowerCase().includes(searchLower)
-      ) {
-        return false;
-      }
-    }
-    if (roleFilter && user.role !== roleFilter) {
-      return false;
-    }
-    return true;
-  });
+    const searchLower = searchQuery.toLowerCase();
+    const roleLower = roleFilter.toUpperCase();
 
+    const matchesSearch =
+      !searchQuery ||
+      user.fullName.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower);
+
+    const matchesRole = !roleFilter || user.role === roleLower;
+
+    return matchesSearch && matchesRole;
+  });
+  
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
@@ -139,7 +137,7 @@ export function UserManagement() {
             </div>
           ) : (
             <UserTable
-              users={users}
+            users={filteredUsers}
               onRefresh={loadUsers}
               onEdit={handleEditClick}
             />

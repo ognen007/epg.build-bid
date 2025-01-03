@@ -1,4 +1,3 @@
-import React from 'react';
 import { Search } from 'lucide-react';
 
 interface UserFiltersProps {
@@ -37,15 +36,16 @@ export function UserFilters({
           Role
         </label>
         <select
-          className="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
-          value={roleFilter}
-          onChange={(e) => onRoleChange(e.target.value)}
-        >
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="projectspecialist">Project Specialist</option>
-          <option value="csm">CSM</option>
-        </select>
+  className="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+  value={roleFilter}
+  onChange={(e) => onRoleChange(e.target.value)}
+>
+  <option value="">All Roles</option>
+  <option value="admin">Admin</option>
+  <option value="projectspecialist">Project Specialist</option>
+  <option value="csm">CSM</option>
+</select>
+
       </div>
     </div>
   );

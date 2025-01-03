@@ -37,7 +37,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
 
     try {
       // Send the data to your backend
-      const response = await fetch('/api/project/create', {
+      const response = await fetch('https://epg-backend.onrender.com/api/project/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         name: '',
         client: '',
         contractor: '',
-        status: 'pending',
+        status: 'Pending',
         deadline: '',
         dropboxLink: '',
         description: '',

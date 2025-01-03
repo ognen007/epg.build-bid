@@ -44,7 +44,7 @@ export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
           value={filters.status}
           onChange={(e) => onFilterChange({ ...filters, status: e.target.value })}
         >
-          <option value="">All Statuses</option>
+          <option value="">All</option>
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
         </select>

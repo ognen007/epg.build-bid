@@ -1,8 +1,9 @@
 export interface ProjectType {
   id: string;
   name: string;
-  client: string;
   contractor: string | null;
-  status: 'active' | 'completed' | 'pending';
-  deadline: string;
+  status: 'Active' | 'Completed' | 'Pending';
+  deadline: string; // ISO string format
+  description?: string;
+  dropboxLink?: string;
 }

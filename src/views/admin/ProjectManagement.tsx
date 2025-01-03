@@ -1,37 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';  // Import axios
 import { ProjectTable } from '../../components/admin/projects/ProjectTable';
 import { ProjectFilters } from '../../components/admin/projects/ProjectFilters';
 import { AddProjectModal } from '../../components/admin/projects/AddProjectModal';
 import { ProjectType } from '../../types/project';
 import { Plus } from 'lucide-react';
 
-const sampleProjects: ProjectType[] = [
-  {
-    id: '1',
-    name: 'City Center Mall Renovation',
-    client: 'John Smith',
-    contractor: 'ABC Construction',
-    status: 'active',
-    deadline: '2024-04-15'
-  },
-  {
-    id: '2',
-    name: 'Harbor Bridge Maintenance',
-    client: 'Sarah Johnson',
-    contractor: null,
-    status: 'pending',
-    deadline: '2024-05-01'
-  }
-];
-
 export function ProjectManagement() {
-  const [projects, setProjects] = useState<ProjectType[]>(sampleProjects);
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<ProjectType[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
     contractor: '',
     search: ''
   });
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const response = await axios.get('https://epg-backend.onrender.com/api/project/display');
+        
+        // Log the raw response to understand its structure
+        console.log('Raw response data:', response.data);
+
+        // Access the 'projects' key inside the response data
+        const data = response.data.projects;  // This accesses the array inside the 'projects' key
+        
+        // Check if the data is an array
+        if (Array.isArray(data)) {
+          const formattedProjects: ProjectType[] = data.map((project: any) => ({
+            id: project.id,
+            name: project.name,
+            contractor: project.contractor || null,
+            status: project.status,
+            deadline: new Date(project.deadline).toISOString(), // Ensure consistent format
+          }));
+
+          setProjects(formattedProjects);
+        } else {
+          throw new Error('Expected an array but got something else');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    }
+
+    fetchProjects();
+  }, []);
+
+  // Filter projects based on filters
+  useEffect(() => {
+    const filtered = projects.filter(project => {
+      const matchesStatus = filters.status
+        ? project.status.toLowerCase() === filters.status.toLowerCase()
+        : true;
+      const matchesContractor = filters.contractor
+        ? project.contractor?.toLowerCase().includes(filters.contractor.toLowerCase())
+        : true;
+      const matchesSearch = filters.search
+        ? project.name.toLowerCase().includes(filters.search.toLowerCase())
+        : true;
+
+      return matchesStatus && matchesContractor && matchesSearch;
+    });
+
+    setFilteredProjects(filtered);
+  }, [filters, projects]);
 
   const handleAddProject = (project: Omit<ProjectType, 'id'>) => {
     const newProject = {
@@ -64,7 +99,7 @@ export function ProjectManagement() {
         </div>
 
         <div className="lg:col-span-3">
-          <ProjectTable projects={projects} />
+          <ProjectTable projects={filteredProjects} />
         </div>
       </div>
 

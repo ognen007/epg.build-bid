@@ -1,13 +1,13 @@
 import React from 'react';
 
 interface ProjectStatusProps {
-  status: 'active' | 'completed' | 'pending';
+  status: 'Active' | 'Completed' | 'pending';
 }
 
 export function ProjectStatus({ status }: ProjectStatusProps) {
   const colors = {
     active: 'bg-green-100 text-green-800',
-    completed: 'bg-blue-100 text-blue-800',
+    Completed: 'bg-blue-100 text-blue-800',
     pending: 'bg-yellow-100 text-yellow-800'
   };
 

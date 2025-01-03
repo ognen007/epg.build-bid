@@ -11,26 +11,32 @@ export function AdminLoginView() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthContext();
   const navigate = useNavigate();
+  const { login } = useAuthContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-  
+
     try {
       const response = await axios.post(
         'https://epg-backend.onrender.com/api/admin/login',
         formData
       );
-  
+
       if (response.data && response.data.user) {
         const { email, role } = response.data.user;
-  
-        // Log the user in
+
+        // Save user details in localStorage
+        localStorage.setItem(
+          'user',
+          JSON.stringify({ email, role })
+        );
+
+        // Log the user in via context
         login(email, role);
-  
+
         setLoading(false);
         navigate('/admin');
       } else {
@@ -42,7 +48,7 @@ export function AdminLoginView() {
       setLoading(false);
     }
   };
-  
+
 
     return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

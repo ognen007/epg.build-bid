@@ -7,6 +7,8 @@ interface ProjectTableProps {
 }
 
 export function ProjectTable({ projects }: ProjectTableProps) {
+  console.log('Projects:', projects); // Log to check the incoming data
+
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
@@ -15,9 +17,6 @@ export function ProjectTable({ projects }: ProjectTableProps) {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Project Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Client
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Contractor
@@ -34,9 +33,17 @@ export function ProjectTable({ projects }: ProjectTableProps) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {projects.map((project) => (
-              <ProjectRow key={project.id} project={project} />
-            ))}
+            {projects.length > 0 ? (
+              projects.map((project) => (
+                <ProjectRow key={project.id} project={project} />
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  No projects available
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

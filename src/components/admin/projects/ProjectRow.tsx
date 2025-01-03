@@ -14,9 +14,6 @@ export function ProjectRow({ project }: ProjectRowProps) {
         <div className="text-sm font-medium text-gray-900">{project.name}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500">{project.client}</div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
         {project.contractor ? (
           <div className="text-sm text-gray-500">{project.contractor}</div>
         ) : (

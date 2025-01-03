@@ -31,7 +31,7 @@ export function ProjectFilters({ filters, onFilterChange }: ProjectFiltersProps)
           value={filters.status}
           onChange={(e) => onFilterChange({ ...filters, status: e.target.value })}
         >
-          <option value="">All Statuses</option>
+          <option value="">All</option>
           <option value="active">Active</option>
           <option value="completed">Completed</option>
           <option value="pending">Pending</option>

@@ -34,13 +34,13 @@ export function RevenueChart() {
       <div className="mt-6">
         <div className="flex justify-between mb-4">
           <div>
-            <div className="text-sm text-gray-500">Contractor Fees</div>
+            <div className="text-sm text-gray-500">Revenue Generated</div>
             <div className="text-lg font-semibold text-gray-900">
               ${data.distribution.contractorFees.toLocaleString()}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-gray-500">Platform Fees</div>
+            <div className="text-sm text-gray-500">Cash Paid Out</div>
             <div className="text-lg font-semibold text-gray-900">
               ${data.distribution.platformFees.toLocaleString()}
             </div>

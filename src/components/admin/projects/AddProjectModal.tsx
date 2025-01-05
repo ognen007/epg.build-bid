@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { DollarSign, X } from 'lucide-react';
 import { ProjectType } from '../../../types/project';
 
 interface AddProjectModalProps {
@@ -8,35 +8,47 @@ interface AddProjectModalProps {
   onAdd: (project: Omit<ProjectType, 'id'>) => void;
 }
 
-const contractorOptions = ['Contractor 1', 'Contractor 2', 'Contractor 3'];
-
 export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     client: '',
     contractor: '',
-    status: 'pending' as ProjectType['status'],
+    status: 'awaiting_bid' as ProjectType['status'],
     deadline: '',
     dropboxLink: '',
+    valuation: '',
     description: '',
   });
 
+  const [contractors, setContractors] = useState<{ id: string; fullName: string }[]>([]);
+  const [loadingContractors, setLoadingContractors] = useState(false);
   const [filteredContractors, setFilteredContractors] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingContractors(true);
+      fetch('https://epg-backend.onrender.com/api/contractors/name')
+        .then((response) => response.json())
+        .then((data) => {
+          setContractors(data);
+          setLoadingContractors(false);
+        })
+        .catch((err) => {
+          console.error('Error fetching contractors:', err);
+          setLoadingContractors(false);
+        });
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Show loading state
     setLoading(true);
-    setError(null); // Reset any previous errors
+    setError(null);
 
     try {
-      // Send the data to your backend
       const response = await fetch('https://epg-backend.onrender.com/api/project/create', {
         method: 'POST',
         headers: {
@@ -45,33 +57,26 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create project');
-      }
+      if (!response.ok) throw new Error('Failed to create project');
 
-      // Parse response and trigger the onAdd callback
       const data = await response.json();
-      onAdd(formData); // Notify the parent that the project was added
-
-      // Reset form data
+      onAdd(formData);
       setFormData({
         name: '',
         client: '',
         contractor: '',
-        status: 'Pending',
+        status: 'awaiting_bid',
         deadline: '',
         dropboxLink: '',
+        valuation: '',
         description: '',
       });
       setShowDropdown(false);
-
-      // Close modal after successful submission
       onClose();
     } catch (err) {
       setError('Failed to create project. Please try again.');
       console.error(err);
     } finally {
-      // Hide loading state
       setLoading(false);
     }
   };
@@ -83,9 +88,12 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
       return;
     }
 
-    const matches = contractorOptions.filter((option) =>
-      option.toLowerCase().includes(input.toLowerCase())
-    );
+    const matches = contractors
+      .filter((contractor) =>
+        contractor.fullName.toLowerCase().includes(input.toLowerCase())
+      )
+      .map((contractor) => contractor.fullName);
+
     setFilteredContractors(matches);
     setShowDropdown(matches.length > 0);
   };
@@ -94,6 +102,8 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     setFormData({ ...formData, contractor });
     setShowDropdown(false);
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -130,6 +140,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 onChange={(e) => handleContractorInputChange(e.target.value)}
                 onFocus={() => setShowDropdown(filteredContractors.length > 0)}
               />
+              {loadingContractors && <p>Loading contractors...</p>}
               {showDropdown && (
                 <ul className="absolute z-10 mt-1 max-h-40 w-full overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg">
                   {filteredContractors.map((contractor) => (
@@ -153,9 +164,10 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
               >
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
+                <option value="awaiting_bid">Awaiting Bid</option>
+                <option value="bid_submitted">Bid Submitted</option>
+                <option value="won">Won</option>
+                <option value="lost">Lost</option>
               </select>
             </div>
 
@@ -179,6 +191,27 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 value={formData.dropboxLink}
                 onChange={(e) => setFormData({ ...formData, dropboxLink: e.target.value })}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Total Project Valuation
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <DollarSign className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="block w-full pl-10 pr-3 py-2 rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.valuation}
+                  onChange={(e) => setFormData({ ...formData, valuation: e.target.value })}
+                />
+              </div>
             </div>
 
             <div>

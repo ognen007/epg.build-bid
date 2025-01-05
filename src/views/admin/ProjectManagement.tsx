@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';  // Import axios
+import axios from 'axios';
 import { ProjectTable } from '../../components/admin/projects/ProjectTable';
 import { ProjectFilters } from '../../components/admin/projects/ProjectFilters';
 import { AddProjectModal } from '../../components/admin/projects/AddProjectModal';
@@ -12,29 +12,26 @@ export function ProjectManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
-    contractor: '',
-    search: ''
+    stage: '',
+    client: '',
+    search: '',
   });
 
   useEffect(() => {
     async function fetchProjects() {
       try {
         const response = await axios.get('https://epg-backend.onrender.com/api/project/display');
-        
-        // Log the raw response to understand its structure
-        console.log('Raw response data:', response.data);
+        const data = response.data.projects;
 
-        // Access the 'projects' key inside the response data
-        const data = response.data.projects;  // This accesses the array inside the 'projects' key
-        
-        // Check if the data is an array
         if (Array.isArray(data)) {
           const formattedProjects: ProjectType[] = data.map((project: any) => ({
             id: project.id,
             name: project.name,
             contractor: project.contractor || null,
             status: project.status,
-            deadline: new Date(project.deadline).toISOString(), // Ensure consistent format
+            stage: project.stage || '', // Ensure stage is included
+            valuation: project.valuation,
+            deadline: new Date(project.deadline).toISOString(),
           }));
 
           setProjects(formattedProjects);
@@ -55,14 +52,14 @@ export function ProjectManagement() {
       const matchesStatus = filters.status
         ? project.status.toLowerCase() === filters.status.toLowerCase()
         : true;
-      const matchesContractor = filters.contractor
-        ? project.contractor?.toLowerCase().includes(filters.contractor.toLowerCase())
+      const matchesClient = filters.client
+        ? project.contractor?.toLowerCase().includes(filters.client.toLowerCase())
         : true;
       const matchesSearch = filters.search
         ? project.name.toLowerCase().includes(filters.search.toLowerCase())
         : true;
 
-      return matchesStatus && matchesContractor && matchesSearch;
+      return matchesStatus && matchesClient && matchesSearch;
     });
 
     setFilteredProjects(filtered);
@@ -71,7 +68,7 @@ export function ProjectManagement() {
   const handleAddProject = (project: Omit<ProjectType, 'id'>) => {
     const newProject = {
       ...project,
-      id: Date.now().toString()
+      id: Date.now().toString(),
     };
     setProjects([...projects, newProject]);
     setIsModalOpen(false);

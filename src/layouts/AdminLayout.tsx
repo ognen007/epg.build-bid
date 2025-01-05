@@ -89,7 +89,7 @@ export function AdminLayout() {
             <Route path="/users" element={<UserManagement />} />
             <Route path="/projects" element={<ProjectManagement />} />
             <Route path="/messages" element={<AdminMessages />} />
-            <Route path="/earnings" element={<EarningsManagement />} />
+            {/* <Route path="/earnings" element={<EarningsManagement />} /> */}
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/platform-settings" element={<PlatformSettings />} />
             <Route path="/support" element={<SupportTickets />} />

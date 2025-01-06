@@ -1,53 +1,99 @@
-import React, { useState } from 'react';
-import { Camera } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Camera } from "lucide-react";
 
-export function ProfileSettings() {
+interface ProfileSettingsProps {
+  fullName: string;
+  email: string;
+  phone: string;
+  company: string;
+  avatar_url: string;
+  onSubmit: (updatedProfile: {
+    fullName: string;
+    email: string;
+    phone: string;
+    company: string;
+    avatar_url: string;
+  }) => void; // New prop for submitting profile changes
+}
+
+export function ProfileSettings({
+  fullName,
+  email,
+  phone,
+  company,
+  avatar_url,
+  onSubmit,
+}: ProfileSettingsProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [profile, setProfile] = useState({
-    fullName: '',
-    email:  '',
-    phone: '',
-    company: '',
-    avatar_url: ''
+    fullName: fullName || "",
+    email: email || "",
+    phone: phone || "",
+    company: company || "",
+    avatar_url: avatar_url || "",
   });
+
+  // Update profile when props change
+  useEffect(() => {
+    setProfile({
+      fullName: fullName || "",
+      email: email || "",
+      phone: phone || "",
+      company: company || "",
+      avatar_url: avatar_url || "",
+    });
+  }, [fullName, email, phone, company, avatar_url]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccess(false);
 
-    // Mock API call
-    setTimeout(() => {
+    try {
+      await onSubmit(profile); // Call the onSubmit prop with the updated profile
       setSuccess(true);
+    } catch (error) {
+      console.error("Error saving changes:", error);
+    } finally {
       setLoading(false);
       setTimeout(() => setSuccess(false), 3000);
-    }, 1000);
+    }
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Mock file upload
     setLoading(true);
+
+    // Simulate a file upload
     setTimeout(() => {
-      setProfile({
-        ...profile,
-        avatar_url: URL.createObjectURL(file)
-      });
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        avatar_url: URL.createObjectURL(file), // Temporarily set the local object URL
+      }));
       setLoading(false);
     }, 1000);
+
+    // Clear the input field to allow re-upload of the same file
+    e.target.value = "";
   };
 
   return (
     <div className="p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h2>
-      
+
       <div className="flex items-center space-x-6 mb-6">
         <div className="relative">
           <img
-            src={profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName)}&background=random`}
+            src={
+              profile.avatar_url ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                profile.fullName
+              )}&background=random`
+            }
             alt="Profile"
             className="h-24 w-24 rounded-full object-cover bg-gray-100"
           />
@@ -71,7 +117,12 @@ export function ProfileSettings() {
             <input
               type="text"
               value={profile.fullName}
-              onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+              onChange={(e) =>
+                setProfile((prevProfile) => ({
+                  ...prevProfile,
+                  fullName: e.target.value,
+                }))
+              }
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
             />
           </div>
@@ -89,7 +140,12 @@ export function ProfileSettings() {
             <input
               type="tel"
               value={profile.phone}
-              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+              onChange={(e) =>
+                setProfile((prevProfile) => ({
+                  ...prevProfile,
+                  phone: e.target.value,
+                }))
+              }
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
             />
           </div>
@@ -98,7 +154,12 @@ export function ProfileSettings() {
             <input
               type="text"
               value={profile.company}
-              onChange={(e) => setProfile({ ...profile, company: e.target.value })}
+              onChange={(e) =>
+                setProfile((prevProfile) => ({
+                  ...prevProfile,
+                  company: e.target.value,
+                }))
+              }
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
             />
           </div>
@@ -113,7 +174,7 @@ export function ProfileSettings() {
             disabled={loading}
             className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>

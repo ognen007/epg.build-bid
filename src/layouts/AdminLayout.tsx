@@ -9,7 +9,6 @@ import { AdminDashboard } from '../views/admin/AdminDashboard';
 import { UserManagement } from '../views/admin/UserManagement';
 import { ProjectManagement } from '../views/admin/ProjectManagement';
 import { AdminMessages } from '../views/admin/AdminMessages';
-import { EarningsManagement } from '../views/admin/EarningsManagement';
 import { Analytics } from '../views/admin/Analytics';
 import { PlatformSettings } from '../views/admin/PlatformSettings';
 import { SupportTickets } from '../views/admin/SupportTickets';

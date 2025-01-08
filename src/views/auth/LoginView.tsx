@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Building2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthContext } from './useAuthContext';
+import epgLogo from "../../asset/epgLogo.png"
 
 export function LoginView() {
   const [formData, setFormData] = useState({
@@ -50,7 +50,7 @@ export function LoginView() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Building2 className="h-12 w-12 text-orange-500" />
+        <img src={epgLogo} className="h-14" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Sign in to your account

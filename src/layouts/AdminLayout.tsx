@@ -13,6 +13,8 @@ import { Analytics } from '../views/admin/Analytics';
 import { PlatformSettings } from '../views/admin/PlatformSettings';
 import { SupportTickets } from '../views/admin/SupportTickets';
 import { AdminSettings } from '../views/admin/AdminSettings';
+import { RevenueComponent } from '../components/admin/analytics/RevenueComponent';
+import { UserGrowthComponent } from '../components/admin/analytics/UserGrowthComponent';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -77,6 +79,7 @@ export function AdminLayout() {
       
       <div className="flex-1 flex flex-col min-w-0">
         <Header 
+        userFullName='Robert Welch'
           onMenuClick={() => setIsSidebarOpen(true)}
           onTasksClick={() => {}}
           showTasksButton={false}
@@ -93,6 +96,8 @@ export function AdminLayout() {
             <Route path="/platform-settings" element={<PlatformSettings />} />
             <Route path="/support" element={<SupportTickets />} />
             <Route path="/settings" element={<AdminSettings />} />
+            <Route path="/analytics/revenue" element={<RevenueComponent />} />
+            <Route path="/analytics/users" element={<UserGrowthComponent />} />
           </Routes>
         </main>
       </div>

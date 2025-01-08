@@ -3,6 +3,7 @@ import { Building2, Briefcase, UserCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ClientRegistration } from './register/ClientRegistration';
 import { ContractorRegistration } from './register/ContractorRegistration';
+import epgLogo from "../../asset/epgLogo.png"
 
 export function RegisterView() {
   const [step, setStep] = useState(1);
@@ -25,7 +26,7 @@ export function RegisterView() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Building2 className="h-12 w-12 text-orange-500" />
+        <img src={epgLogo} className="h-16" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Create your account

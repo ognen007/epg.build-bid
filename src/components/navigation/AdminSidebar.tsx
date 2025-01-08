@@ -1,8 +1,8 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Building2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { NavItem } from './NavItem';
 import { routes } from '../../navigation/routes';
+import epgLogo from "../../asset/epgLogo.png"
 
 interface AdminSidebarProps {
   onClose: () => void;
@@ -16,8 +16,7 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
     <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-6 flex items-center justify-between border-b border-gray-200">
         <div className="flex items-center space-x-2">
-          <Building2 className="h-8 w-8 text-orange-500" />
-          <div className="font-bold text-gray-900 text-lg">ADMIN</div>
+          <img src={epgLogo} className="h-14" />
         </div>
         <button 
           onClick={onClose}

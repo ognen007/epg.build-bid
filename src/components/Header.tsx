@@ -1,13 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Bell, Menu, ListTodo, Phone } from 'lucide-react';
+import { NotificationPopover } from './NotificationPopover';
 
 interface HeaderProps {
   onMenuClick: () => void;
   onTasksClick: () => void;
   showTasksButton: boolean;
+  userFullName: string;
 }
 
-export function Header({ onMenuClick, onTasksClick, showTasksButton }: HeaderProps) {
+export function Header({ onMenuClick, onTasksClick, showTasksButton, userFullName }: HeaderProps) {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: '1',
+      title: 'New Announcement',
+      message: 'Important update about the platform maintenance.',
+      from: 'System Admin',
+      timestamp: '2 hours ago',
+      read: false
+    }
+  ]);
+
+  const hasUnreadNotifications = notifications.some(n => !n.read);
+
+  const handleNotificationClick = (id: string) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    ));
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-3 sm:px-4 md:px-6">
       <div className="flex items-center">
@@ -22,12 +44,25 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton }: HeaderPro
       </div>
       
       <div className="flex items-center space-x-2 sm:space-x-4">
-        <button 
-          className="p-2 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-lg"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5" />
-        </button>
+        <div className="relative">
+          <button 
+            className="p-2 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-lg"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            <Bell className="h-5 w-5" />
+            {hasUnreadNotifications && (
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+            )}
+          </button>
+          
+          {showNotifications && (
+            <NotificationPopover 
+              notifications={notifications}
+              onNotificationClick={handleNotificationClick}
+            />
+          )}
+        </div>
+
         {showTasksButton && (
           <button 
             onClick={onTasksClick}
@@ -37,6 +72,7 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton }: HeaderPro
             <ListTodo className="h-5 w-5" />
           </button>
         )}
+        
         <button className="hidden md:flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
           <Phone className="h-4 w-4 mr-2" />
           <span>Contact Us</span>

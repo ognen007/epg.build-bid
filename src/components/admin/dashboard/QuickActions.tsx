@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus, Bell, LifeBuoy } from 'lucide-react';
+import { CreateAnnouncementModal } from '../../CreateAnnouncementModal';
 
 const actions = [
   {
@@ -12,7 +13,7 @@ const actions = [
     title: 'Create Announcement',
     description: 'Send a platform-wide announcement',
     icon: Bell,
-    onClick: () => console.log('Create announcement')
+    onClick: () => {} // Placeholder, will be overridden
   },
   {
     title: 'Resolve Pending Ticket',
@@ -23,11 +24,31 @@ const actions = [
 ];
 
 export function QuickActions() {
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
+
+  // Open the modal
+  const handleCreateAnnouncementClick = () => {
+    setIsModalOpen(true);
+  };
+
+  // Close the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Update the "Create Announcement" action to use the handler
+  const updatedActions = actions.map((action) => {
+    if (action.title === 'Create Announcement') {
+      return { ...action, onClick: handleCreateAnnouncementClick };
+    }
+    return action;
+  });
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
       <div className="space-y-4">
-        {actions.map((action) => (
+        {updatedActions.map((action) => (
           <button
             key={action.title}
             onClick={action.onClick}
@@ -43,6 +64,13 @@ export function QuickActions() {
           </button>
         ))}
       </div>
+
+      {/* Render the modal */}
+      <CreateAnnouncementModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        userFullName="Robert Welch" // Replace with dynamic user name if needed
+      />
     </div>
   );
 }

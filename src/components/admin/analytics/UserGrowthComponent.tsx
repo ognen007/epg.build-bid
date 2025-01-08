@@ -7,8 +7,14 @@ interface User {
   email: string;
   type: 'contractor' | 'client';
   company: string;
-  joinDate: string;
-  status: 'active' | 'inactive';
+  licenseNumber?: string;
+  specialty?: string;
+  yearsExperience?: number;
+  portfolioUrl?: string;
+  phone?: string;
+  address?: string;
+  businessLicenseUrl?: string;
+  insuranceCertificateUrl?: string;
 }
 
 const sampleUsers: User[] = [
@@ -18,19 +24,196 @@ const sampleUsers: User[] = [
     email: 'john@example.com',
     type: 'contractor',
     company: 'Smith Construction',
-    joinDate: '2024-01-15',
-    status: 'active'
+    licenseNumber: 'LIC123456',
+    specialty: 'Electrical',
+    yearsExperience: 10,
+    portfolioUrl: 'https://example.com',
+    phone: '(555) 123-4567',
+    address: '123 Main St, City, State',
+    businessLicenseUrl: 'https://example.com/license',
+    insuranceCertificateUrl: 'https://example.com/insurance'
   },
   {
     id: '2',
     name: 'Sarah Johnson',
     email: 'sarah@example.com',
     type: 'client',
-    company: 'Johnson Industries',
-    joinDate: '2024-02-01',
-    status: 'active'
+    company: 'Johnson Industries'
   }
 ];
+
+interface EditUserModalProps {
+  user: User;
+  onClose: () => void;
+  onSave: (user: User) => void;
+}
+
+function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
+  const [formData, setFormData] = useState(user);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        
+        <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">Edit User</h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                  type="password"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Leave blank to keep current password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.company}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                />
+              </div>
+
+              {formData.type === 'contractor' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">License Number</label>
+                    <input
+                      type="text"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.licenseNumber}
+                      onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Specialty</label>
+                    <input
+                      type="text"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.specialty}
+                      onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
+                    <input
+                      type="number"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.yearsExperience}
+                      onChange={(e) => setFormData({ ...formData, yearsExperience: Number(e.target.value) })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Portfolio URL</label>
+                    <input
+                      type="url"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.portfolioUrl}
+                      onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input
+                      type="tel"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Office Address</label>
+                    <input
+                      type="text"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Business License URL</label>
+                    <input
+                      type="url"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.businessLicenseUrl}
+                      onChange={(e) => setFormData({ ...formData, businessLicenseUrl: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Insurance Certificate URL</label>
+                    <input
+                      type="url"
+                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                      value={formData.insuranceCertificateUrl}
+                      onChange={(e) => setFormData({ ...formData, insuranceCertificateUrl: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function UserGrowthComponent() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,20 +221,30 @@ export function UserGrowthComponent() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const filteredUsers = sampleUsers.filter(user => {
-    const matchesSearch = 
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.company.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesType = userType === 'all' || user.type === userType;
-    
-    return matchesSearch && matchesType;
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      if (
+        !user.name.toLowerCase().includes(searchLower) &&
+        !user.email.toLowerCase().includes(searchLower)
+      ) {
+        return false;
+      }
+    }
+    if (userType !== 'all' && user.type !== userType) {
+      return false;
+    }
+    return true;
   });
+
+  const handleSaveUser = (updatedUser: User) => {
+    // Handle user update logic here
+    console.log('Updated user:', updatedUser);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">User Growth Analytics</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">User Analytics</h1>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6">
@@ -85,8 +278,6 @@ export function UserGrowthComponent() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="relative px-6 py-3">
                   <span className="sr-only">Actions</span>
                 </th>
@@ -105,16 +296,6 @@ export function UserGrowthComponent() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.company}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.joinDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                    </span>
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => setSelectedUser(user)}
@@ -129,6 +310,14 @@ export function UserGrowthComponent() {
           </table>
         </div>
       </div>
+
+      {selectedUser && (
+        <EditUserModal
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onSave={handleSaveUser}
+        />
+      )}
     </div>
   );
 }

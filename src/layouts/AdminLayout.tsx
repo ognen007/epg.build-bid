@@ -15,6 +15,7 @@ import { SupportTickets } from '../views/admin/SupportTickets';
 import { AdminSettings } from '../views/admin/AdminSettings';
 import { RevenueComponent } from '../components/admin/analytics/RevenueComponent';
 import { UserGrowthComponent } from '../components/admin/analytics/UserGrowthComponent';
+import { RevenueDetails } from '../components/admin/analytics/RevenueDetails';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -97,6 +98,7 @@ export function AdminLayout() {
             <Route path="/support" element={<SupportTickets />} />
             <Route path="/settings" element={<AdminSettings />} />
             <Route path="/analytics/revenue" element={<RevenueComponent />} />
+            <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
             <Route path="/analytics/users" element={<UserGrowthComponent />} />
           </Routes>
         </main>

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Building2, Shield, AlertCircle } from 'lucide-react';
+import { Shield, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { useAuthContext } from './useAuthContext';
 import { useNavigate } from 'react-router-dom';
+import epgLogo from "../../asset/epgLogo.png";
 
 export function AdminLoginView() {
   const [formData, setFormData] = useState({
@@ -54,8 +55,8 @@ export function AdminLoginView() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex flex-col items-center">
-          <div className="p-4 bg-white rounded-2xl shadow-lg">
-            <Building2 className="h-12 w-12 text-orange-500" />
+          <div className="p-4">
+          <img src={epgLogo} className="h-14" />
           </div>
           <div className="mt-6 flex items-center justify-center space-x-2">
             <Shield className="h-5 w-5 text-orange-600" />

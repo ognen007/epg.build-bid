@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Revenue {
   id: string;
@@ -42,6 +43,7 @@ const sampleRevenue: Revenue[] = [
 ];
 
 export function RevenueComponent() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredRevenue = sampleRevenue.filter(rev => 
@@ -84,7 +86,11 @@ export function RevenueComponent() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredRevenue.map((rev) => (
-                <tr key={rev.id} className="hover:bg-gray-50">
+                <tr 
+                  key={rev.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/admin/analytics/revenue/${rev.id}`)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{rev.contractor.name}</div>
                     <div className="text-sm text-gray-500">{rev.contractor.email}</div>

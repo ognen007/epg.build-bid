@@ -1,6 +1,7 @@
 import React from 'react';
-import { Users, TrendingUp } from 'lucide-react';
+import { Users, TrendingUp, ArrowRight } from 'lucide-react';
 import { MetricHeader } from './MetricHeader';
+import { useNavigate } from 'react-router-dom';
 
 const data = {
   totalUsers: 2458,
@@ -16,18 +17,28 @@ const data = {
 };
 
 export function UserGrowthChart() {
+  const navigate = useNavigate();
   const maxValue = Math.max(
     ...data.monthlyData.map(d => Math.max(d.clients, d.contractors))
   );
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <MetricHeader 
-        title="User Growth"
-        total={data.totalUsers}
-        growth={data.growth}
-        icon={Users}
-      />
+      <div className="flex justify-between items-start mb-6">
+        <MetricHeader 
+          title="User Growth"
+          total={data.totalUsers}
+          growth={data.growth}
+          icon={Users}
+        />
+        <button
+          onClick={() => navigate('/admin/analytics/users')}
+          className="flex items-center text-orange-600 hover:text-orange-700 text-sm font-medium"
+        >
+          View Details
+          <ArrowRight className="h-4 w-4 ml-1" />
+        </button>
+      </div>
 
       <div className="mt-6 h-64">
         <div className="h-full flex items-end space-x-2">

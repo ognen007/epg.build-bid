@@ -31,7 +31,7 @@ export const routes = {
   contractor: [
     { path: '/contractor', label: 'Dashboard', icon: BarChart3 },
     { path: '/contractor/projects', label: 'My Projects', icon: Briefcase },
-    { path: '/contractor/find-work', label: 'Find Work', icon: Hammer },
+    // { path: '/contractor/find-work', label: 'Find Work', icon: Hammer },
     { path: '/contractor/earnings', label: 'Earnings', icon: Wallet },
     { path: '/contractor/messages', label: 'Messages', icon: MessageCircle },
     { path: '/contractor/settings', label: 'Settings', icon: Settings },

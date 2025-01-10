@@ -63,22 +63,22 @@ export function TakeoffList() {
           
           <select
             className="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
-            value={filters.estimator}
-            onChange={(e) => setFilters({ ...filters, estimator: e.target.value })}
-          >
-            <option value="">All Estimators</option>
-            <option value="John Smith">John Smith</option>
-            <option value="Sarah Johnson">Sarah Johnson</option>
-          </select>
-
-          <select
-            className="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
             value={filters.contractor}
             onChange={(e) => setFilters({ ...filters, contractor: e.target.value })}
           >
             <option value="">All Contractors</option>
             <option value="ABC Construction">ABC Construction</option>
             <option value="XYZ Contractors">XYZ Contractors</option>
+          </select>
+
+          <select
+            className="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
+            value={filters.estimator}
+            onChange={(e) => setFilters({ ...filters, estimator: e.target.value })}
+          >
+            <option value="">All Estimators</option>
+            <option value="John Smith">John Smith</option>
+            <option value="Sarah Johnson">Sarah Johnson</option>
           </select>
         </div>
       </div>

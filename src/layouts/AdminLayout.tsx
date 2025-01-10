@@ -16,6 +16,8 @@ import { AdminSettings } from '../views/admin/AdminSettings';
 import { RevenueComponent } from '../components/admin/analytics/RevenueComponent';
 import { UserGrowthComponent } from '../components/admin/analytics/UserGrowthComponent';
 import { RevenueDetails } from '../components/admin/analytics/RevenueDetails';
+import { ProjectKanbanView } from '../components/admin/projects/ProjectKanbanView';
+import { TakeoffView } from '../components/admin/takeoff/TakeoffView';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -91,6 +93,7 @@ export function AdminLayout() {
             <Route path="/" element={<AdminDashboard />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="/projects" element={<ProjectManagement />} />
+            <Route path="/projects/:id" element={<ProjectKanbanView />} />
             <Route path="/messages" element={<AdminMessages />} />
             {/* <Route path="/earnings" element={<EarningsManagement />} /> */}
             <Route path="/analytics" element={<Analytics />} />
@@ -100,6 +103,7 @@ export function AdminLayout() {
             <Route path="/analytics/revenue" element={<RevenueComponent />} />
             <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
             <Route path="/analytics/users" element={<UserGrowthComponent />} />
+            <Route path="/takeoff" element={<TakeoffView />} />
           </Routes>
         </main>
       </div>

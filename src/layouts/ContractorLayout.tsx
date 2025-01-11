@@ -11,6 +11,7 @@ import { FindWorkView } from '../views/contractor/FindWorkView';
 import { ContractorEarnings } from '../views/contractor/ContractorEarnings';
 import { ContractorMessages } from '../views/contractor/ContractorMessages';
 import { ContractorSettings } from '../views/contractor/ContractorSettings';
+import { ContractorTasks } from '../views/contractor/ContractorTasks';
 
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -57,6 +58,7 @@ export function ContractorLayout() {
             <Route path="/earnings" element={<ContractorEarnings />} />
             <Route path="/messages" element={<ContractorMessages />} />
             <Route path="/settings" element={<ContractorSettings />} />
+            <Route path="/tasks" element={<ContractorTasks />} />
           </Routes>
         </main>
       </div>

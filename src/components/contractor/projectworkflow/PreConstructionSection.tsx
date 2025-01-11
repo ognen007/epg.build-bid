@@ -39,7 +39,6 @@ export function PreConstructionSection() {
 
   const getStatusText = (status: Project['status']) => {
     switch (status) {
-      case 'proposal': return 'Project Proposals';
       case 'takeoff': return 'Takeoff in Progress';
       case 'ready': return 'Ready for Proposal';
       case 'negotiating': return 'Negotiating';
@@ -55,16 +54,16 @@ export function PreConstructionSection() {
   }, {} as Record<Project['status'], Project[]>);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full"> {/* Ensure full width */}
       <h2 className="text-xl font-semibold text-gray-900">Pre-Construction</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {(['proposal', 'takeoff', 'ready', 'negotiating'] as const).map(status => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full"> {/* Ensure full width */}
+        {(['takeoff', 'ready', 'negotiating'] as const).map(status => {
           const StatusIcon = getStatusIcon(status);
           const projects = groupedProjects[status] || [];
           
           return (
-            <div key={status} className="bg-white rounded-xl shadow-sm p-6">
+            <div key={status} className="bg-white rounded-xl shadow-sm p-6 w-full"> {/* Ensure full width */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <StatusIcon className="h-5 w-5 text-orange-500" />
@@ -75,7 +74,7 @@ export function PreConstructionSection() {
 
               <div className="space-y-3">
                 {projects.map(project => (
-                  <div key={project.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div key={project.id} className="p-3 bg-gray-50 rounded-lg w-full"> {/* Ensure full width */}
                     <div className="font-medium text-gray-900">{project.name}</div>
                     <div className="text-sm text-gray-500 mt-1">{project.contractor}</div>
                     {status === 'ready' && project.dropboxLink && (

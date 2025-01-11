@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import { OngoingProjects } from '../../components/contractor/projects/OngoingProjects';
-import { CompletedProjects } from '../../components/contractor/projects/CompletedProjects';
+import { useState } from 'react';
 import { ProjectProposals } from '../../components/contractor/projects/ProjectProposals';
-import { Project } from '../../types/project';
+import { ProjectWorkflowView } from '../../components/contractor/projectworkflow/ProjectWorkflowView';
 
 const sampleProjects = {
   ongoing: [
@@ -39,11 +37,6 @@ const sampleProjects = {
 export function ContractorProjects() {
   const [projects, setProjects] = useState(sampleProjects);
 
-  const handleProjectClick = (project: Project) => {
-    // Handle project click
-    console.log('Project clicked:', project);
-  };
-
   const handleAcceptProposal = (id: string) => {
     // Handle proposal acceptance
     console.log('Proposal accepted:', id);
@@ -61,16 +54,8 @@ export function ContractorProjects() {
         onAccept={handleAcceptProposal}
         onDecline={handleDeclineProposal}
       />
-      
-      <OngoingProjects
-        projects={projects.ongoing}
-        onProjectClick={handleProjectClick}
-      />
-      
-      <CompletedProjects
-        projects={projects.completed}
-        onProjectClick={handleProjectClick}
-      />
+
+      <ProjectWorkflowView/>
     </div>
   );
 }

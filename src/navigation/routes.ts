@@ -22,7 +22,6 @@ export const routes = {
     { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
     { path: '/admin/analytics', label: 'Reports & Analytics', icon: LineChart },
-    { path: '/admin/workflow', label: 'Workflow', icon: Waypoints },
     { path: '/admin/settings', label: 'Settings', icon: Settings },
   ],
   client: [

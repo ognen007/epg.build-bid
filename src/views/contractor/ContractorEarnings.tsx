@@ -1,6 +1,5 @@
-import React from 'react';
+import { ContractorRevenue } from '../../components/contractor/earnings/ContractorRevenue';
 import { EarningsOverview } from '../../components/contractor/earnings/EarningsOverview';
-import { TransactionHistory } from '../../components/contractor/earnings/TransactionHistory';
 
 const sampleData = {
   stats: {
@@ -30,21 +29,14 @@ const sampleData = {
 };
 
 export function ContractorEarnings() {
-  const handleDownloadInvoice = (transaction: any) => {
-    // Handle invoice download
-    console.log('Downloading invoice for:', transaction.id);
-  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Earnings</h1>
       
       <EarningsOverview stats={sampleData.stats} />
-      
-      <TransactionHistory
-        transactions={sampleData.transactions}
-        onDownloadInvoice={handleDownloadInvoice}
-      />
+  
+  <ContractorRevenue/>
     </div>
   );
 }

@@ -141,7 +141,7 @@ function ProjectModal({ project, onClose }: ProjectModalProps) {
   );
 }
 
-export function RevenueDetails() {
+export function ContractorRevenue() {
   const { id } = useParams();
   const contractorName = "John Smith"; // Replace with actual data fetch
   const [showWonOnly, setShowWonOnly] = useState(false);
@@ -194,7 +194,7 @@ export function RevenueDetails() {
                 yAxisId="right"
                 type="monotone"
                 dataKey="totalRevenue"
-                stroke="blue"
+                stroke="#4A00E0"
                 name="Total Revenue"
               />
             </LineChart>

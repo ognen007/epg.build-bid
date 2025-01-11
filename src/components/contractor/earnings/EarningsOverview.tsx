@@ -20,13 +20,13 @@ export function EarningsOverview({ stats }: EarningsOverviewProps) {
       color: 'bg-green-100 text-green-600'
     },
     {
-      title: 'Pending Payments',
+      title: 'Total Loss',
       value: stats.pendingPayments,
       icon: Clock,
-      color: 'bg-yellow-100 text-yellow-600'
+      color: 'bg-red-100 text-red-600'
     },
     {
-      title: 'Paid Invoices',
+      title: 'In Progress',
       value: stats.paidInvoices,
       icon: CheckCircle,
       color: 'bg-blue-100 text-blue-600'
@@ -42,8 +42,8 @@ export function EarningsOverview({ stats }: EarningsOverviewProps) {
               <p className="text-sm text-gray-500">{card.title}</p>
               <p className="text-2xl font-bold text-gray-900">
                 {card.title === 'Paid Invoices' 
-                  ? card.value
-                  : `$${card.value.toLocaleString()}`}
+                  ? `$${card.value}`
+                  : `${card.value.toLocaleString()}`}
               </p>
             </div>
             <div className={`p-3 rounded-full ${card.color}`}>

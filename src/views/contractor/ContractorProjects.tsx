@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ProjectProposals } from '../../components/contractor/projects/ProjectProposals';
 import { ProjectWorkflowView } from '../../components/contractor/projectworkflow/ProjectWorkflowView';
+import { ProjectSearch } from './ProjectSearch';
 
 const sampleProjects = {
   ongoing: [
@@ -49,6 +50,7 @@ export function ContractorProjects() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
+      <ProjectSearch onSearchChange={() => console.log("Hi")} searchQuery='Search Project'/>
       <ProjectProposals
         proposals={projects.proposals}
         onAccept={handleAcceptProposal}

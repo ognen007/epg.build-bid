@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import { Plus, Bell, LifeBuoy } from 'lucide-react';
 import { CreateAnnouncementModal } from '../../CreateAnnouncementModal';
-
-const actions = [
-  {
-    title: 'Add New Project',
-    description: 'Create a new project in the system',
-    icon: Plus,
-    onClick: () => console.log('Add new project')
-  },
-  {
-    title: 'Create Announcement',
-    description: 'Send a platform-wide announcement',
-    icon: Bell,
-    onClick: () => {} // Placeholder, will be overridden
-  },
-  {
-    title: 'Resolve Pending Ticket',
-    description: 'Handle urgent support requests',
-    icon: LifeBuoy,
-    onClick: () => console.log('Resolve ticket')
-  }
-];
+import { useNavigate } from 'react-router-dom';
 
 export function QuickActions() {
+  const navigate = useNavigate();
+
+  const actions = [
+    {
+      title: 'Add New Project',
+      description: 'Create a new project in the system',
+      icon: Plus,
+      onClick: () => navigate('/admin/pipeline')
+    },
+    {
+      title: 'Create Announcement',
+      description: 'Send a platform-wide announcement',
+      icon: Bell,
+      onClick: () => {} // Placeholder, will be overridden
+    },
+    {
+      title: 'Resolve Pending Ticket',
+      description: 'Handle urgent support requests',
+      icon: LifeBuoy,
+      onClick: () => navigate('/admin/takeoff')
+    }
+  ];
   const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
 
   // Open the modal

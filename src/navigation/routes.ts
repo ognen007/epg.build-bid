@@ -16,7 +16,7 @@ export const routes = {
   admin: [
     { path: '/admin', label: 'Dashboard', icon: BarChart3 },
     { path: '/admin/users', label: 'User Management', icon: Users },
-    { path: '/admin/projects', label: 'Projects', icon: Briefcase },
+    // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
     { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell },
     { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket },
     { path: '/admin/messages', label: 'Messages', icon: MessageCircle },

@@ -3,6 +3,9 @@ import { ProjectProposals } from './contractorpipeline/ProjectProposals';
 import { ProjectWorkflowView } from './contractorpipeline/ProjectWorkflowView';
 import { ContractorFilters } from './contractorpipeline/ContractorProjectFilter';
 import { ProjectKanbanView } from '../../../components/admin/projects/ProjectKanbanView';
+import { Plus } from 'lucide-react'; // Import the Plus icon from Lucide
+import { AddProjectModal } from '../../../components/admin/projects/AddProjectModal';
+import { ProjectType } from '../../../types/project';
 
 const sampleProjects = {
   ongoing: [
@@ -46,6 +49,7 @@ export function ContractorPipeline() {
   const [projects, setProjects] = useState(sampleProjects);
   const [filters, setFilters] = useState({ name: '' });
   const [selectedView, setSelectedView] = useState<'pipeline' | 'tasks'>('pipeline'); // State for selected view
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
 
   const handleAcceptProposal = (id: string) => {
     console.log('Proposal accepted:', id);
@@ -55,11 +59,43 @@ export function ContractorPipeline() {
     console.log('Proposal declined:', id);
   };
 
+  const handleAddProjectClick = () => {
+    setIsModalOpen(true); // Open the modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+  };
+
+  const handleAddProject = (project: Omit<ProjectType, 'id'>) => {
+    console.log('Project added:', project);
+    // Add your logic to handle the new project here
+    setIsModalOpen(false); // Close the modal after adding the project
+  };
+
   // Check if filters are empty
   const isFiltersEmpty = filters.name.trim() === '';
 
   return (
     <div className="space-y-6">
+      {/* Add Project Button */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={handleAddProjectClick}
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+        >
+          <Plus className="w-4 h-4" /> {/* Lucide Plus icon */}
+          <span>Add Project</span>
+        </button>
+      </div>
+
+      {/* Add Project Modal */}
+      <AddProjectModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAdd={handleAddProject}
+      />
+
       {/* Toggle Buttons */}
       <div className="flex justify-center">
         <div className="inline-flex p-1 bg-white rounded-full shadow-sm">

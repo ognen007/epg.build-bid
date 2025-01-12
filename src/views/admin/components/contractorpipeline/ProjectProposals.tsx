@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, X, Calendar, DollarSign } from 'lucide-react';
+import { Check, X, Calendar, DollarSign, Clock } from 'lucide-react';
 import { ProjectType } from '../../../../types/project';
 
 interface ProjectProposalsProps {
@@ -31,20 +31,10 @@ export function ProjectProposals({ proposals, onAccept, onDecline }: ProjectProp
             </div>
 
             <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => onDecline(proposal.id)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                <X className="h-4 w-4 inline-block mr-1" />
-                Decline
-              </button>
-              <button
-                onClick={() => onAccept(proposal.id)}
-                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-medium"
-              >
-                <Check className="h-4 w-4 inline-block mr-1" />
-                Accept
-              </button>
+            <div className="flex items-center text-sm text-gray-500">
+                <Clock className="h-4 w-4 mr-1" />
+                Pending...
+              </div>
             </div>
           </div>
         ))}

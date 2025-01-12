@@ -93,7 +93,7 @@ export function AdminLayout() {
           <Routes>
             <Route path="/" element={<AdminDashboard />} />
             <Route path="/users" element={<UserManagement />} />
-            <Route path="/projects" element={<ProjectManagement />} />
+            {/* <Route path="/projects" element={<ProjectManagement />} /> */}
             <Route path="/projects/:id" element={<ProjectKanbanView />} />
             <Route path="/messages" element={<AdminMessages />} />
             {/* <Route path="/earnings" element={<EarningsManagement />} /> */}

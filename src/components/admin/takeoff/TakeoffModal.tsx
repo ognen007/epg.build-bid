@@ -85,28 +85,6 @@ export function TakeoffModal({ isOpen, onClose, takeoff }: TakeoffModalProps) {
                 <option value="Sarah Johnson">Sarah Johnson</option>
               </select>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Blueprints</label>
-              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
-                      <span>Upload blueprints</span>
-                      <input
-                        type="file"
-                        className="sr-only"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => setFormData({ ...formData, blueprints: e.target.files?.[0] || null })}
-                      />
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                </div>
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Takeoff File</label>
               <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">

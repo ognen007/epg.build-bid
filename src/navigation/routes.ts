@@ -17,7 +17,7 @@ export const routes = {
     { path: '/admin', label: 'Dashboard', icon: BarChart3 },
     { path: '/admin/users', label: 'User Management', icon: Users },
     { path: '/admin/projects', label: 'Projects', icon: Briefcase },
-    { path: '/admin/pipeline', label: 'Contracto Pipeline', icon: Shell },
+    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell },
     { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket },
     { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },

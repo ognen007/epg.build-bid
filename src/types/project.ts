@@ -1,4 +1,6 @@
 export interface ProjectType {
+  title: any;
+  budget: any;
   id: string;
   name: string;
   contractor: string | null;

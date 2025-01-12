@@ -18,6 +18,7 @@ import { UserGrowthComponent } from '../components/admin/analytics/UserGrowthCom
 import { RevenueDetails } from '../components/admin/analytics/RevenueDetails';
 import { ProjectKanbanView } from '../components/admin/projects/ProjectKanbanView';
 import { TakeoffView } from '../components/admin/takeoff/TakeoffView';
+import { ContractorPipeline } from '../views/admin/components/ContractorPipeline';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -103,6 +104,7 @@ export function AdminLayout() {
             <Route path="/analytics/revenue" element={<RevenueComponent />} />
             <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
             <Route path="/analytics/users" element={<UserGrowthComponent />} />
+            <Route path="/pipeline" element={<ContractorPipeline />} />
             <Route path="/takeoff" element={<TakeoffView />} />
           </Routes>
         </main>

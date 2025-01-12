@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProjectProposals } from './contractorpipeline/ProjectProposals';
 import { ProjectWorkflowView } from './contractorpipeline/ProjectWorkflowView';
 import { ContractorFilters } from './contractorpipeline/ContractorProjectFilter';
+import { ProjectKanbanView } from '../../../components/admin/projects/ProjectKanbanView';
 
 const sampleProjects = {
   ongoing: [
@@ -44,6 +45,7 @@ const sampleContractors = [
 export function ContractorPipeline() {
   const [projects, setProjects] = useState(sampleProjects);
   const [filters, setFilters] = useState({ name: '' });
+  const [selectedView, setSelectedView] = useState<'pipeline' | 'tasks'>('pipeline'); // State for selected view
 
   const handleAcceptProposal = (id: string) => {
     console.log('Proposal accepted:', id);
@@ -57,30 +59,64 @@ export function ContractorPipeline() {
   const isFiltersEmpty = filters.name.trim() === '';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <div className="lg:col-span-1">
-        <ContractorFilters
-          filters={filters}
-          onFilterChange={(newFilters) => setFilters(newFilters)}
-          contractors={sampleContractors} // Pass the list of contractors
-        />
+    <div className="space-y-6">
+      {/* Toggle Buttons */}
+      <div className="flex justify-center">
+        <div className="inline-flex p-1 bg-white rounded-full shadow-sm">
+          <button
+            onClick={() => setSelectedView('pipeline')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedView === 'pipeline'
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            Pipeline
+          </button>
+          <button
+            onClick={() => setSelectedView('tasks')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedView === 'tasks'
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            Tasks
+          </button>
+        </div>
       </div>
 
-      {/* Conditionally render the right side based on filters */}
-      {!isFiltersEmpty ? (
-        <div className="lg:col-span-3">
-          <ProjectProposals
-            proposals={projects.proposals}
-            onAccept={handleAcceptProposal}
-            onDecline={handleDeclineProposal}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          <ContractorFilters
+            filters={filters}
+            onFilterChange={(newFilters) => setFilters(newFilters)}
+            contractors={sampleContractors} // Pass the list of contractors
           />
-          <ProjectWorkflowView />
         </div>
-      ) : (
-        <div className="lg:col-span-3">
-          <p className="text-gray-500">No filters applied. Start typing to search for contractors.</p>
-        </div>
-      )}
+
+        {/* Conditionally render the right side based on filters and selected view */}
+        {!isFiltersEmpty ? (
+          <div className="lg:col-span-3">
+            {selectedView === 'pipeline' ? (
+              <>
+                <ProjectProposals
+                  proposals={projects.proposals}
+                  onAccept={handleAcceptProposal}
+                  onDecline={handleDeclineProposal}
+                />
+                <ProjectWorkflowView />
+              </>
+            ) : (
+              <ProjectKanbanView />
+            )}
+          </div>
+        ) : (
+          <div className="lg:col-span-3">
+            <p className="text-gray-500">No filters applied. Start typing to search for contractors.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

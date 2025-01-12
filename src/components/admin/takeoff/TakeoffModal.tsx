@@ -18,7 +18,8 @@ export function TakeoffModal({ isOpen, onClose, takeoff }: TakeoffModalProps) {
     scope: '',
     estimator: takeoff?.estimator || '',
     blueprints: null as File | null,
-    takeoffFile: null as File | null
+    takeoffFile: null as File | null,
+    estimatorNotes: '', // Add estimatorNotes to formData
   });
 
   if (!isOpen) return null;
@@ -125,6 +126,18 @@ export function TakeoffModal({ isOpen, onClose, takeoff }: TakeoffModalProps) {
                   <p className="text-xs text-gray-500">PDF, Excel files up to 10MB</p>
                 </div>
               </div>
+            </div>
+
+            {/* Estimator Notes Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estimator Notes</label>
+              <textarea
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                placeholder="Enter estimator notes..."
+                value={formData.estimatorNotes}
+                onChange={(e) => setFormData({ ...formData, estimatorNotes: e.target.value })}
+              />
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">

@@ -2,7 +2,7 @@ export interface AdminUser {
   id: string;
   full_name: string;
   email: string;
-  role: 'admin' | 'projectspecialist' | 'csm';
+  role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
   created_at: string;
 }
 

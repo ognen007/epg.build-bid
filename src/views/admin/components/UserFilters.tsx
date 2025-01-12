@@ -44,6 +44,7 @@ export function UserFilters({
   <option value="admin">Admin</option>
   <option value="projectspecialist">Project Specialist</option>
   <option value="csm">CSM</option>
+  <option value="estimator">Estimator</option>
 </select>
 
       </div>

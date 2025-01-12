@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, X } from 'lucide-react';
+import { DollarSign, Upload, X } from 'lucide-react';
 import { ProjectType } from '../../../types/project';
 
 interface AddProjectModalProps {
@@ -18,6 +18,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     dropboxLink: '',
     valuation: '',
     description: '',
+    highIntent: false, // Add highIntent field to formData
   });
 
   const [contractors, setContractors] = useState<{ id: string; fullName: string }[]>([]);
@@ -70,6 +71,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         dropboxLink: '',
         valuation: '',
         description: '',
+        highIntent: false, // Reset highIntent field
       });
       setShowDropdown(false);
       onClose();
@@ -166,9 +168,35 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               >
                 <option value="awaiting_bid">Awaiting Bid</option>
                 <option value="bid_submitted">Bid Submitted</option>
+                <option value="bid_recieved">Bid Recieved</option>
+                <option value="abandoned">Abandoned</option>
                 <option value="won">Won</option>
                 <option value="lost">Lost</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Bid Type</label>
+              <select
+                required
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
+              >
+                <option value="gc_bidding">GC Bidding</option>
+                <option value="sub_biddding">Sub Bidding</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Bid Amount</label>
+              <input
+                type="text"
+                required
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={""}
+                onChange={() => console.log("")}
+              />
             </div>
 
             <div>
@@ -183,14 +211,25 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Attach Dropbox link</label>
-              <input
-                type="url"
-                placeholder="https://example.com"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.dropboxLink}
-                onChange={(e) => setFormData({ ...formData, dropboxLink: e.target.value })}
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Blueprints</label>
+              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
+                <div className="space-y-1 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
+                      <span>Upload blueprints</span>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        value={formData.dropboxLink}
+                        onChange={(e) => setFormData({ ...formData, dropboxLink: e.target.value })}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -214,8 +253,22 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               </div>
             </div>
 
+            {/* High Intent Checkbox */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="highIntent"
+                className="h-4 w-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
+                checked={formData.highIntent}
+                onChange={(e) => setFormData({ ...formData, highIntent: e.target.checked })}
+              />
+              <label htmlFor="highIntent" className="ml-2 text-sm text-gray-700">
+                High Intent
+              </label>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-gray-700">Project Description</label>
               <textarea
                 placeholder="Enter project description..."
                 rows={4}

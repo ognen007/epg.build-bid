@@ -16,9 +16,13 @@ export function ProjectManagement() {
     client: '',
     search: '',
   });
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [error, setError] = useState(''); // Add error state
 
   useEffect(() => {
     async function fetchProjects() {
+      setLoading(true); // Set loading to true when fetching starts
+      setError(''); // Clear any previous errors
       try {
         const response = await axios.get('https://epg-backend.onrender.com/api/project/display');
         const data = response.data.projects;
@@ -40,7 +44,15 @@ export function ProjectManagement() {
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
+        const errorMessage =
+          axios.isAxiosError(error) && error.response?.data?.message
+            ? error.response.data.message
+            : error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred';
+        setError(errorMessage); // Set the error message
       }
+      setLoading(false); // Set loading to false when fetching is done
     }
 
     fetchProjects();
@@ -48,7 +60,7 @@ export function ProjectManagement() {
 
   // Filter projects based on filters
   useEffect(() => {
-    const filtered = projects.filter(project => {
+    const filtered = projects.filter((project) => {
       const matchesStatus = filters.status
         ? project.status.toLowerCase() === filters.status.toLowerCase()
         : true;
@@ -87,16 +99,23 @@ export function ProjectManagement() {
         </button>
       </div>
 
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg">{error}</div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <ProjectFilters
-            filters={filters}
-            onFilterChange={setFilters}
-          />
+          <ProjectFilters filters={filters} onFilterChange={setFilters} />
         </div>
 
         <div className="lg:col-span-3">
-          <ProjectTable projects={filteredProjects} />
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+            </div>
+          ) : (
+            <ProjectTable projects={filteredProjects} />
+          )}
         </div>
       </div>
 

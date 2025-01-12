@@ -10,7 +10,7 @@ interface User {
   id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'projectspecialist' | 'csm';
+  role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
   createdAt: string;
 }
 
@@ -51,7 +51,7 @@ export function UserManagement() {
   const handleAddUser = async (userData: {
     email: string;
     fullName: string;
-    role: 'admin' | 'projectspecialist' | 'csm';
+    role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
   }) => {
     setError('');
     try {

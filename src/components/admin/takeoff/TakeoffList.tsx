@@ -1,50 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Search, Pencil } from 'lucide-react';
 import { TakeoffModal } from './TakeoffModal';
 
 interface Takeoff {
   id: string;
-  projectName: string;
+  name: string;
   contractor: string;
   estimator: string;
+  scope?: string;
+  takeoff?: string;
+  estimatorNotes?: string;
 }
 
-const sampleTakeoffs: Takeoff[] = [
-  {
-    id: '1',
-    projectName: 'City Center Mall Renovation',
-    contractor: 'ABC Construction',
-    estimator: 'John Smith'
-  },
-  {
-    id: '2',
-    projectName: 'Harbor Bridge Maintenance',
-    contractor: 'XYZ Contractors',
-    estimator: 'Sarah Johnson'
-  }
-];
-
 export function TakeoffList() {
-  const [takeoffs, setTakeoffs] = useState(sampleTakeoffs);
+  const [takeoffs, setTakeoffs] = useState<Takeoff[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTakeoff, setSelectedTakeoff] = useState<Takeoff | null>(null);
   const [filters, setFilters] = useState({
     search: '',
+    contractor: '',
     estimator: '',
-    contractor: ''
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleEditClick = (takeoff: Takeoff) => {
-    setSelectedTakeoff(takeoff);
-    setIsModalOpen(true);
+  // Fetch all takeoffs on component mount
+  useEffect(() => {
+    const fetchTakeoffs = async () => {
+      try {
+        const response = await axios.get('https://epg-backend.onrender.com/api/project/takeoff/all');
+        setTakeoffs(response.data);
+      } catch (err) {
+        setError('Failed to fetch takeoffs');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTakeoffs();
+  }, []);
+
+  // Get unique contractors and estimators from the takeoffs
+  const contractors = Array.from(new Set(takeoffs.map((takeoff) => takeoff.contractor)));
+  const estimators = Array.from(new Set(takeoffs.map((takeoff) => takeoff.estimator)));
+
+  // Handle editing a takeoff
+  const handleEditClick = async (takeoff: Takeoff) => {
+    try {
+      // Fetch detailed data for the selected takeoff
+      const response = await axios.get(`https://epg-backend.onrender.com/api/project/takeoff/${takeoff.id}`);
+      setSelectedTakeoff(response.data);
+      setIsModalOpen(true);
+    } catch (err) {
+      setError('Failed to fetch takeoff details');
+      console.error(err);
+    }
   };
 
-  const filteredTakeoffs = takeoffs.filter(takeoff => {
-    const matchesSearch = takeoff.projectName.toLowerCase().includes(filters.search.toLowerCase());
-    const matchesEstimator = !filters.estimator || takeoff.estimator === filters.estimator;
+  // Handle saving changes
+  const handleSaveChanges = async (updatedData: any) => {
+    try {
+      if (!selectedTakeoff) return;
+
+      // Send the updated data to the backend
+      const response = await axios.put(`https://epg-backend.onrender.com/api/project/takeoff/${selectedTakeoff.id}`, updatedData);
+
+      // Update the local state with the new data
+      setTakeoffs((prev) =>
+        prev.map((takeoff) =>
+          takeoff.id === selectedTakeoff.id ? { ...takeoff, ...response.data } : takeoff
+        )
+      );
+
+      // Close the modal
+      setIsModalOpen(false);
+    } catch (err) {
+      setError('Failed to update takeoff');
+      console.error(err);
+    }
+  };
+
+  // Filter takeoffs based on search and filters
+  const filteredTakeoffs = takeoffs.filter((takeoff) => {
+    const matchesSearch = takeoff.name.toLowerCase().includes(filters.search.toLowerCase());
     const matchesContractor = !filters.contractor || takeoff.contractor === filters.contractor;
-    return matchesSearch && matchesEstimator && matchesContractor;
+    const matchesEstimator = !filters.estimator || takeoff.estimator === filters.estimator;
+    return matchesSearch && matchesContractor && matchesEstimator;
   });
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
@@ -60,15 +112,18 @@ export function TakeoffList() {
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
-          
+
           <select
             className="w-full rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
             value={filters.contractor}
             onChange={(e) => setFilters({ ...filters, contractor: e.target.value })}
           >
             <option value="">All Contractors</option>
-            <option value="ABC Construction">ABC Construction</option>
-            <option value="XYZ Contractors">XYZ Contractors</option>
+            {contractors.map((contractor, index) => (
+              <option key={index} value={contractor}>
+                {contractor}
+              </option>
+            ))}
           </select>
 
           <select
@@ -77,8 +132,11 @@ export function TakeoffList() {
             onChange={(e) => setFilters({ ...filters, estimator: e.target.value })}
           >
             <option value="">All Estimators</option>
-            <option value="John Smith">John Smith</option>
-            <option value="Sarah Johnson">Sarah Johnson</option>
+            {estimators.map((estimator, index) => (
+              <option key={index} value={estimator}>
+                {estimator}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -105,7 +163,7 @@ export function TakeoffList() {
             {filteredTakeoffs.map((takeoff) => (
               <tr key={takeoff.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {takeoff.projectName}
+                  {takeoff.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {takeoff.contractor}
@@ -134,6 +192,7 @@ export function TakeoffList() {
           setSelectedTakeoff(null);
         }}
         takeoff={selectedTakeoff}
+        onSave={handleSaveChanges}
       />
     </div>
   );

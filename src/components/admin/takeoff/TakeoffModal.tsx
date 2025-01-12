@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
 
 interface TakeoffModalProps {
@@ -6,29 +6,48 @@ interface TakeoffModalProps {
   onClose: () => void;
   takeoff: {
     id: string;
-    projectName: string;
+    name: string;
     contractor: string;
+    scope: string;
     estimator: string;
+    takeoff: string;
+    estimatorNotes: string;
   } | null;
+  onSave: (data: any) => void;
 }
 
-export function TakeoffModal({ isOpen, onClose, takeoff }: TakeoffModalProps) {
+export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalProps) {
   const [formData, setFormData] = useState({
-    contractor: takeoff?.contractor || '',
+    name: '',
+    contractor: '',
     scope: '',
-    estimator: takeoff?.estimator || '',
-    blueprints: null as File | null,
+    estimator: '',
     takeoffFile: null as File | null,
-    estimatorNotes: '', // Add estimatorNotes to formData
+    estimatorNotes: '',
   });
 
-  if (!isOpen) return null;
+  // Update formData when takeoff prop changes
+  useEffect(() => {
+    if (takeoff) {
+      setFormData({
+        name: takeoff.name,
+        contractor: takeoff.contractor, // Pre-fill contractor name
+        scope: takeoff.scope, // Pre-fill scope
+        estimator: takeoff.estimator, // Pre-fill estimator
+        takeoffFile: null, // Handle file uploads separately
+        estimatorNotes: takeoff.estimatorNotes, // Pre-fill estimator notes
+      });
+    }
+  }, [takeoff]);
+
+  if (!isOpen || !takeoff) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
-    onClose();
+    onSave({
+      ...formData,
+      id: takeoff.id, // Include the project ID in the data
+    });
   };
 
   return (
@@ -46,45 +65,45 @@ export function TakeoffModal({ isOpen, onClose, takeoff }: TakeoffModalProps) {
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700">Project Name</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-gray-700">Contractor</label>
-              <select
+              <input
+                type="text"
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.contractor}
                 onChange={(e) => setFormData({ ...formData, contractor: e.target.value })}
-              >
-                <option value="">Select Contractor</option>
-                <option value="ABC Construction">ABC Construction</option>
-                <option value="XYZ Contractors">XYZ Contractors</option>
-              </select>
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Scope</label>
-              <select
+              <input
+                type="text"
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.scope}
                 onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-              >
-                <option value="">Select Scope</option>
-                <option value="electrical">Electrical</option>
-                <option value="plumbing">Plumbing</option>
-                <option value="hvac">HVAC</option>
-                <option value="structural">Structural</option>
-              </select>
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Estimator</label>
-              <select
+              <input
+                type="text"
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.estimator}
                 onChange={(e) => setFormData({ ...formData, estimator: e.target.value })}
-              >
-                <option value="">Select Estimator</option>
-                <option value="John Smith">John Smith</option>
-                <option value="Sarah Johnson">Sarah Johnson</option>
-              </select>
+              />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Takeoff File</label>
               <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
@@ -106,7 +125,6 @@ export function TakeoffModal({ isOpen, onClose, takeoff }: TakeoffModalProps) {
               </div>
             </div>
 
-            {/* Estimator Notes Section */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Estimator Notes</label>
               <textarea

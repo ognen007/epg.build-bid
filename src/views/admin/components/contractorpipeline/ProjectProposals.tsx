@@ -11,7 +11,7 @@ interface ProjectProposalsProps {
 export function ProjectProposals({ proposals, onAccept, onDecline }: ProjectProposalsProps) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Project Proposals</h2>
+      <h2 className="text-lg font-semibold text-gray-900">Prospecting</h2>
       <div className="grid gap-4">
         {proposals.map((proposal) => (
           <div key={proposal.id} className="bg-white rounded-lg shadow-sm p-6">

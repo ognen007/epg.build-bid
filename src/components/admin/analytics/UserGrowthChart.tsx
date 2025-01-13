@@ -1,34 +1,78 @@
-import React from 'react';
-import { Users, TrendingUp, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Users, ArrowRight } from 'lucide-react';
 import { MetricHeader } from './MetricHeader';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const data = {
-  totalUsers: 2458,
-  growth: 12.5,
-  monthlyData: [
-    { month: 'Jan', clients: 120, contractors: 85 },
-    { month: 'Feb', clients: 150, contractors: 95 },
-    { month: 'Mar', clients: 180, contractors: 110 },
-    { month: 'Apr', clients: 210, contractors: 125 },
-    { month: 'May', clients: 250, contractors: 145 },
-    { month: 'Jun', clients: 280, contractors: 160 }
-  ]
-};
+// Define the structure of the monthly data
+interface MonthlyData {
+  month: string;
+  clients: number;
+  contractors: number;
+}
+
+// Define the structure of the API response
+interface ApiResponse {
+  totalUsers: number;
+  growth: number;
+  monthlyData: MonthlyData[];
+}
 
 export function UserGrowthChart() {
   const navigate = useNavigate();
-  const maxValue = Math.max(
-    ...data.monthlyData.map(d => Math.max(d.clients, d.contractors))
-  );
+  const [data, setData] = useState<ApiResponse>({
+    totalUsers: 0,
+    growth: 0,
+    monthlyData: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch data from the backend API
+        const response = await fetch('https://epg-backend.onrender.com/api/users');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const result: ApiResponse = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error fetching user growth data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate growth percentage based on monthlyData
+  const calculateGrowth = (monthlyData: MonthlyData[]): number => {
+    if (monthlyData.length < 2) {
+      return 0; // Not enough data to calculate growth
+    }
+
+    const currentMonth = monthlyData[monthlyData.length - 1];
+    const previousMonth = monthlyData[monthlyData.length - 2];
+
+    const currentMonthUsers = currentMonth.clients + currentMonth.contractors;
+    const previousMonthUsers = previousMonth.clients + previousMonth.contractors;
+
+    if (previousMonthUsers === 0) {
+      return 0; // Avoid division by zero
+    }
+
+    const growth = ((currentMonthUsers - previousMonthUsers) / previousMonthUsers) * 100;
+    return parseFloat(growth.toFixed(2)); // Round to 2 decimal places
+  };
+
+  const growth = calculateGrowth(data.monthlyData);
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <div className="flex justify-between items-start mb-6">
-        <MetricHeader 
+        <MetricHeader
           title="User Growth"
           total={data.totalUsers}
-          growth={data.growth}
+          growth={growth} // Use the calculated growth value
           icon={Users}
         />
         <button
@@ -41,34 +85,25 @@ export function UserGrowthChart() {
       </div>
 
       <div className="mt-6 h-64">
-        <div className="h-full flex items-end space-x-2">
-          {data.monthlyData.map((month) => (
-            <div key={month.month} className="flex-1 space-y-2">
-              <div className="relative h-full flex flex-col justify-end">
-                <div 
-                  className="w-full bg-orange-500 rounded-t"
-                  style={{ height: `${(month.clients / maxValue) * 100}%` }}
-                />
-                <div 
-                  className="w-full bg-blue-500 rounded-t"
-                  style={{ height: `${(month.contractors / maxValue) * 100}%` }}
-                />
-              </div>
-              <div className="text-xs text-gray-500 text-center">{month.month}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-4 flex justify-center space-x-6">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-orange-500 rounded-full mr-2" />
-          <span className="text-sm text-gray-600">Clients</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-          <span className="text-sm text-gray-600">Contractors</span>
-        </div>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data.monthlyData}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="clients" fill="#1E90FF" name="Clients" />
+            <Bar dataKey="contractors" fill="#F97316" name="Contractors" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

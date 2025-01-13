@@ -1,11 +1,11 @@
 import React from 'react';
 import { Check, X, Calendar, DollarSign } from 'lucide-react';
-import { Project } from '../../../types/project';
+import { ProjectType } from '../../../types/project';
 
 interface ProjectProposalsProps {
-  proposals: Project[];
-  onAccept: (id: string) => void;
-  onDecline: (id: string) => void;
+  proposals?: ProjectType[]; // Make proposals optional
+  onAccept: () => void;
+  onDecline: () => void;
 }
 
 export function ProjectProposals({ proposals, onAccept, onDecline }: ProjectProposalsProps) {
@@ -32,14 +32,14 @@ export function ProjectProposals({ proposals, onAccept, onDecline }: ProjectProp
 
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => onDecline(proposal.id)}
+                onClick={() => onDecline()}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
               >
                 <X className="h-4 w-4 inline-block mr-1" />
                 Decline
               </button>
               <button
-                onClick={() => onAccept(proposal.id)}
+                onClick={() => onAccept()}
                 className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-medium"
               >
                 <Check className="h-4 w-4 inline-block mr-1" />

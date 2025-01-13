@@ -14,11 +14,14 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     client: '',
     contractor: '',
     status: 'awaiting_bid' as ProjectType['status'],
+    bidType: 'gc_bidding',
+    bidAmount: '',
     deadline: '',
-    dropboxLink: '',
+    blueprints: '',
     valuation: '',
     description: '',
-    highIntent: false, // Add highIntent field to formData
+    highIntent: false,
+    estimator: '', // Add estimator field
   });
 
   const [contractors, setContractors] = useState<{ id: string; fullName: string }[]>([]);
@@ -67,11 +70,14 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         client: '',
         contractor: '',
         status: 'awaiting_bid',
+        bidType: 'gc_bidding',
+        bidAmount: '',
         deadline: '',
-        dropboxLink: '',
+        blueprints: '',
         valuation: '',
         description: '',
-        highIntent: false, // Reset highIntent field
+        highIntent: false,
+        estimator: '', // Reset estimator field
       });
       setShowDropdown(false);
       onClose();
@@ -125,7 +131,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               <label className="block text-sm font-medium text-gray-700">Project Name</label>
               <input
                 type="text"
-                required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -136,7 +141,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               <label className="block text-sm font-medium text-gray-700">Contractor</label>
               <input
                 type="text"
-                required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.contractor}
                 onChange={(e) => handleContractorInputChange(e.target.value)}
@@ -161,7 +165,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
             <div>
               <label className="block text-sm font-medium text-gray-700">Status</label>
               <select
-                required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
@@ -178,13 +181,12 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
             <div>
               <label className="block text-sm font-medium text-gray-700">Bid Type</label>
               <select
-                required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
+                value={formData.bidType}
+                onChange={(e) => setFormData({ ...formData, bidType: e.target.value })}
               >
                 <option value="gc_bidding">GC Bidding</option>
-                <option value="sub_biddding">Sub Bidding</option>
+                <option value="sub_bidding">Sub Bidding</option>
               </select>
             </div>
 
@@ -192,10 +194,9 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               <label className="block text-sm font-medium text-gray-700">Bid Amount</label>
               <input
                 type="text"
-                required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={""}
-                onChange={() => console.log("")}
+                value={formData.bidAmount}
+                onChange={(e) => setFormData({ ...formData, bidAmount: e.target.value })}
               />
             </div>
 
@@ -203,7 +204,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               <label className="block text-sm font-medium text-gray-700">Deadline</label>
               <input
                 type="date"
-                required
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.deadline}
                 onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
@@ -222,8 +222,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                         type="file"
                         className="sr-only"
                         accept=".pdf,.jpg,.jpeg,.png"
-                        value={formData.dropboxLink}
-                        onChange={(e) => setFormData({ ...formData, dropboxLink: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, blueprints: e.target.value })}
                       />
                     </label>
                   </div>
@@ -242,7 +241,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 </div>
                 <input
                   type="number"
-                  required
                   min="0"
                   step="0.01"
                   placeholder="0.00"
@@ -253,7 +251,16 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               </div>
             </div>
 
-            {/* High Intent Checkbox */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Estimator</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.estimator}
+                onChange={(e) => setFormData({ ...formData, estimator: e.target.value })}
+              />
+            </div>
+
             <div className="flex items-center">
               <input
                 type="checkbox"

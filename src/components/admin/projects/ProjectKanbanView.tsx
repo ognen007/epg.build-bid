@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, MoreVertical, MessageSquare, X, Search } from 'lucide-react';
+import { Plus, MoreVertical, MessageSquare, X } from 'lucide-react';
+import axios from 'axios';
+
+const API_BASE_URL = 'https://epg-backend.onrender.com/api'; // Update with your backend URL
 
 interface Contractor {
   id: string;
@@ -18,8 +21,8 @@ interface ClientTask {
   type: 'client';
   title: string;
   description: string;
-  contractor: Contractor;
-  project: Project;
+  contractor: string; // Updated to match backend
+  project: string;    // Updated to match backend
   taskType: 'quote_verification' | 'price_negotiation' | 'required_documentation';
   comments: Comment[];
   createdAt: string;
@@ -49,7 +52,7 @@ interface Column {
   tickets: Ticket[];
 }
 
-// Sample contractors data
+// Sample contractors data (for dropdowns)
 const sampleContractors: Contractor[] = [
   {
     id: '1',
@@ -99,8 +102,8 @@ function AddClientTaskModal({ onClose, onAdd }: AddClientTaskModalProps) {
       type: 'client',
       title: `${taskType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} - ${selectedProject.name}`,
       description,
-      contractor: selectedContractor,
-      project: selectedProject,
+      contractor: selectedContractor.name, // Updated to match backend
+      project: selectedProject.name,       // Updated to match backend
       taskType
     });
     onClose();
@@ -308,11 +311,7 @@ function AddInternalTaskModal({ onClose, onAdd }: AddInternalTaskModalProps) {
 
 export function ProjectKanbanView() {
   const { id } = useParams();
-  const [columns, setColumns] = useState<Column[]>([
-    { id: '1', title: 'To Do', tickets: [] },
-    { id: '2', title: 'In Progress', tickets: [] },
-    { id: '3', title: 'Done', tickets: [] }
-  ]);
+  const [columns, setColumns] = useState<Column[]>([]);
   const [isAddingColumn, setIsAddingColumn] = useState(false);
   const [isAddingClientTask, setIsAddingClientTask] = useState(false);
   const [isAddingInternalTask, setIsAddingInternalTask] = useState(false);
@@ -320,118 +319,154 @@ export function ProjectKanbanView() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newComment, setNewComment] = useState('');
 
-  const handleAddColumn = () => {
+  // Fetch columns and tickets from the backend
+  useEffect(() => {
+    const fetchColumns = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/columns`);
+        setColumns(response.data);
+      } catch (error) {
+        console.error('Failed to fetch columns:', error);
+      }
+    };
+    fetchColumns();
+  }, []);
+
+  // Add a new column
+  const handleAddColumn = async () => {
     if (newColumnTitle.trim()) {
-      setColumns([
-        ...columns,
-        { id: Date.now().toString(), title: newColumnTitle, tickets: [] }
-      ]);
-      setNewColumnTitle('');
-      setIsAddingColumn(false);
+      try {
+        const response = await axios.post(`${API_BASE_URL}/columns`, {
+          title: newColumnTitle,
+        });
+        setColumns([...columns, response.data]);
+        setNewColumnTitle('');
+        setIsAddingColumn(false);
+      } catch (error) {
+        console.error('Failed to create column:', error);
+      }
     }
   };
 
-  const handleAddClientTask = (task: Omit<ClientTask, 'id' | 'comments' | 'createdAt'>) => {
-    const newTask: ClientTask = {
-      ...task,
-      id: Date.now().toString(),
-      comments: [],
-      createdAt: new Date().toISOString()
-    };
-    
-    setColumns(columns.map(col => {
-      if (col.id === '1') { // Add to "To Do" column
-        return {
-          ...col,
-          tickets: [...col.tickets, newTask]
-        };
-      }
-      return col;
-    }));
+  // Add a new client task
+  const handleAddClientTask = async (task: Omit<ClientTask, 'id' | 'comments' | 'createdAt'>) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/tickets`, {
+        type: 'client',
+        title: task.title,
+        description: task.description,
+        columnId: columns[0].id, // Add to the first column by default
+        contractor: task.contractor,
+        project: task.project,
+        taskType: task.taskType,
+      });
+      setColumns((prevColumns) =>
+        prevColumns.map((col) =>
+          col.id === columns[0].id
+            ? { ...col, tickets: [...col.tickets, response.data] }
+            : col
+        )
+      );
+      setIsAddingClientTask(false);
+    } catch (error) {
+      console.error('Failed to create client task:', error);
+    }
   };
 
-  const handleAddInternalTask = (task: Omit<InternalTask, 'id' | 'comments' | 'createdAt'>) => {
-    const newTask: InternalTask = {
-      ...task,
-      id: Date.now().toString(),
-      comments: [],
-      createdAt: new Date().toISOString()
-    };
-    
-    setColumns(columns.map(col => {
-      if (col.id === '1') { // Add to "To Do" column
-        return {
-          ...col,
-          tickets: [...col.tickets, newTask]
-        };
-      }
-      return col;
-    }));
+  // Add a new internal task
+  const handleAddInternalTask = async (task: Omit<InternalTask, 'id' | 'comments' | 'createdAt'>) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/tickets`, {
+        type: 'internal',
+        title: task.title,
+        description: task.description,
+        columnId: columns[0].id, // Add to the first column by default
+      });
+      setColumns((prevColumns) =>
+        prevColumns.map((col) =>
+          col.id === columns[0].id
+            ? { ...col, tickets: [...col.tickets, response.data] }
+            : col
+        )
+      );
+      setIsAddingInternalTask(false);
+    } catch (error) {
+      console.error('Failed to create internal task:', error);
+    }
   };
 
-  const handleAddComment = () => {
-    if (!selectedTicket || !newComment.trim()) return;
-
-    setColumns(columns.map(col => ({
-      ...col,
-      tickets: col.tickets.map(ticket => {
-        if (ticket.id === selectedTicket.id) {
-          return {
-            ...ticket,
-            comments: [...ticket.comments, {
-              id: Date.now().toString(),
-              content: newComment,
-              author: 'Current User',
-              createdAt: new Date().toISOString()
-            }]
-          };
-        }
-        return ticket;
-      })
-    })));
-    setNewComment('');
-  };
-
-  const handleDragStart = (e: React.DragEvent, ticketId: string, sourceColumnId: string) => {
-    e.dataTransfer.setData('ticketId', ticketId);
-    e.dataTransfer.setData('sourceColumnId', sourceColumnId);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent, targetColumnId: string) => {
+  // Update ticket column (drag-and-drop)
+  const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
     e.preventDefault();
     const ticketId = e.dataTransfer.getData('ticketId');
     const sourceColumnId = e.dataTransfer.getData('sourceColumnId');
 
     if (sourceColumnId === targetColumnId) return;
 
-    const sourceColumn = columns.find(col => col.id === sourceColumnId);
-    const ticket = sourceColumn?.tickets.find(t => t.id === ticketId);
+    try {
+      await axios.put(`${API_BASE_URL}/tickets/${ticketId}/column`, {
+        columnId: targetColumnId,
+      });
 
-    if (!ticket) return;
+      setColumns((prevColumns) =>
+        prevColumns.map((col) => {
+          if (col.id === sourceColumnId) {
+            return {
+              ...col,
+              tickets: col.tickets.filter((t) => t.id !== ticketId),
+            };
+          }
+          if (col.id === targetColumnId) {
+            const ticket = prevColumns
+              .find((c) => c.id === sourceColumnId)
+              ?.tickets.find((t) => t.id === ticketId);
+            if (ticket) {
+              return {
+                ...col,
+                tickets: [...col.tickets, ticket],
+              };
+            }
+          }
+          return col;
+        })
+      );
+    } catch (error) {
+      console.error('Failed to update ticket column:', error);
+    }
+  };
 
-    setColumns(columns.map(col => {
-      if (col.id === sourceColumnId) {
-        return {
+  // Add a comment to a ticket
+  const handleAddComment = async () => {
+    if (!selectedTicket || !newComment.trim()) return;
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/tickets/${selectedTicket.id}/comments`,
+        {
+          content: newComment,
+          author: 'Current User', // Replace with actual user name
+        }
+      );
+
+      setColumns((prevColumns) =>
+        prevColumns.map((col) => ({
           ...col,
-          tickets: col.tickets.filter(t => t.id !== ticketId)
-        };
-      }
-      if (col.id === targetColumnId) {
-        return {
-          ...col,
-          tickets: [...col.tickets, ticket]
-        };
-      }
-      return col;
-    }));
+          tickets: col.tickets.map((ticket) =>
+            ticket.id === selectedTicket.id
+              ? { ...ticket, comments: [...ticket.comments, response.data] }
+              : ticket
+          ),
+        }))
+      );
+      setNewComment('');
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+    }
   };
 
   return (
     <div className="p-6">
+      {/* Header and buttons */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Project Board</h1>
         <div className="flex gap-2">
@@ -459,12 +494,13 @@ export function ProjectKanbanView() {
         </div>
       </div>
 
+      {/* Columns and tickets */}
       <div className="flex gap-6 overflow-x-auto pb-4">
-        {columns.map(column => (
+        {columns.map((column) => (
           <div
             key={column.id}
             className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4"
-            onDragOver={handleDragOver}
+            onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleDrop(e, column.id)}
           >
             <div className="flex justify-between items-center mb-4">
@@ -472,11 +508,14 @@ export function ProjectKanbanView() {
             </div>
 
             <div className="space-y-3">
-              {column.tickets.map(ticket => (
+              {column.tickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   draggable
-                  onDragStart={(e) => handleDragStart(e, ticket.id, column.id)}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('ticketId', ticket.id);
+                    e.dataTransfer.setData('sourceColumnId', column.id);
+                  }}
                   onClick={() => setSelectedTicket(ticket)}
                   className={`
                     bg-white p-3 rounded-lg shadow cursor-pointer hover:shadow-md
@@ -491,8 +530,8 @@ export function ProjectKanbanView() {
                   </div>
                   {ticket.type === 'client' && (
                     <div className="mt-2 text-sm text-gray-500">
-                      <div>{ticket.contractor.name}</div>
-                      <div>{ticket.project.name}</div>
+                      <div>{ticket.contractor}</div>
+                      <div>{ticket.project}</div>
                     </div>
                   )}
                   <div className="mt-2 text-sm text-gray-600 line-clamp-2">
@@ -538,7 +577,7 @@ export function ProjectKanbanView() {
         )}
       </div>
 
-      {/* Task Modals */}
+      {/* Modals */}
       {isAddingClientTask && (
         <AddClientTaskModal
           onClose={() => setIsAddingClientTask(false)}
@@ -553,7 +592,6 @@ export function ProjectKanbanView() {
         />
       )}
 
-      {/* Ticket Details Modal */}
       {selectedTicket && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-screen items-center justify-center p-4">
@@ -575,8 +613,8 @@ export function ProjectKanbanView() {
                   <div className="mb-6">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">Task Details</h3>
                     <div className="space-y-2 text-sm text-gray-600">
-                      <div>Contractor: {selectedTicket.contractor.name}</div>
-                      <div>Project: {selectedTicket.project.name}</div>
+                      <div>Contractor: {selectedTicket.contractor}</div>
+                      <div>Project: {selectedTicket.project}</div>
                       <div>Task Type: {selectedTicket.taskType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</div>
                     </div>
                   </div>

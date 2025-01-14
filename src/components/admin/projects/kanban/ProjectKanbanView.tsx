@@ -72,7 +72,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
       setColumns((prev) =>
         prev.map((col) =>
           col.id === columns[0].id
-            ? { ...col, tickets: [...(col.tickets || []), response.data ] }
+            ? { ...col, tickets: [...(col.tickets || []), response.data] }
             : col
         )
       );
@@ -100,7 +100,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
       setColumns((prev) =>
         prev.map((col) =>
           col.id === columns[0].id
-            ? { ...col, tickets: [...(col.tickets || []), response.data ] }
+            ? { ...col, tickets: [...(col.tickets || []), response.data] }
             : col
         )
       );
@@ -127,7 +127,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
           }
           if (col.id === targetColumnId) {
             const ticket = prev.find((c) => c.id === sourceColumnId)?.tickets.find((t) => t.id === ticketId);
-            return ticket ? { ...col, tickets: [...(col.tickets || []), ticket ] } : col;
+            return ticket ? { ...col, tickets: [...(col.tickets || []), ticket] } : col;
           }
           return col;
         })
@@ -154,7 +154,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
                 ...col,
                 tickets: col.tickets.map((t) =>
                   t.id === selectedTicket.id
-                    ? { ...t, comments: [...(t.comments || []), response.data ] }
+                    ? { ...t, comments: [...(t.comments || []), response.data] }
                     : t
                 ),
               }

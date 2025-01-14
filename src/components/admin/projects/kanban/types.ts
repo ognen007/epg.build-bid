@@ -9,7 +9,7 @@ export interface Contractor {
     name: string;
   }
   
-  export interface ClientTask {
+  export interface ContractorTask {
     id: string;
     type: 'client';
     title: string;
@@ -30,7 +30,7 @@ export interface Contractor {
     createdAt: string;
   }
   
-  export type Ticket = ClientTask | InternalTask;
+  export type Ticket = ContractorTask | InternalTask;
   
   export interface Comment {
     id: string;
@@ -47,7 +47,7 @@ export interface Contractor {
   
   export interface AddClientTaskModalProps {
     onClose: () => void;
-    onAdd: (task: Omit<ClientTask, 'id' | 'comments' | 'createdAt'>) => void;
+    onAdd: (task: Omit<ContractorTask, 'id' | 'comments' | 'createdAt'>) => void;
   }
   
   export interface AddInternalTaskModalProps {

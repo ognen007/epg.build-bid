@@ -4,7 +4,7 @@ import { ProjectType } from '../../../types/project';
 
 interface ProjectProposalsProps {
   proposals?: ProjectType[]; // Make proposals optional
-    onAccept: () => void;
+    onAccept: (id: string) => void;
   onDecline: () => void;
 }
 
@@ -50,7 +50,7 @@ export function ProjectProposals({ onAccept, onDecline, proposals = [] }: Projec
                 Decline
               </button>
               <button
-                onClick={() => onAccept()}
+                onClick={() => onAccept(proposal.id)}
                 className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-medium"
               >
                 <Check className="h-4 w-4 inline-block mr-1" />

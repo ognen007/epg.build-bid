@@ -4,7 +4,6 @@ import { ProjectProposals } from '../../components/contractor/projects/ProjectPr
 import { ProjectWorkflowView } from '../../components/contractor/projectworkflow/ProjectWorkflowView';
 import { ProjectSearch } from './ProjectSearch';
 import { ProjectType } from '../../types/project';
-import { useSearchParams } from 'react-router-dom';
 
 // Define ContractorType interface
 export interface ContractorType {
@@ -92,12 +91,41 @@ export function ContractorProjects() {
         (project) => project.contractor === contractor.fullName
       );
       setFilteredProjects(projectsForContractor);
-      console.log('Filtered Projects:', projectsForContractor);
     }
   }, [contractor, allProjects]);
 
-  const handleAcceptProposal = () => {
-    console.log('Proposal accepted:');
+  // Handle accepting a proposal
+  const handleAcceptProposal = async (taskId: string) => {
+    if (!contractor) {
+      console.error('Contractor not found');
+      return;
+    }
+
+    try {
+      // Call the endpoint to update the task's hold and status
+      const response = await axios.put(
+        `https://epg-backend.onrender.com/api/projects/hold/${taskId}`
+      );
+
+      console.log('Task updated:', response.data);
+
+      // Refresh the projects list
+      const updatedProjects = allProjects.map((project) =>
+        project.id === taskId
+          ? {
+              ...project,
+              hold: 'takeoff_in_progress', // Ensure this matches the expected type
+              status: 'bid_submitted', // Ensure this matches the expected type
+            }
+          : project
+      );
+
+      // Update the state with the new projects list
+      setAllProjects(updatedProjects);
+    } catch (error) {
+      console.error('Error updating task:', error);
+      setError('Failed to update task. Please try again later.');
+    }
   };
 
   const handleDeclineProposal = () => {
@@ -120,7 +148,7 @@ export function ContractorProjects() {
         onAccept={handleAcceptProposal}
         onDecline={handleDeclineProposal}
       />
-      <ProjectWorkflowView />
+      <ProjectWorkflowView contractorId={contractor?.id || ''} />
     </div>
   );
 }

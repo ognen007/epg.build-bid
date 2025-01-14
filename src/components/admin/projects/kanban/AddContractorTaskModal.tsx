@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { Contractor, Project, ClientTask } from './types';
+import { Contractor, Project, ContractorTask } from './types';
 
 interface AddClientTaskModalProps {
   onClose: () => void;
-  onAdd: (task: Omit<ClientTask, 'id' | 'comments' | 'createdAt'>) => void;
+  onAdd: (task: Omit<ContractorTask, 'id' | 'comments' | 'createdAt'>) => void;
 }
 
-export const AddClientTaskModal: React.FC<AddClientTaskModalProps> = ({ onClose, onAdd }) => {
+export const AddContractorTaskModal: React.FC<AddClientTaskModalProps> = ({ onClose, onAdd }) => {
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [taskType, setTaskType] = useState<ClientTask['taskType']>('quote_verification');
+  const [taskType, setTaskType] = useState<ContractorTask['taskType']>('quote_verification');
   const [description, setDescription] = useState('');
   const [contractorSearch, setContractorSearch] = useState('');
 
@@ -45,7 +45,7 @@ export const AddClientTaskModal: React.FC<AddClientTaskModalProps> = ({ onClose,
       type: 'client',
       title: `${taskType
         .split('_')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .map((w:any) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ')} - ${selectedProject.name}`,
       description,
       contractor: selectedContractor.name,
@@ -131,7 +131,7 @@ export const AddClientTaskModal: React.FC<AddClientTaskModalProps> = ({ onClose,
               <select
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 value={taskType}
-                onChange={(e) => setTaskType(e.target.value as ClientTask['taskType'])}
+                onChange={(e) => setTaskType(e.target.value as ContractorTask['taskType'])}
               >
                 <option value="quote_verification">Quote Verification</option>
                 <option value="price_negotiation">Price Negotiation</option>

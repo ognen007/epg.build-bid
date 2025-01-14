@@ -3,16 +3,21 @@ import axios from "axios";
 import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
 
-export function ProjectWorkflowView() {
-  const [tasks, setTasks] = useState([]);
-  const contractorId = "123"; // Replace with the actual contractor ID
+export interface ProjectWorkflowProps {
+  contractorId: string; // Add contractorId as a prop
+}
 
-  // Fetch tasks for the contractor
+export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  // Fetch all tasks
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`https://epg-backend.onrender.com/api/projects/pipeline${contractorId}`);
-        setTasks(response.data);
+        const response = await axios.get(
+          `https://epg-backend.onrender.com/api/projects/hold/`
+        );
+        setTasks(response.data || []);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
@@ -22,13 +27,16 @@ export function ProjectWorkflowView() {
   }, [contractorId]);
 
   // Update task status when dragged and dropped
-  const updateTaskStatus = async (taskId:any, newStatus:any) => {
+  const updateTaskStatus = async (taskId: any, newHold: any) => {
     try {
-      const response = await axios.put(`https://epg-backend.onrender.com/api/projects/pipeline/api/projects/pipeline/${contractorId}/${taskId}`, {
-        status: newStatus,
-      });
-      setTasks((prevTasks:any) =>
-        prevTasks.map((task:any) => (task.id === taskId ? response.data : task))
+      const response = await axios.put(
+        `https://epg-backend.onrender.com/api/projects/pipeline/${taskId}`,
+        {
+          hold: newHold, // Send the new `hold` value
+        }
+      );
+      setTasks((prevTasks: any) =>
+        prevTasks.map((task: any) => (task.id === taskId ? response.data : task))
       );
     } catch (error) {
       console.error("Error updating task status:", error);
@@ -37,14 +45,8 @@ export function ProjectWorkflowView() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <PreConstructionSection
-        tasks={tasks.filter((task:any) => task.type === "pre-construction")}
-        updateTaskStatus={updateTaskStatus}
-      />
-      <ConstructionSection
-        tasks={tasks.filter((task:any) => task.type === "construction")}
-        updateTaskStatus={updateTaskStatus}
-      />
+      <PreConstructionSection tasks={tasks} updateTaskStatus={updateTaskStatus} />
+      <ConstructionSection tasks={tasks} updateTaskStatus={updateTaskStatus} />
     </div>
   );
 }

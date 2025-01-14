@@ -1,38 +1,29 @@
 import { Calendar, Hammer, CheckSquare, Bolt } from "lucide-react";
 
-export function ConstructionSection({ tasks, updateTaskStatus }:any) {
-  const statuses = ["scheduled", "ongoing", "completed"];
+export function ConstructionSection({ tasks, updateTaskStatus }: any) {
+  const statuses = [
+    { hold: "scheduled_projects", label: "Scheduled Projects" },
+    { hold: "ongoing_projects", label: "Ongoing Projects" },
+    { hold: "completed_projects", label: "Completed Projects" },
+  ];
 
-  const getStatusIcon = (status:any) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case "scheduled":
+      case "scheduled_projects":
         return Calendar;
-      case "ongoing":
+      case "ongoing_projects":
         return Hammer;
-      case "completed":
+      case "completed_projects":
         return CheckSquare;
       default:
         return null;
     }
   };
 
-  const getStatusText = (status:any) => {
-    switch (status) {
-      case "scheduled":
-        return "Scheduled Projects";
-      case "ongoing":
-        return "Ongoing Projects";
-      case "completed":
-        return "Completed Projects";
-      default:
-        return "";
-    }
-  };
-
-  const handleDrop = (e:any, status:any) => {
+  const handleDrop = (e: any, status: string) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
-    updateTaskStatus(taskId, status);
+    updateTaskStatus(taskId, status); // Call the `updateTaskStatus` function
   };
 
   return (
@@ -41,26 +32,28 @@ export function ConstructionSection({ tasks, updateTaskStatus }:any) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {statuses.map((status) => {
-          const StatusIcon = getStatusIcon(status);
-          const tasksInGroup = tasks.filter((task:any) => task.status === status);
+          const StatusIcon = getStatusIcon(status.hold);
+          const tasksInGroup = tasks.filter(
+            (task: any) => task.hold === status.hold
+          );
 
           return (
             <div
-              key={status}
+              key={status.hold}
               onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => handleDrop(e, status)}
+              onDrop={(e) => handleDrop(e, status.hold)}
               className="bg-white rounded-xl shadow-sm p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <Bolt className="h-5 w-5 text-orange-500" />
-                  <h3 className="font-medium text-gray-900">{getStatusText(status)}</h3>
+                  <h3 className="font-medium text-gray-900">{status.label}</h3>
                 </div>
                 <span className="text-sm text-gray-500">{tasksInGroup.length}</span>
               </div>
 
               <div className="space-y-3">
-                {tasksInGroup.map((task :any) => (
+                {tasksInGroup.map((task: any) => (
                   <div
                     key={task.id}
                     draggable
@@ -73,7 +66,7 @@ export function ConstructionSection({ tasks, updateTaskStatus }:any) {
                     <div className="text-sm text-gray-500 mt-1">{task.contractor}</div>
                     {task.startDate && (
                       <div className="text-sm text-gray-500 mt-1">
-                        {status === "scheduled" ? "Starts" : "Started"}:{" "}
+                        {status.hold === "scheduled_projects" ? "Starts" : "Started"}:{" "}
                         {new Date(task.startDate).toLocaleDateString()}
                       </div>
                     )}

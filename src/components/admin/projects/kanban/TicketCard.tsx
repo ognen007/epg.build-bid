@@ -8,6 +8,9 @@ interface TicketCardProps {
 }
 
 export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
+  // Ensure comments is always an array
+  const comments = ticket.comments || [];
+
   return (
     <div
       draggable
@@ -32,10 +35,10 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
       <div className="mt-2 text-sm text-gray-600 line-clamp-2">
         {ticket.description}
       </div>
-      {ticket.comments.length > 0 && (
+      {comments.length > 0 && ( // Use the safe comments array
         <div className="mt-2 flex items-center text-sm text-gray-500">
           <MessageSquare className="h-4 w-4 mr-1" />
-          {ticket.comments.length}
+          {comments.length}
         </div>
       )}
     </div>

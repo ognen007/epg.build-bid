@@ -4,20 +4,28 @@ import { InternalTask } from './types';
 
 interface AddInternalTaskModalProps {
   onClose: () => void;
-  onAdd: (task: Omit<InternalTask, 'id' | 'comments' | 'createdAt'>) => void;
+  onAdd: (task: Omit<InternalTask, 'id' | 'comments' | 'createdAt'>, contractorId: string) => void;
+  contractorId: string; // Add contractorId to the props
 }
 
-export const AddInternalTaskModal: React.FC<AddInternalTaskModalProps> = ({ onClose, onAdd }) => {
+export const AddInternalTaskModal: React.FC<AddInternalTaskModalProps> = ({
+  onClose,
+  onAdd,
+  contractorId, // Destructure contractorId from props
+}) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({
-      type: 'internal',
-      title,
-      description,
-    });
+    onAdd(
+      {
+        type: 'internal',
+        title,
+        description,
+      },
+      contractorId // Pass contractorId here
+    );
     onClose();
   };
 

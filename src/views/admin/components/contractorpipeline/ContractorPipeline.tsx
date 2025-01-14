@@ -3,11 +3,11 @@ import axios from 'axios';
 import { ProjectProposals } from './ProjectProposals';
 import { ProjectWorkflowView } from './ProjectWorkflowView';
 import { ContractorFilters } from './ContractorProjectFilter';
-import { ProjectKanbanView } from '../../../../components/admin/projects/ProjectKanbanView';
 import { Plus } from 'lucide-react';
 import { AddProjectModal } from '../../../../components/admin/projects/AddProjectModal';
 import { ProjectType } from '../../../../types/project';
 import { useSearchParams } from 'react-router-dom';
+import { ProjectKanbanView } from '../../../../components/admin/projects/kanban/ProjectKanbanView';
 
 // Define ContractorType interface
 export interface ContractorType {
@@ -19,7 +19,7 @@ export function ContractorPipeline() {
   const [allProjects, setAllProjects] = useState<ProjectType[]>([]);
   const [allContractors, setAllContractors] = useState<ContractorType[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectType[]>([]);
-  const [selectedContractorId, setSelectedContractorId] = useState<string | undefined>();
+  const [selectedContractorId, setSelectedContractorId] = useState<any>();
   const [selectedView, setSelectedView] = useState<'pipeline' | 'tasks'>('pipeline');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -177,14 +177,14 @@ export function ContractorPipeline() {
               ) : (
                 <>
                   <ProjectProposals proposals={filteredProjects} />
-                  <ProjectWorkflowView />
+                  <ProjectWorkflowView contractorId={selectedContractorId}/>
                 </>
               )
             ) : (
               <p className="text-gray-500">No contractor selected. Start typing to search for contractors.</p>
             )
           ) : (
-            <ProjectKanbanView />
+            <ProjectKanbanView contractorId={selectedContractorId}/>
           )}
         </div>
       </div>

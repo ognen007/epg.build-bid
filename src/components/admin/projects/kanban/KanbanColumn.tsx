@@ -9,6 +9,9 @@ interface KanbanColumnProps {
 }
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, onTicketClick, onDrop }) => {
+  // Ensure tickets is always an array
+  const tickets = column.tickets || [];
+
   return (
     <div
       className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4"
@@ -19,7 +22,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ column, onTicketClic
         <h3 className="font-medium text-gray-900">{column.title}</h3>
       </div>
       <div className="space-y-3">
-        {column.tickets.map((ticket:any) => (
+        {tickets.map((ticket) => ( // Use the safe tickets array
           <TicketCard
             key={ticket.id}
             ticket={ticket}

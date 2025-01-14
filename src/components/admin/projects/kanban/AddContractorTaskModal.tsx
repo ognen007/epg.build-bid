@@ -1,57 +1,37 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { Contractor, Project, ContractorTask } from './types';
+import { ContractorTask } from './types';
 
-interface AddClientTaskModalProps {
+interface AddContractorTaskModalProps {
   onClose: () => void;
-  onAdd: (task: Omit<ContractorTask, 'id' | 'comments' | 'createdAt'>) => void;
+  onAdd: (task: Omit<ContractorTask, 'id' | 'comments' | 'createdAt'>, contractorId: string) => void;
+  contractorId: string; // Pass contractorId as a prop
 }
 
-export const AddContractorTaskModal: React.FC<AddClientTaskModalProps> = ({ onClose, onAdd }) => {
-  const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+export const AddContractorTaskModal: React.FC<AddContractorTaskModalProps> = ({
+  onClose,
+  onAdd,
+  contractorId,
+}) => {
   const [taskType, setTaskType] = useState<ContractorTask['taskType']>('quote_verification');
   const [description, setDescription] = useState('');
-  const [contractorSearch, setContractorSearch] = useState('');
-
-  const sampleContractors: Contractor[] = [
-    {
-      id: '1',
-      name: 'ABC Construction',
-      projects: [
-        { id: '1', name: 'City Center Renovation' },
-        { id: '2', name: 'Harbor Bridge Project' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'XYZ Builders',
-      projects: [
-        { id: '3', name: 'Shopping Mall Extension' },
-        { id: '4', name: 'Office Complex' },
-      ],
-    },
-  ];
-
-  const filteredContractors = sampleContractors.filter((c) =>
-    c.name.toLowerCase().includes(contractorSearch.toLowerCase())
-  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedContractor || !selectedProject) return;
 
-    onAdd({
-      type: 'client',
-      title: `${taskType
-        .split('_')
-        .map((w:any) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ')} - ${selectedProject.name}`,
-      description,
-      contractor: selectedContractor.name,
-      project: selectedProject.name,
-      taskType,
-    });
+    onAdd(
+      {
+        type: 'contractor',
+        title: `${taskType
+          .split('_')
+          .map((w: any) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ')}`, // Generate title from task type
+        description,
+        taskType,
+        contractorId: contractorId
+      },
+      contractorId // Pass contractorId as an argument
+    );
     onClose();
   };
 
@@ -61,70 +41,13 @@ export const AddContractorTaskModal: React.FC<AddClientTaskModalProps> = ({ onCl
         <div className="fixed inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Add Client Task</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Add Contractor Task</h2>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
               <X className="h-5 w-5" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Contractor Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contractor</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search contractors..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  value={contractorSearch}
-                  onChange={(e) => setContractorSearch(e.target.value)}
-                />
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-auto">
-                  {filteredContractors.map((contractor) => (
-                    <button
-                      key={contractor.id}
-                      type="button"
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50"
-                      onClick={() => {
-                        setSelectedContractor(contractor);
-                        setSelectedProject(null);
-                        setContractorSearch('');
-                      }}
-                    >
-                      {contractor.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {selectedContractor && (
-                <div className="mt-2 text-sm text-gray-600">
-                  Selected: {selectedContractor.name}
-                </div>
-              )}
-            </div>
-
-            {/* Project Selection */}
-            {selectedContractor && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  value={selectedProject?.id || ''}
-                  onChange={(e) => {
-                    const project = selectedContractor.projects.find((p) => p.id === e.target.value);
-                    setSelectedProject(project || null);
-                  }}
-                >
-                  <option value="">Select a project</option>
-                  {selectedContractor.projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
             {/* Task Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Task Type</label>
@@ -162,7 +85,7 @@ export const AddContractorTaskModal: React.FC<AddClientTaskModalProps> = ({ onCl
               <button
                 type="submit"
                 className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600"
-                disabled={!selectedContractor || !selectedProject || !description}
+                disabled={!description}
               >
                 Add Task
               </button>

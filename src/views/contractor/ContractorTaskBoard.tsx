@@ -1,47 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface Task {
   id: string;
   title: string;
-  type: 'quote' | 'negotiation' | 'documentation';
+  taskType: 'quote_verification' | 'price_negotiation' | 'required_documentation';
   status: 'todo' | 'done';
-  project: string;
+  project: string | null;
   deadline?: string;
 }
 
-const sampleTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Review quote for City Center Project',
-    type: 'quote',
-    status: 'todo',
-    project: 'City Center Mall',
-    deadline: '2024-03-20'
-  },
-  {
-    id: '2',
-    title: 'Submit insurance documentation',
-    type: 'documentation',
-    status: 'todo',
-    project: 'Harbor Bridge',
-    deadline: '2024-03-25'
-  },
-  {
-    id: '3',
-    title: 'Negotiate final price for Office Complex',
-    type: 'negotiation',
-    status: 'done',
-    project: 'Downtown Office Complex'
-  }
-];
-
-type TaskType = 'quote' | 'negotiation' | 'documentation';
+type TaskType = 'quote_verification' | 'price_negotiation' | 'required_documentation';
 
 export function TasksBoard() {
-  const [selectedType, setSelectedType] = useState<TaskType>('quote');
-  const [tasks, setTasks] = useState(sampleTasks);
+  const [selectedType, setSelectedType] = useState<TaskType>('price_negotiation');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [contractorId, setContractorId] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredTasks = tasks.filter(task => task.type === selectedType);
+  // Fetch contractor ID based on user email
+  useEffect(() => {
+    const fetchContractorId = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          setError('User not found');
+          setLoading(false);
+          return;
+        }
+
+        const user = JSON.parse(storedUser);
+        const { email } = user;
+
+        // Fetch all contractors from the backend
+        const response = await axios.get('https://epg-backend.onrender.com/api/contractor/id');
+        console.log('All Contractors:', response.data);
+
+        // Find the logged-in contractor by email
+        const loggedInContractor = response.data.find(
+          (contractor: any) => contractor.email === email
+        );
+
+        if (!loggedInContractor) {
+          throw new Error('Logged-in contractor not found');
+        }
+
+        // Set the contractor ID in the state
+        setContractorId(loggedInContractor.id);
+        console.log('Logged-in Contractor ID:', loggedInContractor.id);
+      } catch (error) {
+        console.error('Error fetching contractor ID:', error);
+        setError('Failed to fetch contractor ID');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContractorId();
+  }, []);
+
+  // Fetch tickets for the contractor
+  useEffect(() => {
+    if (!contractorId) return; // Don't fetch tickets if contractorId is not set
+
+    const fetchTickets = async () => {
+      try {
+        const response = await axios.get(`https://epg-backend.onrender.com/api/tickets/${contractorId}`);
+        const data = response.data;
+
+        // Transform the data to match the Task interface
+        const transformedTasks = data.map((ticket: any) => ({
+          id: ticket.id,
+          title: ticket.title,
+          taskType: ticket.taskType,
+          status: ticket.status || 'todo', // Default to 'todo' if status is not provided
+          project: ticket.project,
+          deadline: ticket.deadline,
+        }));
+        setTasks(transformedTasks);
+      } catch (error) {
+        console.error('Failed to fetch tickets:', error);
+        setError('Failed to fetch tickets');
+      }
+    };
+
+    fetchTickets();
+  }, [contractorId]);
+
+  // Filter tasks based on the selected task type
+  const filteredTasks = tasks.filter(task => task.taskType === selectedType);
+
+  // Separate tasks into "To-Do" and "Done" based on their status
   const todoTasks = filteredTasks.filter(task => task.status === 'todo');
   const doneTasks = filteredTasks.filter(task => task.status === 'done');
 
@@ -61,15 +111,23 @@ export function TasksBoard() {
     e.preventDefault();
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className="space-y-6 bg-gray-100 p-6 rounded-xl">
       {/* Task Type Selector */}
       <div className="flex justify-center">
         <div className="inline-flex p-1 bg-white rounded-full shadow-sm">
           <button
-            onClick={() => setSelectedType('quote')}
+            onClick={() => setSelectedType('quote_verification')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'quote' 
+              selectedType === 'quote_verification' 
                 ? 'bg-orange-500 text-white shadow-sm' 
                 : 'text-gray-500 hover:text-gray-900'
             }`}
@@ -77,9 +135,9 @@ export function TasksBoard() {
             Quote Verification
           </button>
           <button
-            onClick={() => setSelectedType('negotiation')}
+            onClick={() => setSelectedType('price_negotiation')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'negotiation' 
+              selectedType === 'price_negotiation' 
                 ? 'bg-orange-500 text-white shadow-sm' 
                 : 'text-gray-500 hover:text-gray-900'
             }`}
@@ -87,9 +145,9 @@ export function TasksBoard() {
             Price Negotiation
           </button>
           <button
-            onClick={() => setSelectedType('documentation')}
+            onClick={() => setSelectedType('required_documentation')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'documentation' 
+              selectedType === 'required_documentation' 
                 ? 'bg-orange-500 text-white shadow-sm' 
                 : 'text-gray-500 hover:text-gray-900'
             }`}
@@ -117,7 +175,9 @@ export function TasksBoard() {
                 className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
-                <p className="text-sm text-gray-500 mt-1">{task.project}</p>
+                {task.project && (
+                  <p className="text-sm text-gray-500 mt-1">{task.project}</p>
+                )}
                 {task.deadline && (
                   <p className="text-sm text-orange-600 mt-2">
                     Due: {new Date(task.deadline).toLocaleDateString()}
@@ -144,7 +204,9 @@ export function TasksBoard() {
                 className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
-                <p className="text-sm text-gray-500 mt-1">{task.project}</p>
+                {task.project && (
+                  <p className="text-sm text-gray-500 mt-1">{task.project}</p>
+                )}
                 {task.deadline && (
                   <p className="text-sm text-green-600 mt-2">
                     Completed

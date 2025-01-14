@@ -60,15 +60,15 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
       alert('Please add a column first.');
       return;
     }
-
+  
     try {
       const response = await axios.post(`${API_BASE_URL}/tickets`, {
         ...task,
         type: 'contractor',
         columnId: columns[0].id,
-        contractorId,
+        contractor: task.contractorId, // Use `contractor` instead of `contractorId`
       });
-
+  
       setColumns((prev) =>
         prev.map((col) =>
           col.id === columns[0].id
@@ -244,6 +244,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
         <AddContractorTaskModal
           onClose={() => setIsAddingContractorTask(false)}
           onAdd={handleAddContractorTask}
+          contractorId={contractorId}
         />
       )}
 

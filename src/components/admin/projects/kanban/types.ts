@@ -11,11 +11,10 @@ export interface Contractor {
   
   export interface ContractorTask {
     id: string;
-    type: 'client';
+    type: 'contractor';
     title: string;
     description: string;
-    contractor: string; // Updated to match backend
-    project: string;    // Updated to match backend
+    contractorId : string;
     taskType: 'quote_verification' | 'price_negotiation' | 'required_documentation';
     comments: Comment[];
     createdAt: string;

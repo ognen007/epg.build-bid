@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Search, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-interface Revenue {
+interface Contractor {
   id: string;
   contractor: {
     name: string;
@@ -15,42 +15,42 @@ interface Revenue {
   projectsCompleted: number;
 }
 
-const sampleRevenue: Revenue[] = [
-  {
-    id: '1',
-    contractor: {
-      name: 'John Smith',
-      email: 'john@example.com',
-      company: 'Smith Construction'
-    },
-    totalRevenue: 450000,
-    lastMonthRevenue: 45000,
-    growth: 12.5,
-    projectsCompleted: 15
-  },
-  {
-    id: '2',
-    contractor: {
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      company: 'Johnson Industries'
-    },
-    totalRevenue: 380000,
-    lastMonthRevenue: 35000,
-    growth: -5.2,
-    projectsCompleted: 12
-  }
-];
-
 export function RevenueComponent() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredRevenue = sampleRevenue.filter(rev => 
-    rev.contractor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rev.contractor.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rev.contractor.company.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch contractors data from the backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://epg-backend.onrender.com/api/contractor-information');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data: Contractor[] = await response.json();
+        setContractors(data);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Filter contractors based on search query
+  const filteredContractors = contractors.filter((contractor) =>
+    contractor.contractor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contractor.contractor.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contractor.contractor.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -85,43 +85,43 @@ export function RevenueComponent() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRevenue.map((rev) => (
-                <tr 
-                  key={rev.id} 
+              {filteredContractors.map((contractor) => (
+                <tr
+                  key={contractor.id}
                   className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => navigate(`/admin/analytics/revenue/${rev.id}`)}
+                  onClick={() => navigate(`/admin/analytics/revenue/${contractor.id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{rev.contractor.name}</div>
-                    <div className="text-sm text-gray-500">{rev.contractor.email}</div>
+                    <div className="text-sm font-medium text-gray-900">{contractor.contractor.name}</div>
+                    <div className="text-sm text-gray-500">{contractor.contractor.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {rev.contractor.company}
+                    {contractor.contractor.company}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      ${rev.totalRevenue.toLocaleString()}
+                      ${contractor.totalRevenue.toLocaleString()}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      ${rev.lastMonthRevenue.toLocaleString()}
+                      ${contractor.lastMonthRevenue.toLocaleString()}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className={`flex items-center text-sm ${
-                      rev.growth >= 0 ? 'text-green-600' : 'text-red-600'
+                      contractor.growth >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {rev.growth >= 0 ? (
+                      {contractor.growth >= 0 ? (
                         <ArrowUpRight className="h-4 w-4 mr-1" />
                       ) : (
                         <ArrowDownRight className="h-4 w-4 mr-1" />
                       )}
-                      {Math.abs(rev.growth)}%
+                      {Math.abs(contractor.growth)}%
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {rev.projectsCompleted}
+                    {contractor.projectsCompleted}
                   </td>
                 </tr>
               ))}

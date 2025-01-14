@@ -8,6 +8,7 @@ interface Takeoff {
   name: string;
   contractor: string;
   estimator: string;
+  status?: string; // Add status field
   scope?: string;
   takeoff?: string;
   estimatorNotes?: string;
@@ -21,6 +22,7 @@ export function TakeoffList() {
     search: '',
     contractor: '',
     estimator: '',
+    status: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +31,15 @@ export function TakeoffList() {
   useEffect(() => {
     const fetchTakeoffs = async () => {
       try {
-        const response = await axios.get('https://epg-backend.onrender.com/api/project/takeoff/all');
-        setTakeoffs(response.data);
+        const response = await axios.get('https://epg-backend.onrender.com/api/project/takeoff/all/tasks');
+        
+        // Filter projects with status "bid_submitted"
+        const filteredProjects = response.data.filter(
+          (project: Takeoff) => project.status === "bid_submitted"
+        );
+
+        console.log(filteredProjects)
+        setTakeoffs(filteredProjects); // Set filtered projects to state
       } catch (err) {
         setError('Failed to fetch takeoffs');
         console.error(err);
@@ -42,7 +51,7 @@ export function TakeoffList() {
     fetchTakeoffs();
   }, []);
 
-  // Get unique contractors and estimators from the takeoffs
+  // Get unique contractors and estimators from the filtered takeoffs
   const contractors = Array.from(new Set(takeoffs.map((takeoff) => takeoff.contractor)));
   const estimators = Array.from(new Set(takeoffs.map((takeoff) => takeoff.estimator)));
 
@@ -65,7 +74,10 @@ export function TakeoffList() {
       if (!selectedTakeoff) return;
 
       // Send the updated data to the backend
-      const response = await axios.put(`https://epg-backend.onrender.com/api/project/takeoff/${selectedTakeoff.id}`, updatedData);
+      const response = await axios.put(
+        `https://epg-backend.onrender.com/api/project/takeoff/${selectedTakeoff.id}`,
+        updatedData
+      );
 
       // Update the local state with the new data
       setTakeoffs((prev) =>
@@ -84,9 +96,9 @@ export function TakeoffList() {
 
   // Filter takeoffs based on search and filters
   const filteredTakeoffs = takeoffs.filter((takeoff) => {
-    const matchesSearch = takeoff.name.toLowerCase().includes(filters.search.toLowerCase());
-    const matchesContractor = !filters.contractor || takeoff.contractor === filters.contractor;
-    const matchesEstimator = !filters.estimator || takeoff.estimator === filters.estimator;
+    const matchesSearch = (takeoff.name || '').toLowerCase().includes(filters.search.toLowerCase());
+    const matchesContractor = !filters.contractor || (takeoff.contractor || '') === filters.contractor;
+    const matchesEstimator = !filters.estimator || (takeoff.estimator || '') === filters.estimator;
     return matchesSearch && matchesContractor && matchesEstimator;
   });
 

@@ -1,51 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit2 } from 'lucide-react';
 
-interface User {
+interface Contractor {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  type: 'contractor' | 'client';
-  company: string;
-  licenseNumber?: string;
-  specialty?: string;
-  yearsExperience?: number;
-  portfolioUrl?: string;
-  phone?: string;
-  address?: string;
-  businessLicenseUrl?: string;
-  insuranceCertificateUrl?: string;
+  companyName: string;
+  specialty: string;
+  yearsOfExperience: number;
+  phoneNumber: string;
+  officeAddress: string;
+  createdAt: string;
+  role: string;
 }
 
-const sampleUsers: User[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@example.com',
-    type: 'contractor',
-    company: 'Smith Construction',
-    licenseNumber: 'LIC123456',
-    specialty: 'Electrical',
-    yearsExperience: 10,
-    portfolioUrl: 'https://example.com',
-    phone: '(555) 123-4567',
-    address: '123 Main St, City, State',
-    businessLicenseUrl: 'https://example.com/license',
-    insuranceCertificateUrl: 'https://example.com/insurance'
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    type: 'client',
-    company: 'Johnson Industries'
-  }
-];
-
 interface EditUserModalProps {
-  user: User;
+  user: Contractor;
   onClose: () => void;
-  onSave: (user: User) => void;
+  onSave: (user: Contractor) => void;
 }
 
 function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
@@ -61,12 +33,10 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-        
         <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Edit User</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Edit Contractor</h2>
           </div>
-
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -74,11 +44,10 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
                 <input
                   type="text"
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
@@ -88,111 +57,52 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  type="password"
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                  placeholder="Leave blank to keep current password"
-                />
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700">Company Name</label>
                 <input
                   type="text"
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 />
               </div>
-
-              {formData.type === 'contractor' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">License Number</label>
-                    <input
-                      type="text"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.licenseNumber}
-                      onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Specialty</label>
-                    <input
-                      type="text"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.specialty}
-                      onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
-                    <input
-                      type="number"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.yearsExperience}
-                      onChange={(e) => setFormData({ ...formData, yearsExperience: Number(e.target.value) })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Portfolio URL</label>
-                    <input
-                      type="url"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.portfolioUrl}
-                      onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                    <input
-                      type="tel"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Office Address</label>
-                    <input
-                      type="text"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Business License URL</label>
-                    <input
-                      type="url"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.businessLicenseUrl}
-                      onChange={(e) => setFormData({ ...formData, businessLicenseUrl: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Insurance Certificate URL</label>
-                    <input
-                      type="url"
-                      className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                      value={formData.insuranceCertificateUrl}
-                      onChange={(e) => setFormData({ ...formData, insuranceCertificateUrl: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Specialty</label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.specialty}
+                  onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.yearsOfExperience}
+                  onChange={(e) => setFormData({ ...formData, yearsOfExperience: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                  type="tel"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Office Address</label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  value={formData.officeAddress}
+                  onChange={(e) => setFormData({ ...formData, officeAddress: e.target.value })}
+                />
+              </div>
             </div>
-
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -217,34 +127,75 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
 
 export function UserGrowthComponent() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [userType, setUserType] = useState('all');
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [selectedUser, setSelectedUser] = useState<Contractor | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const filteredUsers = sampleUsers.filter(user => {
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      if (
-        !user.name.toLowerCase().includes(searchLower) &&
-        !user.email.toLowerCase().includes(searchLower)
-      ) {
-        return false;
+  // Fetch contractors from the backend
+  useEffect(() => {
+    const fetchContractors = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('https://epg-backend.onrender.com/api/contractors');
+        if (!response.ok) {
+          throw new Error('Failed to fetch contractors');
+        }
+        const data = await response.json();
+        setContractors(data);
+      } catch (err) {
+        setError('Error fetching contractors. Please try again.');
+      } finally {
+        setLoading(false);
       }
-    }
-    if (userType !== 'all' && user.type !== userType) {
-      return false;
-    }
-    return true;
-  });
+    };
 
-  const handleSaveUser = (updatedUser: User) => {
-    // Handle user update logic here
-    console.log('Updated user:', updatedUser);
+    fetchContractors();
+  }, []);
+
+  // Handle saving updated contractor data
+  const handleSaveUser = async (updatedUser: Contractor) => {
+    try {
+      const response = await fetch(`https://epg-backend.onrender.com/api/contractors/${updatedUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUser),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update contractor');
+      }
+
+      const data = await response.json();
+      setContractors((prevContractors) =>
+        prevContractors.map((contractor) =>
+          contractor.id === updatedUser.id ? data : contractor
+        )
+      );
+      setSelectedUser(null); // Close the modal
+      alert('Contractor updated successfully!');
+    } catch (err) {
+      console.error('Error updating contractor:', err);
+      alert('Failed to update contractor. Please try again.');
+    }
   };
+
+  // Filter contractors based on search query
+  const filteredContractors = contractors.filter((contractor) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      contractor.fullName.toLowerCase().includes(searchLower) ||
+      contractor.email.toLowerCase().includes(searchLower) ||
+      contractor.companyName.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">User Analytics</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Contractor Analytics</h1>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6">
@@ -259,16 +210,10 @@ export function UserGrowthComponent() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <select
-            className="w-full sm:w-48 rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
-          >
-            <option value="all">All Users</option>
-            <option value="contractor">Contractors</option>
-            <option value="client">Clients</option>
-          </select>
         </div>
+
+        {loading && <p>Loading contractors...</p>}
+        {error && <p className="text-red-500">{error}</p>}
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -276,29 +221,23 @@ export function UserGrowthComponent() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
                 <th className="relative px-6 py-3">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      user.type === 'contractor' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                    }`}>
-                      {user.type.charAt(0).toUpperCase() + user.type.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.company}</td>
+              {filteredContractors.map((contractor) => (
+                <tr key={contractor.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{contractor.fullName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.companyName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.specialty}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => setSelectedUser(user)}
+                      onClick={() => setSelectedUser(contractor)}
                       className="text-orange-600 hover:text-orange-700"
                     >
                       <Edit2 className="h-4 w-4" />

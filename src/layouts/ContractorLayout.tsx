@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ContractorSidebar } from '../components/navigation/ContractorSidebar';
 import { Header } from '../components/Header';
@@ -16,12 +16,41 @@ import { ContractorTasks } from '../views/contractor/ContractorTasks';
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [fullName, setFullName] = useState('');
+
+  useEffect(() => {
+    const fetchFullNameByEmail = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) return setFullName("Contractor User");
+  
+        const { email } = JSON.parse(storedUser);
+  
+        const response = await fetch(
+          `https://epg-backend.onrender.com/api/contractor/name-by-email?email=${email}`
+        );
+  
+        if (response.ok) {
+          const data = await response.json();
+          setFullName(data.fullName || "Admin User");
+        } else {
+          console.error("Error fetching full name:", response.statusText);
+          setFullName("Admin User");
+        }
+      } catch (error) {
+        console.error("Error fetching full name:", error);
+        setFullName("Admin User");
+      }
+    };
+  
+    fetchFullNameByEmail();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-50">
       {showWelcome && (
         <WelcomePopup 
-          fullName="Contractor User" 
+        fullName={fullName} 
           onComplete={() => setShowWelcome(false)} 
         />
       )}
@@ -44,7 +73,7 @@ export function ContractorLayout() {
       </div>
       
       <div className="flex-1 flex flex-col min-w-0">
-        <Header 
+        <Header userFullName={fullName}
           onMenuClick={() => setIsSidebarOpen(true)}
           onTasksClick={() => {}}
           showTasksButton={false}

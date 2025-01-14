@@ -1,30 +1,41 @@
 import React from 'react';
-import { Check, X, Calendar, DollarSign } from 'lucide-react';
+import { Calendar, X, Check } from 'lucide-react';
 import { ProjectType } from '../../../types/project';
 
 interface ProjectProposalsProps {
   proposals?: ProjectType[]; // Make proposals optional
-  onAccept: () => void;
+    onAccept: () => void;
   onDecline: () => void;
 }
 
-export function ProjectProposals({ proposals, onAccept, onDecline }: ProjectProposalsProps) {
+export function ProjectProposals({ onAccept, onDecline, proposals = [] }: ProjectProposalsProps) {
+  // Log the incoming proposals
+  console.log('Incoming Proposals:', proposals);
+
+  // Filter proposals to only include projects with status "awaiting_bid"
+  const filteredProposals = proposals.filter(
+    (proposal) => proposal.status === 'awaiting_bid'
+  );
+
+  // Log the filtered proposals
+  console.log('Filtered Proposals:', filteredProposals);
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-gray-900">Project Proposals</h2>
       <div className="grid gap-4">
-        {proposals.map((proposal) => (
+        {filteredProposals.map((proposal) => (
           <div key={proposal.id} className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">{proposal.title}</h3>
+                <h3 className="text-lg font-medium text-gray-900">{proposal.name}</h3>
                 <p className="text-sm text-gray-600 mt-1">{proposal.description}</p>
               </div>
               <span className="text-lg font-semibold text-gray-900">
-                ${proposal.budget.toLocaleString()}
+                ${proposal.valuation?.toLocaleString()}
               </span>
             </div>
-            
+
             <div className="flex items-center text-sm text-gray-500 mb-4">
               <Calendar className="h-4 w-4 mr-1" />
               Due {new Date(proposal.deadline).toLocaleDateString()}

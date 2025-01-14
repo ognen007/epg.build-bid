@@ -97,7 +97,7 @@ export function RevenueChart() {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="revenue" fill="#1E90FF" name="Revenue" />
+            <Bar dataKey="revenue" fill="#25993C" name="Revenue" />
           </BarChart>
         </ResponsiveContainer>
       </div>

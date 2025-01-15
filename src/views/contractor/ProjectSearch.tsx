@@ -18,7 +18,7 @@ export function ProjectSearch({ searchQuery, onSearchChange }: ProjectSearchProp
           placeholder="Search your projects..."
           className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-full shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => onSearchChange(e.target.value)} // Pass the search query to the parent
         />
       </div>
     </div>

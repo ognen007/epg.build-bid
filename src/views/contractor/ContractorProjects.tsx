@@ -18,6 +18,7 @@ export function ContractorProjects() {
   const [filteredProjects, setFilteredProjects] = useState<ProjectType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState(''); // Add searchQuery state
 
   // Fetch contractor data
   useEffect(() => {
@@ -84,15 +85,24 @@ export function ContractorProjects() {
     fetchProjects();
   }, []);
 
-  // Filter projects based on contractor fullName
+  // Filter projects based on contractor fullName and search query
   useEffect(() => {
     if (contractor && allProjects.length > 0) {
-      const projectsForContractor = allProjects.filter(
+      let projectsForContractor = allProjects.filter(
         (project) => project.contractor === contractor.fullName
       );
+
+      // Apply search query filter
+      if (searchQuery) {
+        projectsForContractor = projectsForContractor.filter((project) =>
+          project.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
       setFilteredProjects(projectsForContractor);
+      console.log('Filtered Projects:', projectsForContractor);
     }
-  }, [contractor, allProjects]);
+  }, [contractor, allProjects, searchQuery]);
 
   // Handle accepting a proposal
   const handleAcceptProposal = async (taskId: string) => {
@@ -130,6 +140,12 @@ export function ContractorProjects() {
 
   const handleDeclineProposal = () => {
     console.log('Proposal declined:');
+  };
+
+  // Handle search query change
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    console.log('Search query:', query);
   };
 
   // Skeleton loader for loading state
@@ -173,7 +189,10 @@ export function ContractorProjects() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <ProjectSearch onSearchChange={() => console.log('Hi')} searchQuery="Search Project" />
+      <ProjectSearch
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange} // Pass the search handler
+      />
       <ProjectProposals
         proposals={filteredProjects}
         onAccept={handleAcceptProposal}

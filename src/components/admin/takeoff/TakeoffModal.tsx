@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { X, Upload } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { X, Upload } from "lucide-react";
+import axios from "axios";
 
 interface TakeoffModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface TakeoffModalProps {
     scope: string;
     estimator: string;
     takeoff: string;
+    blueprints: string;
     estimatorNotes: string;
   } | null;
   onSave: (data: any) => void;
@@ -18,43 +20,80 @@ interface TakeoffModalProps {
 
 export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalProps) {
   const [formData, setFormData] = useState({
-    name: '',
-    contractor: '',
-    scope: '',
-    estimator: '',
+    name: "",
+    contractor: "",
+    scope: "",
+    estimator: "",
+    blueprintsFile: null as File | null,
     takeoffFile: null as File | null,
-    estimatorNotes: '',
+    estimatorNotes: "",
   });
 
   // Update formData when takeoff prop changes
   useEffect(() => {
     if (takeoff) {
       setFormData({
-        name: takeoff.name,
-        contractor: takeoff.contractor, // Pre-fill contractor name
-        scope: takeoff.scope, // Pre-fill scope
-        estimator: takeoff.estimator, // Pre-fill estimator
-        takeoffFile: null, // Handle file uploads separately
-        estimatorNotes: takeoff.estimatorNotes, // Pre-fill estimator notes
+        name: takeoff.name || "",
+        contractor: takeoff.contractor || "",
+        scope: takeoff.scope || "",
+        estimator: takeoff.estimator || "",
+        takeoffFile: null,
+        blueprintsFile: null,
+        estimatorNotes: takeoff.estimatorNotes || "",
       });
     }
   }, [takeoff]);
 
   if (!isOpen || !takeoff) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      ...formData,
-      id: takeoff.id, // Include the project ID in the data
-    });
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("contractor", formData.contractor);
+      formDataToSend.append("scope", formData.scope);
+      formDataToSend.append("estimator", formData.estimator);
+      formDataToSend.append("estimatorNotes", formData.estimatorNotes);
+
+      // Append files if they exist
+      if (formData.takeoffFile) {
+        formDataToSend.append("takeoffFile", formData.takeoffFile);
+      }
+      if (formData.blueprintsFile) {
+        formDataToSend.append("blueprintsFile", formData.blueprintsFile);
+      }
+
+      // Log the FormData object for debugging
+      for (const [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+
+      // Send the form data to the backend
+      const response = await axios.put(
+        `https://epg-backend.onrender.com/api/takeoff/projects/${takeoff.id}`,
+        formDataToSend
+      );
+
+      // Call the onSave callback with the updated data
+      onSave(response.data);
+      onClose(); // Close the modal after saving
+    } catch (error) {
+      console.error("Error updating project:", error);
+      if (error) {
+        alert(`Failed to update project: ${error}`);
+      } else {
+        alert("Failed to update project. Please try again later.");
+      }
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-        
+
         <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md">
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Edit Takeoff</h2>
@@ -64,6 +103,7 @@ export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalP
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Form fields for name, contractor, scope, estimator */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Project Name</label>
               <input
@@ -104,6 +144,7 @@ export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalP
               />
             </div>
 
+            {/* File upload fields */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Takeoff File</label>
               <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
@@ -126,6 +167,28 @@ export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalP
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Blueprints</label>
+              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
+                <div className="space-y-1 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
+                      <span>Upload blueprints</span>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setFormData({ ...formData, blueprintsFile: e.target.files?.[0] || null })}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Estimator Notes */}
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Estimator Notes</label>
               <textarea
                 rows={4}
@@ -136,6 +199,7 @@ export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalP
               />
             </div>
 
+            {/* Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"

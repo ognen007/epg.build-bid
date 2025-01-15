@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -15,165 +14,123 @@ import { Eye, X } from 'lucide-react';
 interface Project {
   id: string;
   name: string;
-  deadline: string;
-  valuation: number;
-  status: 'won' | 'lost';
-  description: string;
-  client: string;
-  location: string;
-  startDate: string;
-  completionDate?: string;
-  team: string[];
+  status: string;
+  valuation: string | null;
 }
 
-const monthlyData = [
-  { month: 'Jan', wonProjects: 4, lostProjects: 2, totalRevenue: 12000 },
-  { month: 'Feb', wonProjects: 3, lostProjects: 5, totalRevenue: 15000 },
-  { month: 'Mar', wonProjects: 5, lostProjects: 2, totalRevenue: 18000 },
-  { month: 'Apr', wonProjects: 6, lostProjects: 3, totalRevenue: 20000 },
-  { month: 'May', wonProjects: 4, lostProjects: 1, totalRevenue: 14000 },
-  { month: 'Jun', wonProjects: 7, lostProjects: 3, totalRevenue: 23000 },
-];
-
-const sampleProjects: Project[] = [
-  {
-    id: '1',
-    name: 'City Center Mall Renovation',
-    deadline: '2024-06-15',
-    valuation: 450000,
-    status: 'won',
-    description: 'Complete renovation of the west wing including new flooring, lighting, and store frontages.',
-    client: 'ABC Corporation',
-    location: 'New York, NY',
-    startDate: '2024-01-15',
-    completionDate: '2024-06-15',
-    team: ['John Smith', 'Sarah Johnson', 'Mike Brown']
-  },
-  {
-    id: '2',
-    name: 'Harbor Bridge Maintenance',
-    deadline: '2024-08-30',
-    valuation: 280000,
-    status: 'lost',
-    description: 'Structural maintenance and repainting of the harbor bridge support beams.',
-    client: 'City Department',
-    location: 'Boston, MA',
-    startDate: '2024-03-01',
-    team: ['Robert Wilson', 'Emily Davis']
-  }
-];
-
-interface ProjectModalProps {
-  project: Project;
-  onClose: () => void;
-}
-
-function ProjectModal({ project, onClose }: ProjectModalProps) {
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-        
-        <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">{project.name}</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Description</h3>
-              <p className="mt-1 text-sm text-gray-900">{project.description}</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Client</h3>
-                <p className="mt-1 text-sm text-gray-900">{project.client}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                <p className="mt-1 text-sm text-gray-900">{project.location}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Start Date</h3>
-                <p className="mt-1 text-sm text-gray-900">{new Date(project.startDate).toLocaleDateString()}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Completion Date</h3>
-                <p className="mt-1 text-sm text-gray-900">
-                  {project.completionDate ? new Date(project.completionDate).toLocaleDateString() : 'TBD'}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Valuation</h3>
-                <p className="mt-1 text-sm text-gray-900">${project.valuation.toLocaleString()}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Status</h3>
-                <span className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                  project.status === 'won' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {project.status.toUpperCase()}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Team Members</h3>
-              <ul className="mt-1 space-y-1">
-                {project.team.map((member, index) => (
-                  <li key={index} className="text-sm text-gray-900">{member}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+interface ContractorDetails {
+  id: string;
+  contractor: {
+    name: string;
+    email: string;
+    company: string;
+  };
+  totalRevenue: number;
+  lastMonthRevenue: number;
+  growth: number;
+  projectsCompleted: number;
+  projects: Project[];
 }
 
 export function ContractorRevenue() {
-  const { id } = useParams();
-  const contractorName = "John Smith"; // Replace with actual data fetch
+  const [contractorData, setContractorData] = useState<ContractorDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showWonOnly, setShowWonOnly] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [contractorId, setContractorId] = useState<string>("");
 
-  // Filter projects based on the toggle state
+  // Fetch contractor ID based on user email
+  useEffect(() => {
+    const fetchContractorId = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          setError('User not found');
+          setLoading(false);
+          return;
+        }
+
+        const user = JSON.parse(storedUser);
+        const { email } = user;
+
+        // Fetch all contractors from the backend
+        const response = await fetch('https://epg-backend.onrender.com/api/contractor/id');
+        if (!response.ok) {
+          throw new Error('Failed to fetch contractors');
+        }
+
+        const contractors = await response.json();
+
+        // Find the logged-in contractor by email
+        const loggedInContractor = contractors.find(
+          (contractor: any) => contractor.email === email
+        );
+
+        if (!loggedInContractor) {
+          throw new Error('Logged-in contractor not found');
+        }
+
+        // Set the contractor ID in the state
+        setContractorId(loggedInContractor.id);
+      } catch (error) {
+        console.error('Error fetching contractor ID:', error);
+        setError('Failed to fetch contractor ID');
+        setLoading(false);
+      }
+    };
+
+    fetchContractorId();
+  }, []);
+
+  // Fetch detailed contractor data using the contractor ID
+  useEffect(() => {
+    if (!contractorId) return; // Don't fetch data if contractorId is not set
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`https://epg-backend.onrender.com/api/contractor-information/${contractorId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data: ContractorDetails = await response.json();
+        setContractorData(data);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [contractorId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!contractorData) return <div>No data found</div>;
+
+  const { contractor, projects } = contractorData;
+
+  // Filter projects based on toggle state
   const filteredProjects = showWonOnly
-    ? sampleProjects.filter((project) => project.status === 'won')
-    : sampleProjects.filter((project) => project.status === 'lost');
+    ? projects.filter((project) => project.status === 'won')
+    : projects.filter((project) => project.status === 'lost');
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{contractorName}'s Revenue Analytics</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">{contractor.name}'s Revenue Analytics</h1>
 
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Monthly Revenue and Projects</h2>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={monthlyData}>
+            <LineChart data={[]}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              
-              {/* Primary Y-Axis for won/lost projects */}
               <YAxis yAxisId="left" />
-              
-              {/* Secondary Y-Axis for total revenue */}
               <YAxis yAxisId="right" orientation="right" />
-
               <Tooltip />
               <Legend />
-
-              {/* Lines for projects won/lost (left Y-axis) */}
               <Line
                 yAxisId="left"
                 type="monotone"
@@ -188,13 +145,11 @@ export function ContractorRevenue() {
                 stroke="#2a9d8f"
                 name="Projects Won"
               />
-
-              {/* Line for total revenue (right Y-axis) */}
               <Line
                 yAxisId="right"
                 type="monotone"
                 dataKey="totalRevenue"
-                stroke="#4A00E0"
+                stroke="blue"
                 name="Total Revenue"
               />
             </LineChart>
@@ -231,7 +186,7 @@ export function ContractorRevenue() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deadline</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valuation</th>
                 <th className="relative px-6 py-3">
                   <span className="sr-only">Actions</span>
@@ -245,10 +200,10 @@ export function ContractorRevenue() {
                     {project.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(project.deadline).toLocaleDateString()}
+                    {project.status}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${project.valuation.toLocaleString()}
+                    ${project.valuation || '0'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -271,6 +226,39 @@ export function ContractorRevenue() {
           onClose={() => setSelectedProject(null)}
         />
       )}
+    </div>
+  );
+}
+
+interface ProjectModalProps {
+  project: Project;
+  onClose: () => void;
+}
+
+function ProjectModal({ project, onClose }: ProjectModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">{project.name}</h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Status</h3>
+              <p className="mt-1 text-sm text-gray-900">{project.status}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Valuation</h3>
+              <p className="mt-1 text-sm text-gray-900">${project.valuation || '0'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

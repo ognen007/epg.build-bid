@@ -42,8 +42,29 @@ export function ProjectMetrics() {
     fetchData();
   }, []);
 
+  // Skeleton loader for loading state
   if (loading) {
-    return <div className="bg-white rounded-xl shadow-sm p-6">Loading...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        {/* Metric Header Skeleton */}
+        <div className="animate-pulse">
+          <div className="flex justify-between items-center mb-6">
+            <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/6"></div>
+          </div>
+        </div>
+
+        {/* Category Bars Skeleton */}
+        <div className="space-y-4">
+          {[1, 2, 3].map((_, index) => (
+            <div key={index} className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-full"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

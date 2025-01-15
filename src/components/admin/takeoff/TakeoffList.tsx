@@ -38,7 +38,7 @@ export function TakeoffList() {
           (project: Takeoff) => project.status === "bid_submitted"
         );
 
-        console.log(filteredProjects)
+        console.log(filteredProjects);
         setTakeoffs(filteredProjects); // Set filtered projects to state
       } catch (err) {
         setError('Failed to fetch takeoffs');
@@ -102,12 +102,76 @@ export function TakeoffList() {
     return matchesSearch && matchesContractor && matchesEstimator;
   });
 
+  // Skeleton loader for loading state
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-sm">
+        <div className="p-6 border-b border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search Input Skeleton */}
+            <div className="relative animate-pulse">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 bg-gray-200 rounded-full"></div>
+              <div className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg bg-gray-200"></div>
+            </div>
+
+            {/* Contractor Select Skeleton */}
+            <div className="animate-pulse">
+              <div className="w-full h-10 bg-gray-200 rounded-lg"></div>
+            </div>
+
+            {/* Estimator Select Skeleton */}
+            <div className="animate-pulse">
+              <div className="w-full h-10 bg-gray-200 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Table Skeleton */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </th>
+                <th className="relative px-6 py-3">
+                  <span className="sr-only">Edit</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {[1, 2, 3].map((_, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <div className="h-4 bg-gray-200 rounded w-4"></div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 
+  // Error state
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500 p-6">{error}</div>;
   }
 
   return (

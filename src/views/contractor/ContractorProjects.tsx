@@ -132,12 +132,43 @@ export function ContractorProjects() {
     console.log('Proposal declined:');
   };
 
+  // Skeleton loader for loading state
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* ProjectSearch Skeleton */}
+        <div className="animate-pulse">
+          <div className="h-10 bg-gray-200 rounded w-full max-w-md"></div>
+        </div>
+
+        {/* ProjectProposals Skeleton */}
+        <div className="space-y-4">
+          {[1, 2, 3].map((_, index) => (
+            <div key={index} className="bg-white p-6 rounded-lg shadow-sm animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="flex space-x-4">
+                <div className="h-10 bg-gray-200 rounded w-24"></div>
+                <div className="h-10 bg-gray-200 rounded w-24"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ProjectWorkflowView Skeleton */}
+        <div className="bg-white p-6 rounded-lg shadow-sm animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    );
   }
 
+  // Error state
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-red-600 p-6">Error: {error}</div>;
   }
 
   return (

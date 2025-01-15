@@ -111,12 +111,54 @@ export function TasksBoard() {
     e.preventDefault();
   };
 
+  // Skeleton loader for loading state
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6 bg-gray-100 p-6 rounded-xl">
+        {/* Task Type Selector Skeleton */}
+        <div className="flex justify-center">
+          <div className="inline-flex p-1 bg-white rounded-full shadow-sm animate-pulse">
+            <div className="px-4 py-2 rounded-full bg-gray-200 w-24"></div>
+            <div className="px-4 py-2 rounded-full bg-gray-200 w-24 mx-2"></div>
+            <div className="px-4 py-2 rounded-full bg-gray-200 w-24"></div>
+          </div>
+        </div>
+
+        {/* Kanban Board Skeleton */}
+        <div className="grid grid-cols-2 gap-6">
+          {/* To-Do Column Skeleton */}
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">To-Do</h3>
+            <div className="space-y-3">
+              {[1, 2, 3].map((_, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Done Column Skeleton */}
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Done</h3>
+            <div className="space-y-3">
+              {[1, 2, 3].map((_, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
+  // Error state
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-red-600 p-6">Error: {error}</div>;
   }
 
   return (

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ProjectProposals } from './ProjectProposals';
 import { ProjectWorkflowView } from './ProjectWorkflowView';
 import { ContractorFilters } from './ContractorProjectFilter';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react'; // Import the Search icon
 import { AddProjectModal } from '../../../../components/admin/projects/AddProjectModal';
 import { ProjectType } from '../../../../types/project';
 import { useSearchParams } from 'react-router-dom';
@@ -108,6 +108,44 @@ export function ContractorPipeline() {
     setIsModalOpen(false);
   };
 
+  // Skeleton loader for loading state
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {/* Add Project Button Skeleton */}
+        <div className="flex justify-between items-center animate-pulse">
+          <div className="h-10 bg-gray-200 rounded-md w-32"></div>
+        </div>
+
+        {/* Toggle Buttons Skeleton */}
+        <div className="flex justify-center animate-pulse">
+          <div className="inline-flex p-1 bg-white rounded-full shadow-sm">
+            <div className="px-4 py-2 rounded-full bg-gray-200 w-24"></div>
+            <div className="px-4 py-2 rounded-full bg-gray-200 w-24 ml-2"></div>
+          </div>
+        </div>
+
+        {/* Grid Layout Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Contractor Filters Skeleton */}
+          <div className="lg:col-span-1">
+            <div className="h-64 bg-gray-200 rounded-lg animate-pulse"></div>
+          </div>
+
+          {/* Projects View Skeleton */}
+          <div className="lg:col-span-3">
+            <div className="h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return <div className="text-red-500 p-6">{error}</div>;
+  }
+
   return (
     <div className="space-y-6">
       {/* Add Project Button */}
@@ -170,18 +208,17 @@ export function ContractorPipeline() {
         <div className={selectedView === 'pipeline' ? 'lg:col-span-3' : 'lg:col-span-4'}>
           {selectedView === 'pipeline' ? (
             selectedContractorId ? (
-              loading ? (
-                <p>Loading projects...</p>
-              ) : error ? (
-                <p className="text-red-500">{error}</p>
-              ) : (
-                <>
-                  <ProjectProposals proposals={filteredProjects} />
-                  <ProjectWorkflowView contractorId={selectedContractorId}/>
-                </>
-              )
+              <>
+                <ProjectProposals proposals={filteredProjects} />
+                <ProjectWorkflowView contractorId={selectedContractorId}/>
+              </>
             ) : (
-              <p className="text-gray-500">No contractor selected. Start typing to search for contractors.</p>
+              <div className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center justify-center h-full">
+                <Search className="h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-gray-500 text-lg text-center">
+                  No contractor selected. Start typing to search for contractors.
+                </p>
+              </div>
             )
           ) : (
             <ProjectKanbanView contractorId={selectedContractorId}/>

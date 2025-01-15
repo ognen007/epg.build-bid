@@ -166,6 +166,37 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
     }
   };
 
+  // Skeleton loader for loading state
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        {/* Header and buttons skeleton */}
+        <div className="flex justify-between items-center mb-6 animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="flex gap-2">
+            <div className="h-10 bg-gray-200 rounded-lg w-32"></div>
+            <div className="h-10 bg-gray-200 rounded-lg w-36"></div>
+            <div className="h-10 bg-gray-200 rounded-lg w-24"></div>
+          </div>
+        </div>
+
+        {/* Columns skeleton */}
+        <div className="flex gap-6 overflow-x-auto pb-4">
+          {[1, 2, 3].map((_, index) => (
+            <div key={index} className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4">
+              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="space-y-3">
+                {[1, 2, 3].map((_, index) => (
+                  <div key={index} className="h-20 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       {/* Header and buttons */}
@@ -198,18 +229,14 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
 
       {/* Columns and tickets */}
       <div className="flex gap-6 overflow-x-auto pb-4">
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : (
-          columns.map((column) => (
-            <KanbanColumn
-              key={column.id}
-              column={column}
-              onTicketClick={setSelectedTicket}
-              onDrop={handleDrop}
-            />
-          ))
-        )}
+        {columns.map((column) => (
+          <KanbanColumn
+            key={column.id}
+            column={column}
+            onTicketClick={setSelectedTicket}
+            onDrop={handleDrop}
+          />
+        ))}
 
         {isAddingColumn && (
           <div className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4">

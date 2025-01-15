@@ -25,6 +25,7 @@ export function UserGrowthChart() {
     growth: 0,
     monthlyData: [],
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +39,8 @@ export function UserGrowthChart() {
         setData(result);
       } catch (error) {
         console.error('Error fetching user growth data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -65,6 +68,27 @@ export function UserGrowthChart() {
   };
 
   const growth = calculateGrowth(data.monthlyData);
+
+  // Skeleton loader for loading state
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        {/* Metric Header Skeleton */}
+        <div className="animate-pulse">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <div className="h-6 bg-gray-200 rounded w-1/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+            </div>
+            <div className="h-6 bg-gray-200 rounded w-24"></div>
+          </div>
+        </div>
+
+        {/* Chart Skeleton */}
+        <div className="mt-6 h-64 bg-gray-200 rounded-lg animate-pulse"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">

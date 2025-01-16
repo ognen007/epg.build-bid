@@ -12,9 +12,9 @@ export function ProjectProposals({ onAccept, onDecline, proposals = [] }: Projec
   // Log the incoming proposals
   console.log('Incoming Proposals:', proposals);
 
-  // Filter proposals to only include projects with status "awaiting_bid"
+  // Filter proposals to only include projects with status "awaiting_takeoff"
   const filteredProposals = proposals.filter(
-    (proposal) => proposal.status === 'awaiting_bid'
+    (proposal) => proposal.status === 'awaiting_takeoff'
   );
 
   // Log the filtered proposals

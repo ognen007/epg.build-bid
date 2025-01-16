@@ -8,6 +8,7 @@ import { AddProjectModal } from '../../../../components/admin/projects/AddProjec
 import { ProjectType } from '../../../../types/project';
 import { useSearchParams } from 'react-router-dom';
 import { ProjectKanbanView } from '../../../../components/admin/projects/kanban/ProjectKanbanView';
+import { DraftedProjectSection } from './DraftedProjectSection';
 
 // Define ContractorType interface
 export interface ContractorType {
@@ -209,6 +210,7 @@ export function ContractorPipeline() {
           {selectedView === 'pipeline' ? (
             selectedContractorId ? (
               <>
+              <DraftedProjectSection proposals={filteredProjects}/>
                 <ProjectProposals proposals={filteredProjects} />
                 <ProjectWorkflowView contractorId={selectedContractorId}/>
               </>

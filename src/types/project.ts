@@ -4,11 +4,11 @@ export interface ProjectType {
   title: any;
   budget: any;
   contractor: string | null;
-  status: "bid_submitted" | "awaiting_bid" | "abandoned" | "bid_recieved" | "won" | "lost"; // Union of specific strings
+  status: "awaiting_approval" | "awaiting_takeoff" | "takeoff_in_progress" | "takeoff_complete" | "bid_recieved" | "bid_submitted" | "won" | "lost" | "abandoned";
   hold: string;
   deadline: string;
   description?: string;
   dropboxLink?: string;
   valuation: string;
-
+  blueprintsFile: any;
 }

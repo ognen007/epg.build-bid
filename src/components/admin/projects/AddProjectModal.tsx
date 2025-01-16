@@ -13,14 +13,15 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     name: '',
     client: '',
     contractor: '',
-    status: 'awaiting_bid' as ProjectType['status'],
+    status: 'awaiting_approval' as ProjectType['status'],
     bidType: 'gc_bidding',
     bidAmount: '',
     deadline: '',
     valuation: '',
     description: '',
     highIntent: false,
-    estimator: '', // Add estimator field
+    estimator: '',
+    blueprintsFile: null as File | null, // Correct field name for file upload
   });
 
   const [contractors, setContractors] = useState<{ id: string; fullName: string }[]>([]);
@@ -52,12 +53,26 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     setError(null);
 
     try {
+      // Create FormData object
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('client', formData.client);
+      formDataToSend.append('contractor', formData.contractor);
+      formDataToSend.append('status', formData.status);
+      formDataToSend.append('bidType', formData.bidType);
+      formDataToSend.append('bidAmount', formData.bidAmount);
+      formDataToSend.append('deadline', formData.deadline);
+      formDataToSend.append('valuation', formData.valuation);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('highIntent', String(formData.highIntent));
+      formDataToSend.append('estimator', formData.estimator);
+      if (formData.blueprintsFile) {
+        formDataToSend.append('blueprintsFile', formData.blueprintsFile); // Correct field name for file upload
+      }
+
       const response = await fetch('https://epg-backend.onrender.com/api/project/create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: formDataToSend, // Use FormData for file upload
       });
 
       if (!response.ok) throw new Error('Failed to create project');
@@ -68,14 +83,15 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         name: '',
         client: '',
         contractor: '',
-        status: 'awaiting_bid',
+        status: 'awaiting_approval',
         bidType: 'gc_bidding',
         bidAmount: '',
         deadline: '',
         valuation: '',
         description: '',
         highIntent: false,
-        estimator: "",
+        estimator: '',
+        blueprintsFile: null,
       });
       setShowDropdown(false);
       onClose();
@@ -107,6 +123,11 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
   const handleSelectContractor = (contractor: string) => {
     setFormData({ ...formData, contractor });
     setShowDropdown(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData({ ...formData, blueprintsFile: file });
   };
 
   if (!isOpen) return null;
@@ -167,9 +188,12 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
               >
-                <option value="awaiting_bid">Awaiting Bid</option>
-                <option value="bid_submitted">Bid Submitted</option>
+                <option value="awaiting_approval">Awaiting Approval</option>
+                <option value="awaiting_takeoff">Awaiting Takeoff</option>
+                <option value="takeoff_in_progress">Takeoff in Progress</option>
+                <option value="takeoff_complete">Takeoff Complete</option>
                 <option value="bid_recieved">Bid Recieved</option>
+                <option value="bid_submitted">Bid Submitted</option>
                 <option value="abandoned">Abandoned</option>
                 <option value="won">Won</option>
                 <option value="lost">Lost</option>
@@ -236,6 +260,33 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 value={formData.estimator}
                 onChange={(e) => setFormData({ ...formData, estimator: e.target.value })}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Blueprints</label>
+              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
+                <div className="space-y-1 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
+                      <span>Upload blueprints</span>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                  {/* Display the file name if a file is selected */}
+                  {formData.blueprintsFile && (
+                    <p className="text-sm text-gray-700 mt-2">
+                      Selected file: {formData.blueprintsFile.name}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center">

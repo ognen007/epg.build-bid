@@ -9,20 +9,22 @@ import {
   Search,
   Rocket,
   Waypoints,
-  Wallet
+  Wallet,
+  PlaneTakeoff
 } from 'lucide-react';
 
 export const routes = {
   admin: [
-    { path: '/admin', label: 'Dashboard', icon: BarChart3 },
-    { path: '/admin/users', label: 'User Management', icon: Users },
+    { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['ADMIN', 'ESTIMATOR'] },
+    { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN"] },
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
-    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell },
-    { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket },
-    { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
+    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell, roles: ["ADMIN"] },
+    { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket, roles: ["ADMIN"] },
+    { path: '/admin/takeoff/estimate', label: 'Takeoff', icon: PlaneTakeoff, roles:["ESTIMATOR"] },
+    { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'ESTIMATOR']  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
-    { path: '/admin/analytics', label: 'Reports & Analytics', icon: LineChart },
-    { path: '/admin/settings', label: 'Settings', icon: Settings },
+    { path: '/admin/analytics', label: 'Reports & Analytics', icon: LineChart, roles: ["ADMIN"] },
+    { path: '/admin/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'ESTIMATOR']  },
   ],
   client: [
     { path: '/client', label: 'Dashboard', icon: BarChart3 },

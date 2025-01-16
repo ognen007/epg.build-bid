@@ -125,7 +125,7 @@ export function ContractorProjects() {
           ? {
               ...project,
               hold: 'takeoff_in_progress', // Ensure this matches the expected type
-              status: 'bid_submitted', // Ensure this matches the expected type
+              status: 'takeoff_in_progress', // Ensure this matches the expected type
             }
           : project
       );

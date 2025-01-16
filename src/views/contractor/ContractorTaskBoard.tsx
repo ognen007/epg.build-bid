@@ -2,12 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 interface Task {
+  description: string;
   id: string;
   title: string;
   taskType: 'quote_verification' | 'price_negotiation' | 'required_documentation';
   status: 'todo' | 'done';
   project: string | null;
   deadline?: string;
+  comments?: Comment[]; // Add comments to the Task interface
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  createdAt: string;
 }
 
 type TaskType = 'quote_verification' | 'price_negotiation' | 'required_documentation';
@@ -18,6 +27,8 @@ export function TasksBoard() {
   const [contractorId, setContractorId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null); // Track the selected task for the modal
+  const [newComment, setNewComment] = useState(''); // Track the new comment input
 
   // Fetch contractor ID based on user email
   useEffect(() => {
@@ -77,6 +88,7 @@ export function TasksBoard() {
           status: ticket.status || 'todo', // Default to 'todo' if status is not provided
           project: ticket.project,
           deadline: ticket.deadline,
+          comments: ticket.comments || [], // Include comments
         }));
         setTasks(transformedTasks);
       } catch (error) {
@@ -87,6 +99,32 @@ export function TasksBoard() {
 
     fetchTickets();
   }, [contractorId]);
+
+  // Handle adding a comment
+  const handleAddComment = async () => {
+    if (!selectedTask || !newComment.trim()) return;
+
+    try {
+      const response = await axios.post(`https://epg-backend.onrender.com/api/comments`, {
+        content: newComment,
+        author: 'Contractor', // Replace with actual author
+        ticketId: selectedTask.id,
+      });
+
+      // Update the task with the new comment
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === selectedTask.id
+            ? { ...task, comments: [...(task.comments || []), response.data] }
+            : task
+        )
+      );
+
+      setNewComment(''); // Clear the comment input
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
 
   // Filter tasks based on the selected task type
   const filteredTasks = tasks.filter(task => task.taskType === selectedType);
@@ -214,6 +252,7 @@ export function TasksBoard() {
                 key={task.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
+                onClick={() => setSelectedTask(task)} // Open modal on task click
                 className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
@@ -243,6 +282,7 @@ export function TasksBoard() {
                 key={task.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
+                onClick={() => setSelectedTask(task)} // Open modal on task click
                 className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
@@ -259,6 +299,77 @@ export function TasksBoard() {
           </div>
         </div>
       </div>
+
+      {/* Task Details Modal */}
+      {selectedTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">{selectedTask.title}</h2>
+              <button
+                onClick={() => setSelectedTask(null)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Description</h3>
+              <p className="text-gray-600">{selectedTask.description || 'No description available.'}</p>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Comments</h3>
+              {selectedTask.comments && selectedTask.comments.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedTask.comments.map((comment) => (
+                    <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-700">{comment.content}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        By {comment.author} on {new Date(comment.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No comments yet.</p>
+              )}
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAddComment();
+              }}
+            >
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                rows={3}
+              />
+              <button
+                type="submit"
+                className="mt-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+              >
+                Add Comment
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

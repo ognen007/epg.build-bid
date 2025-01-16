@@ -1,5 +1,4 @@
 import React from 'react';
-import { TicketCard } from './TicketCard';
 import { Column, Ticket } from './types';
 
 interface KanbanColumnProps {
@@ -23,7 +22,10 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, column.id)}
     >
+      {/* Column Title */}
       <h2 className="text-lg font-semibold text-gray-900 mb-4">{column.title}</h2>
+
+      {/* Tickets in the Column */}
       <div className="space-y-3">
         {column.tickets.map((ticket) => (
           <div
@@ -33,8 +35,15 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             draggable
             onDragStart={(e) => onDragStart(e, ticket.id, column.id)}
           >
-            <h3 className="font-medium text-gray-900">{ticket.title}</h3>
-            <p className="text-sm text-gray-500">{ticket.description}</p>
+            {/* Project Name in Large Font */}
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {ticket.name}
+            </h3>
+
+            {/* Contractor and Scope in Small Text */}
+            <p className="text-sm text-gray-600">
+              {ticket.contractor} | {ticket.scope}
+            </p>
           </div>
         ))}
       </div>

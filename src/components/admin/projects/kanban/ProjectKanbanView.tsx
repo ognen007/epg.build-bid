@@ -140,13 +140,15 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
   // Add a comment to a ticket
   const handleAddComment = async (content: string) => {
     if (!selectedTicket) return;
-
+  
     try {
-      const response = await axios.post(`${API_BASE_URL}/tickets/${selectedTicket.id}/comments`, {
+      const response = await axios.post(`${API_BASE_URL}/comments`, {
         content,
-        author: 'Current User', // Replace with actual author
+        author: 'Admin', // Replace with actual author
+        ticketId: selectedTicket.id,
       });
-
+  
+      // Update the state with the new comment
       setColumns((prev) =>
         prev.map((col) =>
           col.id === selectedTicket.columnId

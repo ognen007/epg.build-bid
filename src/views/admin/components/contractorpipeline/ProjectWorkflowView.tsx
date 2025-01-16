@@ -26,15 +26,40 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
     fetchTasks();
   }, [contractorId]);
 
-  // Update task status when dragged and dropped
   const updateTaskStatus = async (taskId: any, newHold: any) => {
     try {
+      // Map the `hold` value to the corresponding `status`
+      let newStatus;
+      switch (newHold) {
+        case "takeoff_in_progress":
+          newStatus = "takeoff_in_progress";
+          break;
+        case "ready_for_proposal":
+          newStatus = "takeoff_complete";
+          break;
+        case "negotiating":
+          newStatus = "bid_recieved";
+          break;
+        default:
+          newStatus = "awaiting_takeoff"; // Default status
+      }
+  
+      // Log the payload for debugging
+      console.log("Sending payload:", {
+        hold: newHold,
+        status: newStatus,
+      });
+  
+      // Send the updated status to the backend
       const response = await axios.put(
         `https://epg-backend.onrender.com/api/projects/pipeline/${taskId}`,
         {
           hold: newHold, // Send the new `hold` value
+          status: newStatus, // Send the new `status` value
         }
       );
+  
+      // Update the tasks in the state
       setTasks((prevTasks: any) =>
         prevTasks.map((task: any) => (task.id === taskId ? response.data : task))
       );

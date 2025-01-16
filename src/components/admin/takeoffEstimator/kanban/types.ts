@@ -28,8 +28,22 @@ export interface Contractor {
     comments: Comment[];
     createdAt: string;
   }
-  
-  export type Ticket = ContractorTask | InternalTask;
+
+export interface Ticket {
+  title: string;
+  type: string;
+  project: string;
+  taskType: any;
+  id: string;
+  name: string; // Add this
+  contractor: string; // Add this
+  scope: string; // Add this
+  status?: string; // Optional, depending on your data
+  hold?: string; // Optional, depending on your data
+  description?: string; // Optional
+  comments?: any[]; // Optional
+  createdAt?: string; // Optional
+}
   
   export interface Comment {
     id: string;

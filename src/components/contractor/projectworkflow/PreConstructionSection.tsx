@@ -49,11 +49,6 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
                 {tasksInGroup.map((task: any) => (
                   <div
                     key={task.id}
-                    onClick={() => {
-                      if (task.hold === "negotiating") {
-                        onTaskClick(task.id); // Only open modal for tasks in "negotiating" status
-                      }
-                    }}
                     className={`p-3 rounded-lg w-full cursor-pointer ${
                       status.hold === "negotiating"
                         ? "bg-orange-50 border-l-4 border-orange-500 hover:bg-orange-100"
@@ -72,7 +67,11 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
                     {task.hold === "negotiating" && (
                       <div
                         className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block cursor-pointer"
-                        onClick={() => onTaskClick(task.id)}
+                        onClick={() => {
+                          if (task.hold === "negotiating") {
+                            onTaskClick(task.id); // Only open modal for tasks in "negotiating" status
+                          }
+                        }}
                       >
                         View Comments
                       </div>

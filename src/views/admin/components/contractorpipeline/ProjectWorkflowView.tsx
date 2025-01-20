@@ -3,6 +3,7 @@ import axios from "axios";
 import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
 import { AddCommentModal } from "./AddCommentModal";
+import { ProjectDetailsModal } from "./ProjectDetailsModal"; // Import the new modal
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
@@ -12,6 +13,7 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
   const [tasks, setTasks] = useState<any[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [isProjectDetailsModalOpen, setIsProjectDetailsModalOpen] = useState(false); // New state for ProjectDetailsModal
   const [comments, setComments] = useState<any[]>([]);
 
   // Fetch all tasks
@@ -56,7 +58,7 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
   const handleTaskClick = (taskId: string) => {
     console.log("Selected Task ID:", taskId); // Debugging
     setSelectedTaskId(taskId); // Set the selected task ID
-    setIsCommentModalOpen(true); // Open the modal
+    setIsProjectDetailsModalOpen(true); // Open the ProjectDetailsModal
   };
 
   // Handle adding a comment
@@ -146,6 +148,13 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
         onClose={() => setIsCommentModalOpen(false)}
         onSubmit={handleAddComment}
         comments={comments} // Pass comments as a prop
+      />
+
+      {/* Project Details Modal */}
+      <ProjectDetailsModal
+        isOpen={isProjectDetailsModalOpen}
+        onClose={() => setIsProjectDetailsModalOpen(false)}
+        taskId={selectedTaskId} // Pass the selected task ID
       />
     </div>
   );

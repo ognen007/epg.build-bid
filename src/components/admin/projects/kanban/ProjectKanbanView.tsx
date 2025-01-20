@@ -60,7 +60,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
       alert('Please add a column first.');
       return;
     }
-  
+
     try {
       const response = await axios.post(`${API_BASE_URL}/tickets`, {
         ...task,
@@ -68,7 +68,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
         columnId: columns[0].id,
         contractor: task.contractorId, // Use `contractor` instead of `contractorId`
       });
-  
+
       setColumns((prev) =>
         prev.map((col) =>
           col.id === columns[0].id
@@ -140,14 +140,14 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
   // Add a comment to a ticket
   const handleAddComment = async (content: string) => {
     if (!selectedTicket) return;
-  
+
     try {
       const response = await axios.post(`${API_BASE_URL}/comments`, {
         content,
         author: 'Admin', // Replace with actual author
         ticketId: selectedTicket.id,
       });
-  
+
       // Update the state with the new comment
       setColumns((prev) =>
         prev.map((col) =>

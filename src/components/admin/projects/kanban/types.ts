@@ -17,6 +17,7 @@ export interface Contractor {
     contractorId : string;
     taskType: 'quote_verification' | 'price_negotiation' | 'required_documentation';
     comments: Comment[];
+    stand?: string;
     createdAt: string;
   }
   
@@ -25,6 +26,7 @@ export interface Contractor {
     type: 'internal';
     title: string;
     description: string;
+    stand?:string;
     comments: Comment[];
     createdAt: string;
   }

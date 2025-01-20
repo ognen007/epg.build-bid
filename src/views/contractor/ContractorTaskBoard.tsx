@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 interface Task {
-  description: string;
   id: string;
   title: string;
+  description: string;
   taskType: 'quote_verification' | 'price_negotiation' | 'required_documentation';
   status: 'todo' | 'done';
   project: string | null;
   deadline?: string;
-  comments?: Comment[]; // Add comments to the Task interface
+  comments?: Comment[];
+  stand?: string; // Add the stand field
 }
 
 interface Comment {
@@ -27,8 +28,8 @@ export function TasksBoard() {
   const [contractorId, setContractorId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null); // Track the selected task for the modal
-  const [newComment, setNewComment] = useState(''); // Track the new comment input
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [newComment, setNewComment] = useState('');
 
   // Fetch contractor ID based on user email
   useEffect(() => {
@@ -85,10 +86,11 @@ export function TasksBoard() {
           id: ticket.id,
           title: ticket.title,
           taskType: ticket.taskType,
-          status: ticket.status || 'todo', // Default to 'todo' if status is not provided
+          status: ticket.stand === 'done' ? 'done' : 'todo', // Sync status with stand
           project: ticket.project,
           deadline: ticket.deadline,
           comments: ticket.comments || [], // Include comments
+          stand: ticket.stand || '', // Include stand field
         }));
         setTasks(transformedTasks);
       } catch (error) {
@@ -126,28 +128,62 @@ export function TasksBoard() {
     }
   };
 
-  // Filter tasks based on the selected task type
-  const filteredTasks = tasks.filter(task => task.taskType === selectedType);
-
-  // Separate tasks into "To-Do" and "Done" based on their status
-  const todoTasks = filteredTasks.filter(task => task.status === 'todo');
-  const doneTasks = filteredTasks.filter(task => task.status === 'done');
-
+  // Handle drag start
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
   };
 
-  const handleDrop = (e: React.DragEvent, status: 'todo' | 'done') => {
+  // Handle drop
+  const handleDrop = async (e: React.DragEvent, status: 'todo' | 'done') => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, status } : task
-    ));
+
+    // Find the task being moved
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task) return;
+
+    // Update the task status and stand locally
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId
+        ? {
+            ...task,
+            status, // Update status
+            stand: status === 'done' ? 'done' : '', // Update stand
+          }
+        : task
+    );
+    setTasks(updatedTasks);
+
+    try {
+      // Update the task in the backend
+      await axios.put(`https://epg-backend.onrender.com/api/tickets/${taskId}`, {
+        status, // Send the new status
+        stand: status === 'done' ? 'done' : '', // Send the new stand
+      });
+      console.log('Ticket updated successfully:', { status, stand: status === 'done' ? 'done' : '' });
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+      // Revert the local state if the API call fails
+      setTasks(tasks);
+    }
   };
 
+  // Handle drag over
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
+
+  // Filter tasks based on the selected task type
+  const filteredTasks = tasks.filter((task) => task.taskType === selectedType);
+
+  // Separate tasks into "To-Do" and "Done" based on their stand field
+  const todoTasks = filteredTasks.filter((task) => task.stand !== 'done');
+  const doneTasks = filteredTasks.filter((task) => task.stand === 'done');
+
+  // Debugging: Log tasks whenever they are updated
+  useEffect(() => {
+    console.log('Tasks updated:', tasks);
+  }, [tasks]);
 
   // Skeleton loader for loading state
   if (loading) {
@@ -207,8 +243,8 @@ export function TasksBoard() {
           <button
             onClick={() => setSelectedType('quote_verification')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'quote_verification' 
-                ? 'bg-orange-500 text-white shadow-sm' 
+              selectedType === 'quote_verification'
+                ? 'bg-orange-500 text-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -217,8 +253,8 @@ export function TasksBoard() {
           <button
             onClick={() => setSelectedType('price_negotiation')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'price_negotiation' 
-                ? 'bg-orange-500 text-white shadow-sm' 
+              selectedType === 'price_negotiation'
+                ? 'bg-orange-500 text-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -227,8 +263,8 @@ export function TasksBoard() {
           <button
             onClick={() => setSelectedType('required_documentation')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'required_documentation' 
-                ? 'bg-orange-500 text-white shadow-sm' 
+              selectedType === 'required_documentation'
+                ? 'bg-orange-500 text-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -247,12 +283,12 @@ export function TasksBoard() {
         >
           <h3 className="text-lg font-medium text-gray-900 mb-4">To-Do</h3>
           <div className="space-y-3">
-            {todoTasks.map(task => (
+            {todoTasks.map((task) => (
               <div
                 key={task.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
-                onClick={() => setSelectedTask(task)} // Open modal on task click
+                onClick={() => setSelectedTask(task)}
                 className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
@@ -277,12 +313,12 @@ export function TasksBoard() {
         >
           <h3 className="text-lg font-medium text-gray-900 mb-4">Done</h3>
           <div className="space-y-3">
-            {doneTasks.map(task => (
+            {doneTasks.map((task) => (
               <div
                 key={task.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
-                onClick={() => setSelectedTask(task)} // Open modal on task click
+                onClick={() => setSelectedTask(task)}
                 className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
@@ -290,9 +326,7 @@ export function TasksBoard() {
                   <p className="text-sm text-gray-500 mt-1">{task.project}</p>
                 )}
                 {task.deadline && (
-                  <p className="text-sm text-green-600 mt-2">
-                    Completed
-                  </p>
+                  <p className="text-sm text-green-600 mt-2">Completed</p>
                 )}
               </div>
             ))}

@@ -11,13 +11,23 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
   // Ensure comments is always an array
   const comments = ticket.comments || [];
 
+  // Debug: Log the ticket object to verify the `stand` field
+  console.log('Ticket:', ticket);
+
+  // Apply light green background if the stand is "done"
+  const backgroundColor = ticket.stand === 'done' ? 'bg-green-100' : 'bg-white';
+
+  // Debug: Log the computed background color
+  console.log('Background Color:', backgroundColor);
+
   return (
     <div
       draggable
       onClick={onClick}
       className={`
-        bg-white p-3 rounded-lg shadow cursor-pointer hover:shadow-md
-        ${ticket.type === 'client' ? 'border-l-4 border-blue-500' : 'border-l-4 border-gray-500'}
+        p-3 rounded-lg shadow cursor-pointer hover:shadow-md
+        ${backgroundColor} // Apply dynamic background color
+        ${ticket.type === 'contractor' ? 'border-l-4 border-blue-500' : 'border-l-4 border-gray-500'}
       `}
     >
       <div className="flex justify-between items-start">
@@ -26,7 +36,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
           <MoreVertical className="h-4 w-4" />
         </button>
       </div>
-      {ticket.type === 'client' && (
+      {ticket.type === 'contractor' && (
         <div className="mt-2 text-sm text-gray-500">
           <div>{ticket.contractor}</div>
           <div>{ticket.project}</div>

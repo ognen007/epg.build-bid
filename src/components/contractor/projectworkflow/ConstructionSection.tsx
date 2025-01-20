@@ -34,7 +34,7 @@ export function ConstructionSection({ tasks }: any) {
           return (
             <div
               key={status.hold}
-              className="bg-white rounded-xl shadow-sm p-6"
+                            className="bg-white rounded-xl shadow-sm p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
@@ -48,19 +48,22 @@ export function ConstructionSection({ tasks }: any) {
                 {tasksInGroup.map((task: any) => (
                   <div
                     key={task.id}
-                    className="p-3 bg-gray-50 rounded-lg"
+                    className={`p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 ${
+                      task.highIntent ? "border-l-[5px] border-red-500" : ""
+                    }`}
                   >
                     <div className="font-medium text-gray-900">{task.name}</div>
-                    <div className="text-sm text-gray-500 mt-1">{task.contractor}</div>
-                    {task.startDate && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        {status.hold === "scheduled_projects" ? "Starts" : "Started"}:{" "}
-                        {new Date(task.startDate).toLocaleDateString()}
-                      </div>
-                    )}
-                    {task.completionDate && (
-                      <div className="text-sm text-gray-500">
-                        Completed: {new Date(task.completionDate).toLocaleDateString()}
+                    <div className="text-sm text-gray-500 mt-1">
+                      Valuation: ${task.valuation?.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Deadline: {new Date(task.deadline).toLocaleDateString()}
+                    </div>
+                    {task.hold === "negotiating" && (
+                      <div
+                        className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block cursor-pointer"
+                      >
+                        View Comments
                       </div>
                     )}
                   </div>

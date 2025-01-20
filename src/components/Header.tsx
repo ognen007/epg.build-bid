@@ -72,11 +72,6 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userFullNam
             <ListTodo className="h-5 w-5" />
           </button>
         )}
-        
-        <button className="hidden md:flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
-          <Phone className="h-4 w-4 mr-2" />
-          <span>Contact Us</span>
-        </button>
       </div>
     </header>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
+import { AddCommentModal } from "./AddCommentModal";
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
@@ -9,6 +10,9 @@ export interface ProjectWorkflowProps {
 
 export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
   const [tasks, setTasks] = useState<any[]>([]);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
 
   // Fetch all tasks
   useEffect(() => {
@@ -17,6 +21,7 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
         const response = await axios.get(
           `https://epg-backend.onrender.com/api/projects/hold/`
         );
+        console.log("Fetched Tasks:", response.data); // Debugging
         setTasks(response.data || []);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -26,6 +31,60 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
     fetchTasks();
   }, [contractorId]);
 
+  // Fetch comments for the selected project
+  useEffect(() => {
+    if (!selectedTaskId) return;
+
+    console.log("Fetching comments for Task ID:", selectedTaskId); // Debugging
+
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(
+          `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTaskId}/comments`
+        );
+        console.log("Fetched Comments:", response.data); // Debugging
+        setComments(response.data || []);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchComments();
+  }, [selectedTaskId, isCommentModalOpen]); // Fetch comments when the modal opens or projectId changes
+
+  // Handle task click
+  const handleTaskClick = (taskId: string) => {
+    console.log("Selected Task ID:", taskId); // Debugging
+    setSelectedTaskId(taskId); // Set the selected task ID
+    setIsCommentModalOpen(true); // Open the modal
+  };
+
+  // Handle adding a comment
+  const handleAddComment = async (comment: string) => {
+    if (!selectedTaskId) return;
+
+    console.log("Adding comment for Task ID:", selectedTaskId); // Debugging
+
+    try {
+      // Send the comment to the backend
+      const response = await axios.post(
+        `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTaskId}/comments`,
+        { content: comment, author: "User" } // Replace "User" with the actual author
+      );
+
+      console.log("Comment added successfully:", response.data);
+
+      // Refresh comments after adding a new one
+      const updatedComments = await axios.get(
+        `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTaskId}/comments`
+      );
+      setComments(updatedComments.data || []);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
+  // Update task status
   const updateTaskStatus = async (taskId: any, newHold: any) => {
     try {
       // Map the `hold` value to the corresponding `status`
@@ -43,13 +102,13 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
         default:
           newStatus = "awaiting_takeoff"; // Default status
       }
-  
+
       // Log the payload for debugging
       console.log("Sending payload:", {
         hold: newHold,
         status: newStatus,
       });
-  
+
       // Send the updated status to the backend
       const response = await axios.put(
         `https://epg-backend.onrender.com/api/projects/pipeline/${taskId}`,
@@ -58,7 +117,7 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
           status: newStatus, // Send the new `status` value
         }
       );
-  
+
       // Update the tasks in the state
       setTasks((prevTasks: any) =>
         prevTasks.map((task: any) => (task.id === taskId ? response.data : task))
@@ -70,8 +129,24 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <PreConstructionSection tasks={tasks} updateTaskStatus={updateTaskStatus} />
-      <ConstructionSection tasks={tasks} updateTaskStatus={updateTaskStatus} />
+      <PreConstructionSection
+        tasks={tasks}
+        updateTaskStatus={updateTaskStatus}
+        onTaskClick={handleTaskClick}
+      />
+      <ConstructionSection
+        tasks={tasks}
+        updateTaskStatus={updateTaskStatus}
+        onTaskClick={handleTaskClick}
+      />
+
+      {/* Add Comment Modal */}
+      <AddCommentModal
+        isOpen={isCommentModalOpen}
+        onClose={() => setIsCommentModalOpen(false)}
+        onSubmit={handleAddComment}
+        comments={comments} // Pass comments as a prop
+      />
     </div>
   );
 }

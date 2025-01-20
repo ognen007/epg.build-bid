@@ -113,7 +113,7 @@ export function AdminLayout() {
                 <Route path="/analytics/users" element={<UserGrowthComponent />} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />
-                <Route path="/takeoff" element={<TakeoffView />} />
+                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
               </>
             )}
 

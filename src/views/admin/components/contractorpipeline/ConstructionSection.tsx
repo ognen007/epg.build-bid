@@ -1,6 +1,6 @@
 import { Calendar, Hammer, CheckSquare, Bolt } from "lucide-react";
 
-export function ConstructionSection({ tasks, updateTaskStatus }: any) {
+export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
   const statuses = [
     { hold: "scheduled_projects", label: "Scheduled Projects" },
     { hold: "ongoing_projects", label: "Ongoing Projects" },
@@ -60,19 +60,28 @@ export function ConstructionSection({ tasks, updateTaskStatus }: any) {
                     onDragStart={(e) => {
                       e.dataTransfer.setData("taskId", task.id);
                     }}
-                    className="p-3 bg-gray-50 rounded-lg"
+                    onClick={() => {
+                      if (task.hold === "negotiating") {
+                        onTaskClick(task.id); // Only open modal for tasks in "negotiating" status
+                      }
+                    }}
+                    className={`p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 ${
+                      task.highIntent ? "border-l-[5px] border-red-500" : ""
+                    }`}
                   >
                     <div className="font-medium text-gray-900">{task.name}</div>
-                    <div className="text-sm text-gray-500 mt-1">{task.contractor}</div>
-                    {task.startDate && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        {status.hold === "scheduled_projects" ? "Starts" : "Started"}:{" "}
-                        {new Date(task.startDate).toLocaleDateString()}
-                      </div>
-                    )}
-                    {task.completionDate && (
-                      <div className="text-sm text-gray-500">
-                        Completed: {new Date(task.completionDate).toLocaleDateString()}
+                    <div className="text-sm text-gray-500 mt-1">
+                      Valuation: ${task.valuation?.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Deadline: {new Date(task.deadline).toLocaleDateString()}
+                    </div>
+                    {task.hold === "negotiating" && (
+                      <div
+                        className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block cursor-pointer"
+                        onClick={() => onTaskClick(task.id)}
+                      >
+                        View Comments
                       </div>
                     )}
                   </div>

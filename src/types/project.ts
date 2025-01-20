@@ -9,6 +9,7 @@ export interface ProjectType {
   deadline: string;
   description?: string;
   dropboxLink?: string;
+  highIntent?: boolean;
   valuation: string;
   blueprintsFile: any;
 }

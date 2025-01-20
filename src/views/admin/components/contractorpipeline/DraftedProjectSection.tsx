@@ -38,7 +38,12 @@ export function DraftedProjectSection({ proposals = [] }: ProjectProposalsProps)
       <h2 className="text-lg font-semibold text-gray-900">Drafts</h2>
       <div className="grid gap-4">
         {filteredProposals.map((proposal) => (
-          <div key={proposal.id} className="bg-white rounded-lg shadow-sm p-6">
+          <div
+            key={proposal.id}
+            className={`bg-white rounded-lg shadow-sm p-6 ${
+              proposal.highIntent === true ? 'border-l-[5px] border-red-500' : ''
+            }`}
+          >
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">{proposal.name}</h3>

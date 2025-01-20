@@ -1,7 +1,7 @@
 import React from "react";
 import { Clock, FileText, CheckCircle, Bolt } from "lucide-react";
 
-export function PreConstructionSection({ tasks, updateTaskStatus }: any) {
+export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
   const statuses = [
     { hold: "takeoff_in_progress", label: "Takeoff in Progress" },
     { hold: "ready_for_proposal", label: "Ready for Proposal" },
@@ -61,31 +61,32 @@ export function PreConstructionSection({ tasks, updateTaskStatus }: any) {
                     onDragStart={(e) => {
                       e.dataTransfer.setData("taskId", task.id);
                     }}
-                    className={`p-3 rounded-lg w-full ${
+                    onClick={() => {
+                      if (task.hold === "negotiating") {
+                        onTaskClick(task.id); // Only open modal for tasks in "negotiating" status
+                      }
+                    }}
+                    className={`p-3 rounded-lg w-full cursor-pointer ${
                       status.hold === "negotiating"
-                        ? "bg-orange-50 border-l-4 border-orange-500 cursor-pointer hover:bg-orange-100"
-                        : "bg-gray-50"
+                        ? "bg-orange-50 border-l-4 border-orange-500 hover:bg-orange-100"
+                        : "bg-gray-50 hover:bg-gray-100"
+                    } ${
+                      task.highIntent ? "border-l-[5px] border-red-500" : ""
                     }`}
                   >
                     <div className="font-medium text-gray-900">{task.name}</div>
-                    {task.dueDate && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        Due {new Date(task.dueDate).toLocaleDateString()}
-                      </div>
-                    )}
-                    {task.dropboxLink && (
-                      <a
-                        href={task.dropboxLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block"
+                    <div className="text-sm text-gray-500 mt-1">
+                      Valuation: ${task.valuation?.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Deadline: {new Date(task.deadline).toLocaleDateString()}
+                    </div>
+                    {task.hold === "negotiating" && (
+                      <div
+                        className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block cursor-pointer"
+                        onClick={() => onTaskClick(task.id)}
                       >
-                        View Files
-                      </a>
-                    )}
-                    {task.totalBidAmount && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        Total Bid: ${task.totalBidAmount.toLocaleString()}
+                        View Comments
                       </div>
                     )}
                   </div>

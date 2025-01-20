@@ -71,7 +71,7 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
                   >
                     <div className="font-medium text-gray-900">{task.name}</div>
                     <div className="text-sm text-gray-500 mt-1">
-                      Valuation: ${task.valuation?.toLocaleString()}
+                      Bid Amount: ${task.valuation?.toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
                       Deadline: {new Date(task.deadline).toLocaleDateString()}

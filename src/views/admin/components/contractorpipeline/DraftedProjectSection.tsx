@@ -35,7 +35,7 @@ export function DraftedProjectSection({ proposals = [] }: ProjectProposalsProps)
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Drafts</h2>
+      <h2 className="text-lg font-semibold text-gray-900">Prospecting</h2>
       <div className="grid gap-4">
         {filteredProposals.map((proposal) => (
           <div

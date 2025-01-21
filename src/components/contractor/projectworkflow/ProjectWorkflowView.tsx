@@ -27,19 +27,19 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
   const [comments, setComments] = useState<Comment[]>([]);
 
   // Fetch all tasks
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get<Task[]>(
-          `https://epg-backend.onrender.com/api/projects/hold/`
-        );
-        console.log("Fetched Tasks:", response.data); // Debugging
-        setTasks(response.data || []);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get<Task[]>(
+        `https://epg-backend.onrender.com/api/projects/hold/`
+      );
+      console.log("Fetched Tasks:", response.data); // Debugging
+      setTasks(response.data || []);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchTasks();
   }, [contractorId]);
 
@@ -98,7 +98,11 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <PreConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
+      <PreConstructionSection
+        tasks={tasks}
+        onTaskClick={handleTaskClick}
+        refreshTasks={fetchTasks} // Pass the refresh function
+      />
       <ConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
 
       {/* Add Comment Modal */}

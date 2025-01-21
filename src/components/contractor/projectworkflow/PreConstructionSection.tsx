@@ -1,7 +1,11 @@
-import React from "react";
-import { Clock, FileText, CheckCircle, Bolt } from "lucide-react";
+import React, { useState } from "react";
+import { Clock, FileText, CheckCircle, Bolt, HandHelping } from "lucide-react";
+import { UploadProposalModal } from "./UploadProposalModal";
 
-export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
+export function PreConstructionSection({ tasks, onTaskClick, refreshTasks }: any) {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
   const statuses = [
     { hold: "takeoff_in_progress", label: "Takeoff in Progress" },
     { hold: "ready_for_proposal", label: "Ready for Proposal" },
@@ -19,6 +23,15 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
       default:
         return null;
     }
+  };
+
+  const handleUploadClick = (taskId: string) => {
+    setSelectedProjectId(taskId);
+    setIsUploadModalOpen(true);
+  };
+
+  const handleUploadSuccess = () => {
+    refreshTasks(); // Refresh the tasks after a successful upload
   };
 
   return (
@@ -76,6 +89,14 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
                         View Comments
                       </div>
                     )}
+                    {task.hold === "ready_for_proposal" && (
+                      <div className="flex justify-end mt-2">
+                        <HandHelping
+                          className="h-5 w-5 text-orange-500 cursor-pointer"
+                          onClick={() => handleUploadClick(task.id)}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -83,6 +104,13 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
           );
         })}
       </div>
+
+      <UploadProposalModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        projectId={selectedProjectId || ""}
+        onUploadSuccess={handleUploadSuccess} // Pass the success handler
+      />
     </div>
   );
 }

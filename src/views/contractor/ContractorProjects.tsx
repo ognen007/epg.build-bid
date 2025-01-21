@@ -110,28 +110,35 @@ export function ContractorProjects() {
       console.error('Contractor not found');
       return;
     }
-
+  
     try {
-      // Call the endpoint to update the task's hold and status
+      console.log('Updating task with ID:', taskId);
+  
+      // Send the status and hold values in the request body
       const response = await axios.put(
-        `https://epg-backend.onrender.com/api/projects/hold/${taskId}`
+        `https://epg-backend.onrender.com/api/projects/hold/${taskId}`,
+        {
+          status: 'takeoff_in_progress', // Set the new status
+          hold: 'takeoff_in_progress', // Set the new hold
+        }
       );
-
+  
       console.log('Task updated:', response.data);
-
-      // Refresh the projects list
-      const updatedProjects = allProjects.map((project) =>
-        project.id === taskId
-          ? {
-              ...project,
-              hold: 'takeoff_in_progress', // Ensure this matches the expected type
-              status: 'takeoff_in_progress', // Ensure this matches the expected type
-            }
-          : project
+  
+      // Update the state immutably
+      setAllProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === taskId
+            ? {
+                ...project,
+                hold: response.data.hold, // Use the updated hold from the response
+                status: response.data.status, // Use the updated status from the response
+              }
+            : project
+        )
       );
-
-      // Update the state with the new projects list
-      setAllProjects(updatedProjects);
+  
+      console.log('State updated successfully');
     } catch (error) {
       console.error('Error updating task:', error);
       setError('Failed to update task. Please try again later.');

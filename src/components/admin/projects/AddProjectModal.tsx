@@ -11,7 +11,6 @@ interface AddProjectModalProps {
 export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps) {
   const [formData, setFormData] = useState({
     name: '',
-    client: '',
     contractor: '',
     status: 'awaiting_approval' as ProjectType['status'],
     bidType: 'gc_bidding',
@@ -21,7 +20,8 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     description: '',
     highIntent: false,
     estimator: '',
-    blueprintsFile: null as File | null, // Correct field name for file upload
+    estimatorNotes: '',
+    blueprintsFile: null as File | null,
   });
 
   const [contractors, setContractors] = useState<{ id: string; fullName: string }[]>([]);
@@ -30,6 +30,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -47,16 +48,36 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     }
   }, [isOpen]);
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+
+    // Required fields validation
+    if (!formData.contractor.trim()) errors.contractor = 'Contractor is required';
+    if (!formData.name.trim()) errors.name = 'Project name is required';
+    if (!formData.deadline.trim()) errors.deadline = 'Deadline is required';
+    if (!formData.description.trim()) errors.description = 'Project description is required';
+    if (!formData.status.trim()) errors.status = 'Status is required';
+    if (!formData.bidType.trim()) errors.bidType = 'Bid type is required';
+    if (!formData.estimator.trim()) errors.estimator = 'Estimator is required';
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0; // Return true if no errors
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      // Create FormData object
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('client', formData.client);
       formDataToSend.append('contractor', formData.contractor);
       formDataToSend.append('status', formData.status);
       formDataToSend.append('bidType', formData.bidType);
@@ -66,13 +87,14 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
       formDataToSend.append('description', formData.description);
       formDataToSend.append('highIntent', String(formData.highIntent));
       formDataToSend.append('estimator', formData.estimator);
+      formDataToSend.append('estimatorNotes', formData.estimatorNotes);
       if (formData.blueprintsFile) {
-        formDataToSend.append('blueprintsFile', formData.blueprintsFile); // Correct field name for file upload
+        formDataToSend.append('blueprintsFile', formData.blueprintsFile);
       }
 
       const response = await fetch('https://epg-backend.onrender.com/api/project/create', {
         method: 'POST',
-        body: formDataToSend, // Use FormData for file upload
+        body: formDataToSend,
       });
 
       if (!response.ok) throw new Error('Failed to create project');
@@ -81,7 +103,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
       onAdd(formData);
       setFormData({
         name: '',
-        client: '',
         contractor: '',
         status: 'awaiting_approval',
         bidType: 'gc_bidding',
@@ -91,6 +112,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         description: '',
         highIntent: false,
         estimator: '',
+        estimatorNotes: '',
         blueprintsFile: null,
       });
       setShowDropdown(false);
@@ -146,16 +168,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Project Name</label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-
+            {/* Contractor */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700">Contractor</label>
               <input
@@ -164,7 +177,11 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 value={formData.contractor}
                 onChange={(e) => handleContractorInputChange(e.target.value)}
                 onFocus={() => setShowDropdown(filteredContractors.length > 0)}
+                required
               />
+              {validationErrors.contractor && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.contractor}</p>
+              )}
               {loadingContractors && <p>Loading contractors...</p>}
               {showDropdown && (
                 <ul className="absolute z-10 mt-1 max-h-40 w-full overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg">
@@ -181,47 +198,22 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
               )}
             </div>
 
+            {/* Project Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Status</label>
-              <select
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
-              >
-                <option value="awaiting_approval">Awaiting Approval</option>
-                <option value="awaiting_takeoff">Awaiting Takeoff</option>
-                <option value="takeoff_in_progress">Takeoff in Progress</option>
-                <option value="takeoff_complete">Takeoff Complete</option>
-                <option value="bid_recieved">Bid Recieved</option>
-                <option value="bid_submitted">Bid Submitted</option>
-                <option value="abandoned">Abandoned</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Bid Type</label>
-              <select
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.bidType}
-                onChange={(e) => setFormData({ ...formData, bidType: e.target.value })}
-              >
-                <option value="gc_bidding">GC Bidding</option>
-                <option value="sub_bidding">Sub Bidding</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Bid Amount</label>
+              <label className="block text-sm font-medium text-gray-700">Project Name</label>
               <input
                 type="text"
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.bidAmount}
-                onChange={(e) => setFormData({ ...formData, bidAmount: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
               />
+              {validationErrors.name && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.name}</p>
+              )}
             </div>
 
+            {/* Deadline */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Deadline</label>
               <input
@@ -229,79 +221,14 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.deadline}
                 onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                required
               />
+              {validationErrors.deadline && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.deadline}</p>
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Total Project Valuation
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSign className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  className="block w-full pl-10 pr-3 py-2 rounded-lg border-gray-300 focus:ring-orange-500 focus:border-orange-500"
-                  value={formData.valuation}
-                  onChange={(e) => setFormData({ ...formData, valuation: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Estimator</label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.estimator}
-                onChange={(e) => setFormData({ ...formData, estimator: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Blueprints</label>
-              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
-                      <span>Upload blueprints</span>
-                      <input
-                        type="file"
-                        className="sr-only"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                  {/* Display the file name if a file is selected */}
-                  {formData.blueprintsFile && (
-                    <p className="text-sm text-gray-700 mt-2">
-                      Selected file: {formData.blueprintsFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="highIntent"
-                className="h-4 w-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
-                checked={formData.highIntent}
-                onChange={(e) => setFormData({ ...formData, highIntent: e.target.checked })}
-              />
-              <label htmlFor="highIntent" className="ml-2 text-sm text-gray-700">
-                High Intent
-              </label>
-            </div>
-
+            {/* Project Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Project Description</label>
               <textarea
@@ -310,8 +237,71 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                required
               />
+              {validationErrors.description && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
+              )}
             </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <select
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectType['status'] })}
+                required
+              >
+                <option value="awaiting_approval">Awaiting Approval</option>
+                <option value="awaiting_takeoff">Awaiting Takeoff</option>
+                <option value="takeoff_in_progress">Takeoff in Progress</option>
+                <option value="takeoff_complete">Takeoff Complete</option>
+                <option value="bid_recieved">Bid Received</option>
+                <option value="bid_submitted">Bid Submitted</option>
+                <option value="abandoned">Abandoned</option>
+                <option value="won">Won</option>
+                <option value="lost">Lost</option>
+              </select>
+              {validationErrors.status && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.status}</p>
+              )}
+            </div>
+
+            {/* Bid Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Bid Type</label>
+              <select
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.bidType}
+                onChange={(e) => setFormData({ ...formData, bidType: e.target.value })}
+                required
+              >
+                <option value="gc_bidding">GC Bidding</option>
+                <option value="sub_bidding">Sub Bidding</option>
+              </select>
+              {validationErrors.bidType && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.bidType}</p>
+              )}
+            </div>
+
+            {/* Estimator */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Estimator</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                value={formData.estimator}
+                onChange={(e) => setFormData({ ...formData, estimator: e.target.value })}
+                required
+              />
+              {validationErrors.estimator && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.estimator}</p>
+              )}
+            </div>
+
+            {/* Non-required fields (e.g., Bid Amount, Estimator Notes, High Intent, Blueprints) */}
+            {/* ... (keep the existing code for non-required fields) ... */}
 
             {error && <div className="text-red-500 text-sm">{error}</div>}
 

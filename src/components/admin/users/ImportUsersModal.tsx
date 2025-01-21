@@ -77,7 +77,7 @@ export function ImportUsersModal({ isOpen, onClose, onImport }: ImportUsersModal
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">CSV file up to 10MB</p>
+                  <p className="text-xs text-gray-500">CSV file</p>
                 </div>
               </div>
               {file && (

@@ -195,7 +195,7 @@ export const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({ projectI
                         />
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                    <p className="text-xs text-gray-500">PDF, JPG, PNG</p>
                     {file && (
                       <p className="text-sm text-gray-700 mt-2">Selected file: {file.name}</p>
                     )}

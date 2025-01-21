@@ -161,7 +161,7 @@ export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalP
                       />
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500">PDF, Excel files up to 10MB</p>
+                  <p className="text-xs text-gray-500">PDF, Excel files</p>
                 </div>
               </div>
             </div>
@@ -182,7 +182,7 @@ export function TakeoffModal({ isOpen, onClose, takeoff, onSave }: TakeoffModalP
                       />
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG</p>
                 </div>
               </div>
             </div>

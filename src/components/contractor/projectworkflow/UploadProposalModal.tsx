@@ -95,7 +95,7 @@ export function UploadProposalModal({
                       />
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG</p>
                   {file && (
                     <p className="text-sm text-gray-900 mt-2">Selected file: {file.name}</p>
                   )}

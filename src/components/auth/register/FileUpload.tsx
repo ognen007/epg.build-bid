@@ -17,7 +17,7 @@ export function FileUpload({ label, accept, onChange }: FileUploadProps) {
           <div className="text-sm text-gray-600">
             <span className="text-orange-500">Upload a file</span> or drag and drop
           </div>
-          <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+          <p className="text-xs text-gray-500">PDF, JPG, PNG</p>
         </div>
         <input type="file" className="hidden" accept={accept} onChange={onChange} />
       </label>

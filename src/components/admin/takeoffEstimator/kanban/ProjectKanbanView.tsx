@@ -12,17 +12,17 @@ export const EstimatorKanban: React.FC<ProjectKanbanProps> = () => {
     {
       id: 'assigned',
       title: 'Assigned',
-      tickets: [], // All tasks start here
+      tickets: [], // Projects with status = takeoff_in_progress and hold = takeoff_in_progress, and isInProgress = false
     },
     {
       id: 'in-progress',
       title: 'In Progress',
-      tickets: [], // Tasks moved here manually
+      tickets: [], // Projects with status = takeoff_in_progress and hold = takeoff_in_progress, and isInProgress = true
     },
     {
       id: 'completed',
       title: 'Completed',
-      tickets: [], // Tasks with status = awaiting_bid and hold = ready_for_proposal
+      tickets: [], // Projects with status = bid_received and hold = ready_for_proposal
     },
   ]);
 
@@ -38,21 +38,38 @@ export const EstimatorKanban: React.FC<ProjectKanbanProps> = () => {
         );
         const projects = response.data;
 
-        // Separate tasks into columns
-        const assignedTickets = projects.filter(
+        // Add a default `isInProgress` property to each project
+        const projectsWithProgress = projects.map((project: any) => ({
+          ...project,
+          isInProgress: project.isInProgress || false, // Default to false
+        }));
+
+        // Filter tasks for the "completed" column
+        const completedTickets = projectsWithProgress.filter(
           (project: any) =>
-            project.status !== 'awaiting_bid' || project.hold !== 'ready_for_proposal'
+            project.status === 'bid_received' &&
+            project.hold === 'ready_for_proposal'
         );
 
-        const completedTickets = projects.filter(
+        // Filter tasks for the "assigned" column
+        const assignedTickets = projectsWithProgress.filter(
           (project: any) =>
-            project.status === 'awaiting_bid' &&
-            project.hold === 'ready_for_proposal'
+            project.status === 'takeoff_in_progress' &&
+            project.hold === 'takeoff_in_progress' &&
+            !project.isInProgress
+        );
+
+        // Filter tasks for the "in-progress" column
+        const inProgressTickets = projectsWithProgress.filter(
+          (project: any) =>
+            project.status === 'takeoff_in_progress' &&
+            project.hold === 'takeoff_in_progress' &&
+            project.isInProgress
         );
 
         setColumns([
           { id: 'assigned', title: 'Assigned', tickets: assignedTickets },
-          { id: 'in-progress', title: 'In Progress', tickets: [] }, // Initially empty
+          { id: 'in-progress', title: 'In Progress', tickets: inProgressTickets },
           { id: 'completed', title: 'Completed', tickets: completedTickets },
         ]);
       } catch (error) {
@@ -63,44 +80,44 @@ export const EstimatorKanban: React.FC<ProjectKanbanProps> = () => {
     fetchProjects();
   }, []);
 
-  // Update task status and hold when a ticket is moved
   const updateTaskStatus = async (taskId: string, newColumnId: string) => {
     try {
       let newStatus = 'takeoff_in_progress'; // Default status
       let newHold = 'takeoff_in_progress'; // Default hold
-
-      // Only update status and hold if the task is moved to the "completed" column
-      if (newColumnId === 'completed') {
-        newStatus = 'awaiting_bid';
-        newHold = 'ready_for_proposal';
+      let isInProgress = false; // Default isInProgress
+  
+      // Determine the new status, hold, and isInProgress based on the target column
+      switch (newColumnId) {
+        case 'in-progress':
+          isInProgress = true; // Mark as in progress
+          break;
+        case 'completed':
+          newStatus = 'bid_received';
+          newHold = 'ready_for_proposal';
+          break;
+        default:
+          // For "assigned", keep the default values
+          break;
       }
-
-      // Log the payload for debugging
-      console.log('Updating task:', {
-        taskId,
-        newStatus,
-        newHold,
-      });
-
-      // Send the updated status and hold to the backend
+  
+      // Send the updated status, hold, and isInProgress to the backend
       const response = await axios.put(
         `https://epg-backend.onrender.com/api/projects/hold/${taskId}`,
         {
           status: newStatus,
           hold: newHold,
+          isInProgress,
         }
       );
-
-      console.log('Update successful:', response.data);
-
+  
       // Update the columns state with the updated task
-      setColumns((prevColumns:any) =>
-        prevColumns.map((col:any) => {
-          if (col.tickets.some((ticket:any) => ticket.id === taskId)) {
+      setColumns((prevColumns: any) =>
+        prevColumns.map((col: any) => {
+          if (col.tickets.some((ticket: any) => ticket.id === taskId)) {
             // Remove the ticket from the current column
             return {
               ...col,
-              tickets: col.tickets.filter((ticket:any) => ticket.id !== taskId),
+              tickets: col.tickets.filter((ticket: any) => ticket.id !== taskId),
             };
           }
           if (col.id === newColumnId) {
@@ -139,30 +156,26 @@ export const EstimatorKanban: React.FC<ProjectKanbanProps> = () => {
   };
 
   // Add a comment to a ticket
-  const handleAddComment = async (content: string) => {
+  const handleAddComment = (content: string) => {
     if (!selectedTicket) return;
 
-    try {
-      // Send the comment to the backend
-      const response = await axios.post(
-        `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTicket.id}/comments`,
-        { content, author: 'Current User' } // Replace with actual author
-      );
+    const newComment = {
+      id: String(selectedTicket.comments.length + 1),
+      content,
+      author: 'Current User', // Replace with actual author
+      createdAt: new Date().toISOString(),
+    };
 
-      // Update the columns state with the new comment
-      setColumns((prev) =>
-        prev.map((col: any) => ({
-          ...col,
-          tickets: col.tickets.map((ticket: any) =>
-            ticket.id === selectedTicket.id
-              ? { ...ticket, comments: [...ticket.comments, response.data] }
-              : ticket
-          ),
-        }))
-      );
-    } catch (error) {
-      console.error('Error adding comment:', error);
-    }
+    setColumns((prev) =>
+      prev.map((col: any) => ({
+        ...col,
+        tickets: col.tickets.map((ticket: any) =>
+          ticket.id === selectedTicket.id
+            ? { ...ticket, comments: [...ticket.comments, newComment] }
+            : ticket
+        ),
+      }))
+    );
   };
 
   return (
@@ -170,6 +183,15 @@ export const EstimatorKanban: React.FC<ProjectKanbanProps> = () => {
       {/* Header and buttons */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Project Board</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsAddingInternalTask(true)}
+            className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Internal Task
+          </button>
+        </div>
       </div>
 
       {/* Columns and tickets */}
@@ -185,6 +207,15 @@ export const EstimatorKanban: React.FC<ProjectKanbanProps> = () => {
           />
         ))}
       </div>
+
+      {/* Ticket Details Modal */}
+      {selectedTicket && (
+        <TicketDetailsModal
+          projectId={selectedTicket.id} // Pass the project ID
+          onClose={() => setSelectedTicket(null)}
+          onAddComment={handleAddComment}
+        />
+      )}
     </div>
   );
 };

@@ -21,6 +21,7 @@ import { ContractorPipeline } from '../views/admin/components/contractorpipeline
 import { useAuthContext } from '../views/auth/useAuthContext';
 import { routes } from '../navigation/routes';
 import { EstimatorKanban } from '../components/admin/takeoffEstimator/kanban/ProjectKanbanView';
+import { ProjectManagement } from '../views/admin/ProjectManagement';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -103,6 +104,7 @@ export function AdminLayout() {
                 <Route path="/" element={<AdminDashboard />} />
                 <Route path="/users" element={<UserManagement />} />
                 <Route path="/projects/:id" element={<ProjectKanbanView />} />
+                <Route path="/projects/" element={<ProjectManagement />} />
                 <Route path="/messages" element={<AdminMessages />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/platform-settings" element={<PlatformSettings />} />

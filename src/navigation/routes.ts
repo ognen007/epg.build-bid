@@ -7,7 +7,6 @@ import {
   Settings,
   LineChart,
   Search,
-  Rocket,
   Waypoints,
   Wallet,
   PlaneTakeoff
@@ -19,6 +18,7 @@ export const routes = {
     { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN"] },
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
     { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell, roles: ["ADMIN"] },
+    { path: '/admin/projects', label: 'Projects', icon: Briefcase, roles: ["ADMIN"] },
     // { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket, roles: ["ADMIN"] },
     { path: '/admin/takeoff/estimate', label: 'Takeoff', icon: PlaneTakeoff, roles:["ADMIN, ESTIMATOR"] },
     { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'ESTIMATOR']  },

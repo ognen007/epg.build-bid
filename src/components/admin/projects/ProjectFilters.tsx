@@ -1,9 +1,14 @@
 const PROJECT_STAGES = [
   { value: '', label: 'All' },
-  { value: 'awaiting_bid', label: 'Awaiting Bid' },
+  { value: 'awaiting_approval', label: 'Awaiting Approval' },
+  { value: 'awaiting_takeoff', label: 'Awaiting Takeoff' },
+  { value: 'takeoff_in_progress', label: 'Takeoff in Progress' },
+  { value: 'takeoff_complete', label: 'Takeoff Complete' },
+  { value: 'bid_recieved', label: 'Bid Recieved' },
   { value: 'bid_submitted', label: 'Bid Submitted' },
   { value: 'won', label: 'Won' },
-  { value: 'lost', label: 'Lost' }
+  { value: 'lost', label: 'Lost' },
+  { value: 'abandoned', label: 'Abandoned' }
 ];
 
 interface ProjectFiltersProps {

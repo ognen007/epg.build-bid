@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthContext } from './useAuthContext';
-import epgLogo from "../../asset/epgLogo.png"
+import epgLogo from '../../asset/epgLogo.png';
 
 export function LoginView() {
   const [formData, setFormData] = useState({
@@ -11,26 +11,54 @@ export function LoginView() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const navigate = useNavigate();
   const { login } = useAuthContext();
+
+  // Handle the PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
+      console.log('beforeinstallprompt event fired'); // Debugging
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+  
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    setInstallPrompt(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-  
+
     try {
       const response = await axios.post(
         'https://epg-backend.onrender.com/api/login',
         formData
       );
-  
+
       console.log(response.data); // Log the response data
-  
+
       if (response.status === 200) {
         const { email, role } = response.data;
         login(email, role);
-  
+
         // Navigate based on role
         if (role === 'CLIENT') {
           navigate('/client');
@@ -44,13 +72,24 @@ export function LoginView() {
       setLoading(false);
     }
   };
-  
-  
- return (
+
+  return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* PWA Install Button (Top Right) */}
+      {installPrompt && (
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={handleInstallClick}
+            className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            Install App
+          </button>
+        </div>
+      )}
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-        <img src={epgLogo} className="h-14" />
+          <img src={epgLogo} className="h-14" alt="EPG Logo" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Sign in to your account

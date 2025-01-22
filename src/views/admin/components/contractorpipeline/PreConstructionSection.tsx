@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Clock, FileText, CheckCircle, Bolt } from "lucide-react";
+import { RightClickPopup } from "./RightClickPopup";
+import axios from "axios";
 
 export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
   const statuses = [
@@ -8,6 +10,73 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
     { hold: "negotiating", label: "Negotiating" },
   ];
 
+  // State for the right-click context menu
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    position: { x: number; y: number };
+    taskId: string | null;
+  }>({
+    visible: false,
+    position: { x: 0, y: 0 },
+    taskId: null,
+  });
+
+  // Handle right-click event
+  const handleRightClick = (e: React.MouseEvent, taskId: string) => {
+    e.preventDefault(); // Prevent the default browser context menu
+    setContextMenu({
+      visible: true,
+      position: { x: e.pageX, y: e.pageY },
+      taskId,
+    });
+  };
+
+  const handleContextMenuAction = async (action: string, taskId: string) => {
+    let newHold = "none";
+    let newStatus = "";
+  
+    switch (action) {
+      case "abandoned":
+        newStatus = "abandoned"; // Set status to abandoned
+        break;
+      case "loss":
+        newStatus = "lost"; // Set status to lost
+        break;
+      default:
+        console.error(`Invalid action: ${action}`);
+        return;
+    }
+  
+    console.log("Sending payload:", { hold: newHold, status: newStatus });
+  
+    try {
+      const response = await axios.put(
+        `https://epg-backend.onrender.com/api/projects/pipeline/${taskId}`,
+        {
+          hold: newHold,
+          status: newStatus,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("Backend response:", response.data);
+  
+      // Update the task in the state
+      updateTaskStatus(taskId, newHold, newStatus); // Pass both newHold and newStatus
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error response data:", error.response?.data);
+      } else {
+        console.error("Error updating task:", error);
+      }
+    }
+  
+    setContextMenu({ visible: false, position: { x: 0, y: 0 }, taskId: null });
+  };
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "takeoff_in_progress":
@@ -62,6 +131,7 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
                       e.dataTransfer.setData("taskId", task.id);
                     }}
                     onClick={() => onTaskClick(task.id)} // Call onTaskClick when the task is clicked
+                    onContextMenu={(e) => handleRightClick(e, task.id)} // Handle right-click
                     className={`p-3 rounded-lg w-full cursor-pointer ${
                       status.hold === "negotiating"
                         ? "bg-orange-50 border-l-4 border-orange-500 hover:bg-orange-100"
@@ -92,6 +162,16 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
           );
         })}
       </div>
+
+      {/* Render the RightClickPopup if visible */}
+      {contextMenu.visible && contextMenu.taskId && (
+        <RightClickPopup
+          position={contextMenu.position}
+          onClose={() => setContextMenu({ visible: false, position: { x: 0, y: 0 }, taskId: null })}
+          onAction={handleContextMenuAction}
+          taskId={contextMenu.taskId} // Pass the taskId to the RightClickPopup
+        />
+      )}
     </div>
   );
 }

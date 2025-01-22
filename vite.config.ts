@@ -12,17 +12,17 @@ export default defineConfig({
         short_name: 'EPG Bid',
         description: 'EPGs Bidding app',
         theme_color: '#ffffff',
-        background_color: '#ffffff', // Add background color
-        start_url: '/', // Add start URL
-        display: 'standalone', // Ensure standalone display mode
+        background_color: '#ffffff',
+        start_url: '/',
+        display: 'standalone',
         icons: [
           {
-            src: '/src/assets/android-chrome-192x192.png', // Path to icon in src/assets
+            src: '/android-chrome-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/src/assets/android-chrome-512x512.png', // Path to icon in src/assets
+            src: '/android-chrome-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
@@ -31,19 +31,6 @@ export default defineConfig({
       workbox: {
         // Enable offline support
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.example\.com\/.*/, // Cache API requests
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24, // 1 day
-              },
-            },
-          },
-        ],
       },
     }),
   ],

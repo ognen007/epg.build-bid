@@ -15,7 +15,6 @@ export function LoginView() {
   const navigate = useNavigate();
   const { login } = useAuthContext();
 
-  // Handle the PWA install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
       console.log('beforeinstallprompt event fired'); // Debugging
@@ -29,7 +28,6 @@ export function LoginView() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
-
   const handleInstallClick = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();

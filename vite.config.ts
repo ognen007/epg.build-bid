@@ -29,7 +29,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+        globPatterns: ['**/*.{js,ts,tsx,css,html,png,svg,ico}'], // Add ts and tsx
+      },
+      devOptions: {
+        enabled: true, // Enable PWA support in development mode
       },
     }),
   ],

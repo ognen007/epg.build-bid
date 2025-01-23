@@ -16,8 +16,9 @@ export function LoginView() {
   const { login } = useAuthContext();
 
   useEffect(() => {
+    console.log('useEffect ran'); // Add this
     const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
-      console.log('beforeinstallprompt event fired'); // Debugging
+      console.log('beforeinstallprompt event fired');
       event.preventDefault();
       setInstallPrompt(event);
     };
@@ -29,6 +30,7 @@ export function LoginView() {
     };
   }, []);
   
+
   const handleInstallClick = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();

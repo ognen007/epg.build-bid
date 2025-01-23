@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate', // Automatically update the service worker
+      registerType: 'autoUpdate',
       manifest: {
         name: 'EPG.build Bid',
         short_name: 'EPG Bid',
@@ -29,7 +29,6 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Enable offline support
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       },
     }),

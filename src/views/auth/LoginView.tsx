@@ -28,6 +28,7 @@ export function LoginView() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+  
   const handleInstallClick = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();

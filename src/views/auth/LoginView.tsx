@@ -16,7 +16,6 @@ export function LoginView() {
   const { login } = useAuthContext();
 
   useEffect(() => {
-    console.log('useEffect ran'); // Add this
     const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
       console.log('beforeinstallprompt event fired');
       event.preventDefault();
@@ -32,7 +31,10 @@ export function LoginView() {
   
 
   const handleInstallClick = async () => {
-    if (!installPrompt) return;
+    if (!installPrompt) {
+      console.error('Install prompt is null');
+      return;
+    }
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === 'accepted') {
@@ -42,7 +44,7 @@ export function LoginView() {
     }
     setInstallPrompt(null);
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');

@@ -92,7 +92,12 @@ export function LoginView() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <img src={epgLogo} className="h-14" alt="EPG Logo" />
+        <Link
+            to="/login/admin"
+            className="font-medium text-orange-600 hover:text-orange-500"
+          >
+                      <img src={epgLogo} className="h-14" alt="EPG Logo" />
+          </Link>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Sign in to your account
@@ -143,7 +148,7 @@ export function LoginView() {
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
-                }
+                } 
               />
             </div>
 

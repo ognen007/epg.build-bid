@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { useAuthContext } from './useAuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import epgLogo from "../../asset/epgLogo.png";
 
 export function AdminLoginView() {
@@ -56,7 +56,12 @@ export function AdminLoginView() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex flex-col items-center">
           <div className="p-4">
-          <img src={epgLogo} className="h-14" />
+          <Link
+            to="/login"
+            className="font-medium text-orange-600 hover:text-orange-500"
+          >
+                      <img src={epgLogo} className="h-14" alt="EPG Logo" />
+          </Link>
           </div>
           <div className="mt-6 flex items-center justify-center space-x-2">
             <Shield className="h-5 w-5 text-orange-600" />

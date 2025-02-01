@@ -308,7 +308,7 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
         <label className="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
           <span>Upload business license</span>
           <input
-            type="file"
+            type="file" 
             className="sr-only"
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={(e) => handleChange('businessLicenseFile', e.target.files ? e.target.files[0] : null)}

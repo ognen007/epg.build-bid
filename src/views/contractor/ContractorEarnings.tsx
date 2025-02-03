@@ -1,42 +1,121 @@
+import { useEffect, useState } from 'react';
 import { ContractorRevenue } from '../../components/contractor/earnings/ContractorRevenue';
 import { EarningsOverview } from '../../components/contractor/earnings/EarningsOverview';
+import { ProjectType } from '../../types/project';
 
-const sampleData = {
-  stats: {
-    totalEarnings: 125000,
-    pendingPayments: 15000,
-    paidInvoices: 24
-  },
-  transactions: [
-    {
-      id: '1',
-      clientName: 'ABC Corporation',
-      projectTitle: 'Office Building Renovation',
-      amount: 45000,
-      date: '2024-03-01',
-      status: 'paid',
-      invoiceUrl: '/invoices/1'
-    },
-    {
-      id: '2',
-      clientName: 'XYZ Industries',
-      projectTitle: 'Factory Maintenance',
-      amount: 15000,
-      date: '2024-03-15',
-      status: 'pending'
-    }
-  ]
-};
+interface ContractorDetails {
+  id: string;
+  contractor: {
+    name: string;
+    email: string;
+    company: string;
+  };
+  totalRevenue: number;
+  lastMonthRevenue: number;
+  growth: number;
+  projectsCompleted: number;
+  projects: ProjectType[];
+}
 
 export function ContractorEarnings() {
+  const [contractorData, setContractorData] = useState<ContractorDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [contractorId, setContractorId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchContractorId = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          setError('User not found');
+          setLoading(false);
+          return;
+        }
+
+        const user = JSON.parse(storedUser);
+        const { email } = user;
+
+        // Fetch all contractors from the backend
+        const response = await fetch('https://epg-backend.onrender.com/api/contractor/id');
+        if (!response.ok) {
+          throw new Error('Failed to fetch contractors');
+        }
+
+        const contractors = await response.json();
+
+        // Find the logged-in contractor by email
+        const loggedInContractor = contractors.find(
+          (contractor: any) => contractor.email === email
+        );
+
+        if (!loggedInContractor) {
+          throw new Error('Logged-in contractor not found');
+        }
+
+        // Set the contractor ID in the state
+        setContractorId(loggedInContractor.id);
+      } catch (error) {
+        console.error('Error fetching contractor ID:', error);
+        setError('Failed to fetch contractor ID');
+        setLoading(false);
+      }
+    };
+
+    fetchContractorId();
+  }, []);
+
+  useEffect(() => {
+    const fetchContractorData = async () => {
+      if (!contractorId) return;
+
+      try {
+        const response = await fetch(`https://epg-backend.onrender.com/api/contractor-information/${contractorId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch contractor data');
+        }
+
+        const data = await response.json();
+        setContractorData(data);
+      } catch (error) {
+        console.error('Error fetching contractor data:', error);
+        setError('Failed to fetch contractor data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContractorData();
+  }, [contractorId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!contractorData) {
+    return <div>No data available</div>;
+  }
+
+  // Calculate stats for EarningsOverview
+  const stats = {
+    totalEarnings: contractorData.totalRevenue,
+    pendingPayments: contractorData.lastMonthRevenue, // Assuming lastMonthRevenue represents pending payments
+    paidInvoices: contractorData.projectsCompleted, // Assuming projectsCompleted represents paid invoices
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Earnings</h1>
       
-      <EarningsOverview stats={sampleData.stats} />
+      {/* Pass the fetched stats to EarningsOverview */}
+      <EarningsOverview stats={stats} />
   
-  <ContractorRevenue/>
+      {/* Pass the fetched projects to ContractorRevenue */}
+      <ContractorRevenue projects={contractorData.projects} />
     </div>
   );
 }

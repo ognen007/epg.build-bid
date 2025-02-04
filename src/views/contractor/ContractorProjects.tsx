@@ -1,211 +1,109 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { ProjectProposals } from '../../components/contractor/projects/ProjectProposals';
-import { ProjectWorkflowView } from '../../components/contractor/projectworkflow/ProjectWorkflowView';
-import { ProjectSearch } from './ProjectSearch';
-import { ProjectType } from '../../types/project';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { ProjectProposals } from "../../components/contractor/projects/ProjectProposals";
+import { ProjectWorkflowView } from "../../components/contractor/projectworkflow/ProjectWorkflowView";
+import { ProjectSearch } from "./ProjectSearch";
+import { ProjectType } from "../../types/project";
 
-// Define ContractorType interface
 export interface ContractorType {
   id: string;
-  fullName: string; // Add fullName to match the backend response
+  fullName: string;
   email: string;
 }
 
 export function ContractorProjects() {
-  const [allProjects, setAllProjects] = useState<ProjectType[]>([]);
-  const [contractor, setContractor] = useState<ContractorType | null>(null); // Fix: Single contractor or null
-  const [filteredProjects, setFilteredProjects] = useState<ProjectType[]>([]);
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+  const [contractor, setContractor] = useState<ContractorType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); // Add searchQuery state
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch contractor data
   useEffect(() => {
     const fetchContractorData = async () => {
       try {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem("user");
         if (!storedUser) {
-          console.error('No User');
-          setError('User not found');
+          setError("User not found");
           setLoading(false);
           return;
         }
-
         const user = JSON.parse(storedUser);
         const { email } = user;
 
-        // Fetch all contractors
-        const response = await axios.get('https://epg-backend.onrender.com/api/contractor/id');
-        console.log('All Contractors:', response.data);
-
-        // Find the logged-in contractor by email
-        const loggedInContractor = response.data.find(
-          (contractor: ContractorType) => contractor.email === email
-        );
+        const response = await axios.get("https://epg-backend.onrender.com/api/contractor/id");
+        const loggedInContractor = response.data.find((c: ContractorType) => c.email === email);
 
         if (!loggedInContractor) {
-          throw new Error('Logged-in contractor not found');
+          throw new Error("Logged-in contractor not found");
         }
-
-        // Set the contractor state
         setContractor(loggedInContractor);
-        console.log('Logged-in Contractor:', loggedInContractor);
       } catch (err) {
-        console.error('Error fetching contractor data:', err);
-        setError('Failed to fetch contractor data');
+        setError("Failed to fetch contractor data");
       } finally {
         setLoading(false);
       }
     };
-
     fetchContractorData();
   }, []);
 
-  // Fetch all projects from the backend
   useEffect(() => {
+    if (!contractor?.fullName) return;
+
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://epg-backend.onrender.com/api/project/display');
-        if (response.data && Array.isArray(response.data.projects)) {
-          setAllProjects(response.data.projects);
-          console.log('All Projects:', response.data.projects);
+        const response = await axios.get(
+          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractor.fullName)}`
+        );
+
+        console.log("Fetched projects response:", response.data);
+
+        if (Array.isArray(response.data.projects)) {
+          setProjects(response.data.projects);
         } else {
-          throw new Error('Invalid data format: Expected an array of projects');
+          setProjects([]); // If data format is unexpected, assume no projects
         }
-      } catch (err) {
-        console.error('Error fetching projects:', err);
-        setError('Failed to fetch projects. Please try again later.');
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          console.warn("No projects found, setting an empty list.");
+          setProjects([]); // Gracefully handle 404 without errors
+        } else {
+          console.error("Error fetching projects:", err);
+          setError("Failed to fetch projects");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, []);
+  }, [contractor]);
 
-  // Filter projects based on contractor fullName and search query
-  useEffect(() => {
-    if (contractor && allProjects.length > 0) {
-      let projectsForContractor = allProjects.filter(
-        (project) => project.contractor === contractor.fullName
-      );
-
-      // Apply search query filter
-      if (searchQuery) {
-        projectsForContractor = projectsForContractor.filter((project) =>
-          project.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setFilteredProjects(projectsForContractor);
-      console.log('Filtered Projects:', projectsForContractor);
-    }
-  }, [contractor, allProjects, searchQuery]);
-
-  // Handle accepting a proposal
   const handleAcceptProposal = async (taskId: string) => {
-    if (!contractor) {
-      console.error('Contractor not found');
-      return;
-    }
-  
     try {
-      console.log('Updating task with ID:', taskId);
-  
-      // Send the status and hold values in the request body
       const response = await axios.put(
         `https://epg-backend.onrender.com/api/projects/hold/${taskId}`,
-        {
-          status: 'takeoff_in_progress', // Set the new status
-          hold: 'takeoff_in_progress', // Set the new hold
-        }
+        { status: "takeoff_in_progress", hold: "takeoff_in_progress" }
       );
-  
-      console.log('Task updated:', response.data);
-  
-      // Update the state immutably
-      setAllProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project.id === taskId
-            ? {
-                ...project,
-                hold: response.data.hold, // Use the updated hold from the response
-                status: response.data.status, // Use the updated status from the response
-              }
-            : project
-        )
+      setProjects((prev) =>
+        prev.map((p) => (p.id === taskId ? { ...p, hold: response.data.hold, status: response.data.status } : p))
       );
-  
-      console.log('State updated successfully');
     } catch (error) {
-      console.error('Error updating task:', error);
-      setError('Failed to update task. Please try again later.');
+      setError("Failed to update task");
     }
   };
 
-  const handleDeclineProposal = () => {
-    console.log('Proposal declined:');
-  };
+  const handleDeclineProposal = () => console.log("Proposal declined");
+  const handleSearchChange = (query: string) => setSearchQuery(query);
 
-  // Handle search query change
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    console.log('Search query:', query);
-  };
-
-  // Skeleton loader for loading state
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* ProjectSearch Skeleton */}
-        <div className="animate-pulse">
-          <div className="h-10 bg-gray-200 rounded w-full max-w-md"></div>
-        </div>
-
-        {/* ProjectProposals Skeleton */}
-        <div className="space-y-4">
-          {[1, 2, 3].map((_, index) => (
-            <div key={index} className="bg-white p-6 rounded-lg shadow-sm animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="flex space-x-4">
-                <div className="h-10 bg-gray-200 rounded w-24"></div>
-                <div className="h-10 bg-gray-200 rounded w-24"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ProjectWorkflowView Skeleton */}
-        <div className="bg-white p-6 rounded-lg shadow-sm animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return <div className="text-red-600 p-6">Error: {error}</div>;
-  }
+  if (loading) return <div className="text-gray-500 p-6">Loading...</div>;
+  if (error) return <div className="text-red-600 p-6">Error: {error}</div>;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <ProjectSearch
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange} // Pass the search handler
-      />
-      <ProjectProposals
-        proposals={filteredProjects}
-        onAccept={handleAcceptProposal}
-        onDecline={handleDeclineProposal}
-      />
-      <ProjectWorkflowView contractorId={contractor?.id || ''} />
+      <ProjectSearch searchQuery={searchQuery} onSearchChange={handleSearchChange} />
+      <ProjectProposals proposals={projects} onAccept={handleAcceptProposal} onDecline={handleDeclineProposal} />
+      <ProjectWorkflowView contractorId={contractor?.id || ""} />
     </div>
   );
 }

@@ -20,28 +20,82 @@ interface Comment {
   // Add other comment properties here
 }
 
+export interface ContractorType {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
 export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
-
-  // Fetch all tasks
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get<Task[]>(
-        `https://epg-backend.onrender.com/api/projects/hold/`
-      );
-      console.log("Fetched Tasks:", response.data); // Debugging
-      setTasks(response.data || []);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    }
-  };
+  const [contractor, setContractor] = useState<ContractorType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchTasks();
-  }, [contractorId]);
+    if (!contractor?.fullName) return;
+  
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractor.fullName)}`
+        );
+  
+        console.log("Fetched projects response:", response.data); // Log response
+  
+        if (Array.isArray(response.data.projects)) {
+          setTasks(response.data.projects);
+        } else {
+          setTasks([]); // No error, just set empty tasks
+        }
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          console.warn("No projects found, continuing without error."); // Log as a warning, not an error
+          setTasks([]); // Gracefully handle no projects
+        } else {
+          console.error("Error fetching projects:", err);
+          setError("Failed to fetch projects");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchProjects();
+  }, [contractor]);
+  
+
+  useEffect(() => {
+    if (!contractor?.fullName) return;
+  
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractor.fullName)}`
+        );
+  
+        console.log("Fetched projects response:", response.data); // Log response
+  
+        if (Array.isArray(response.data.projects)) {
+          setTasks(response.data.projects);
+        } else {
+          setTasks([]); // No error, just set empty tasks
+        }
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+        setTasks([]); // Ensure tasks are empty instead of throwing an error
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchProjects();
+  }, [contractor]);
 
   // Fetch comments for the selected project
   useEffect(() => {
@@ -101,7 +155,6 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
       <PreConstructionSection
         tasks={tasks}
         onTaskClick={handleTaskClick}
-        refreshTasks={fetchTasks} // Pass the refresh function
       />
       <ConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
 

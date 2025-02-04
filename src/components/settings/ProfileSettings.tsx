@@ -4,23 +4,23 @@ import { Camera } from "lucide-react";
 interface ProfileSettingsProps {
   fullName: string;
   email: string;
-  phone: string;
-  company: string;
-  avatar_url: string;
+  phoneNumber: string;
+  companyName: string;
+  avatar_url?: string;
   onSubmit: (updatedProfile: {
     fullName: string;
     email: string;
-    phone: string;
-    company: string;
-    avatar_url: string;
-  }) => void; // New prop for submitting profile changes
+    phoneNumber: string;
+    companyName: string;
+    avatar_url?: string;
+  }) => Promise<void>;
 }
 
 export function ProfileSettings({
   fullName,
   email,
-  phone,
-  company,
+  phoneNumber,
+  companyName,
   avatar_url,
   onSubmit,
 }: ProfileSettingsProps) {
@@ -29,21 +29,21 @@ export function ProfileSettings({
   const [profile, setProfile] = useState({
     fullName: fullName || "",
     email: email || "",
-    phone: phone || "",
-    company: company || "",
+    phoneNumber: phoneNumber || "",
+    companyName: companyName || "",
     avatar_url: avatar_url || "",
   });
 
-  // Update profile when props change
+  // Sync state with props when they change
   useEffect(() => {
     setProfile({
       fullName: fullName || "",
       email: email || "",
-      phone: phone || "",
-      company: company || "",
+      phoneNumber: phoneNumber || "",
+      companyName: companyName || "",
       avatar_url: avatar_url || "",
     });
-  }, [fullName, email, phone, company, avatar_url]);
+  }, [fullName, email, phoneNumber, companyName, avatar_url]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +51,7 @@ export function ProfileSettings({
     setSuccess(false);
 
     try {
-      await onSubmit(profile); // Call the onSubmit prop with the updated profile
+      await onSubmit(profile);
       setSuccess(true);
     } catch (error) {
       console.error("Error saving changes:", error);
@@ -77,7 +77,6 @@ export function ProfileSettings({
       setLoading(false);
     }, 1000);
 
-    // Clear the input field to allow re-upload of the same file
     e.target.value = "";
   };
 
@@ -136,28 +135,28 @@ export function ProfileSettings({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Phone</label>
+            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
             <input
               type="tel"
-              value={profile.phone}
+              value={profile.phoneNumber}
               onChange={(e) =>
                 setProfile((prevProfile) => ({
                   ...prevProfile,
-                  phone: e.target.value,
+                  phoneNumber: e.target.value,
                 }))
               }
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Company</label>
+            <label className="block text-sm font-medium text-gray-700">Company Name</label>
             <input
               type="text"
-              value={profile.company}
+              value={profile.companyName}
               onChange={(e) =>
                 setProfile((prevProfile) => ({
                   ...prevProfile,
-                  company: e.target.value,
+                  companyName: e.target.value,
                 }))
               }
               className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"

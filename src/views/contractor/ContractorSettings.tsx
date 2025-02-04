@@ -9,7 +9,6 @@ export function ContractorSettings() {
     email: "",
     phoneNumber: "",
     companyName: "",
-    avatar_url: "",
   });
   const [loading, setLoading] = useState(true); // Add loading state
 
@@ -55,29 +54,29 @@ export function ContractorSettings() {
         ([_, value]) => value !== null && value !== undefined && value !== ""
       )
     );
-
+  
     const storedUser = localStorage.getItem("user");
-
+  
     if (!storedUser) {
       console.error("No user found in localStorage");
       return;
     }
-
+  
     const parsedUser = JSON.parse(storedUser);
-
+  
     if (!parsedUser.email) {
       console.error("Email not found in stored user data");
       return;
     }
-
+  
     console.log("Payload being sent:", payload);
-
+  
     try {
       const response = await axios.put(
-        `https://epg-backend.onrender.com/api/admin/settings/?email=${parsedUser.email}`,
+        `https://epg-backend.onrender.com/api/contractor/settings/?email=${parsedUser.email}`,
         payload
       );
-
+  
       if (response.status === 200) {
         setContractorProfile(updatedProfile);
         console.log("Profile updated successfully");
@@ -87,7 +86,7 @@ export function ContractorSettings() {
     } catch (error) {
       console.error("Error updating profile:", error);
     }
-  };
+  };  
 
   // Skeleton loader for loading state
   if (loading) {
@@ -136,9 +135,8 @@ export function ContractorSettings() {
         <ProfileSettings
           fullName={contractorProfile.fullName}
           email={contractorProfile.email}
-          phone={contractorProfile.phoneNumber}
-          company={contractorProfile.companyName}
-          avatar_url={contractorProfile.avatar_url}
+          phoneNumber={contractorProfile.phoneNumber}
+          companyName={contractorProfile.companyName}
           onSubmit={handleProfileUpdate} // Pass callback as prop
         />
       </div>

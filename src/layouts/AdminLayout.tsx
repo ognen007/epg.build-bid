@@ -119,6 +119,46 @@ export function AdminLayout() {
               </>
             )}
 
+{user?.role === 'PROJECTSPECIALIST' && (
+              <>
+                <Route path="/" element={<AdminDashboard />} />
+                <Route path="/users" element={<UserManagement />} />
+                <Route path="/projects/:id" element={<ProjectKanbanView />} />
+                <Route path="/projects/" element={<ProjectManagement />} />
+                <Route path="/messages" element={<AdminMessages />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/platform-settings" element={<PlatformSettings />} />
+                <Route path="/support" element={<SupportTickets />} />
+                <Route path="/settings" element={<AdminSettings />} />
+                <Route path="/analytics/revenue" element={<RevenueComponent />} />
+                <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
+                <Route path="/analytics/users" element={<UserGrowthComponent />} />
+                <Route path="/pipeline" element={<ContractorPipeline />} />
+                <Route path="/pipeline/:id" element={<ContractorPipeline />} />
+                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
+              </>
+            )}
+
+{user?.role === 'CSM' && (
+              <>
+                <Route path="/" element={<AdminDashboard />} />
+                <Route path="/users" element={<UserManagement />} />
+                <Route path="/projects/:id" element={<ProjectKanbanView />} />
+                <Route path="/projects/" element={<ProjectManagement />} />
+                <Route path="/messages" element={<AdminMessages />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/platform-settings" element={<PlatformSettings />} />
+                <Route path="/support" element={<SupportTickets />} />
+                <Route path="/settings" element={<AdminSettings />} />
+                <Route path="/analytics/revenue" element={<RevenueComponent />} />
+                <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
+                <Route path="/analytics/users" element={<UserGrowthComponent />} />
+                <Route path="/pipeline" element={<ContractorPipeline />} />
+                <Route path="/pipeline/:id" element={<ContractorPipeline />} />
+                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
+              </>
+            )}
+
             {/* Estimator Routes */}
             {user?.role === 'ESTIMATOR' && (
               <>

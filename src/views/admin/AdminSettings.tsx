@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { ProfileSettings } from "../../components/settings/ProfileSettings";
 import { LogoutButton } from "../../components/settings/LogoutButton";
@@ -7,9 +7,8 @@ export function AdminSettings() {
   const [adminProfile, setAdminProfile] = useState({
     fullName: "",
     email: "",
-    phone: "",
-    company: "",
-    avatar_url: "",
+    phoneNumber: "",
+    companyName: "",
   });
   const [loading, setLoading] = useState(true); // Add loading state
 
@@ -55,29 +54,29 @@ export function AdminSettings() {
         ([_, value]) => value !== null && value !== undefined && value !== ""
       )
     );
-
+  
     const storedUser = localStorage.getItem("user");
-
+  
     if (!storedUser) {
       console.error("No user found in localStorage");
       return;
     }
-
+  
     const parsedUser = JSON.parse(storedUser);
-
+  
     if (!parsedUser.email) {
       console.error("Email not found in stored user data");
       return;
     }
-
+  
     console.log("Payload being sent:", payload);
-
+  
     try {
       const response = await axios.put(
         `https://epg-backend.onrender.com/api/admin/settings/change/?email=${parsedUser.email}`,
         payload
       );
-
+  
       if (response.status === 200) {
         setAdminProfile(updatedProfile);
         console.log("Profile updated successfully");
@@ -87,7 +86,7 @@ export function AdminSettings() {
     } catch (error) {
       console.error("Error updating profile:", error);
     }
-  };
+  };  
 
   // Skeleton loader for loading state
   if (loading) {
@@ -136,9 +135,8 @@ export function AdminSettings() {
         <ProfileSettings
           fullName={adminProfile.fullName}
           email={adminProfile.email}
-          phone={adminProfile.phone}
-          company={adminProfile.company}
-          avatar_url={adminProfile.avatar_url}
+          phoneNumber={adminProfile.phoneNumber}
+          companyName={adminProfile.companyName}
           onSubmit={handleProfileUpdate} // Pass callback as prop
         />
       </div>

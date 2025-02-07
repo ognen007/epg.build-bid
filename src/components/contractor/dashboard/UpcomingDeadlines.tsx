@@ -1,5 +1,6 @@
-import React from 'react';
-import { Calendar, Clock } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from "react";
+import axios from "axios";
+import { Calendar, Clock } from "lucide-react";
 
 interface Deadline {
   id: string;
@@ -9,48 +10,133 @@ interface Deadline {
   daysLeft: number;
 }
 
-const deadlines: Deadline[] = [
-  {
-    id: '1',
-    project: 'City Center Mall',
-    task: 'Submit final renovation proposal',
-    date: '2024-03-20',
-    daysLeft: 5
-  },
-  {
-    id: '2',
-    project: 'Harbor Bridge',
-    task: 'Complete safety inspection report',
-    date: '2024-03-25',
-    daysLeft: 10
-  }
-];
-
 export function UpcomingDeadlines() {
+  const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [contractorId, setContractorId] = useState<string | null>(null);
+
+  // Fetch contractor ID
+  const fetchContractorId = useCallback(async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) throw new Error("User not found");
+
+      const { email } = JSON.parse(storedUser);
+      const { data: contractors } = await axios.get(
+        "https://epg-backend.onrender.com/api/contractor/id"
+      );
+
+      const loggedInContractor = contractors.find(
+        (contractor: any) => contractor.email === email
+      );
+
+      if (!loggedInContractor) throw new Error("Contractor not found");
+
+      setContractorId(loggedInContractor.id);
+    } catch (err) {
+      console.error("Error fetching contractor ID:", err);
+      setError((err as Error).message);
+    }
+  }, []);
+
+  // Fetch deadlines
+  const fetchDeadlines = useCallback(async () => {
+    if (!contractorId) return;
+
+    try {
+      setLoading(true);
+      const { data } = await axios.get(
+        `https://epg-backend.onrender.com/api/contractor/upcoming/deadlines/${contractorId}`
+      );
+
+      setDeadlines(
+        data.map((project: any) => {
+          const deadlineDate = new Date(project.deadline);
+          const today = new Date();
+          const daysLeft = Math.ceil(
+            (deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          return {
+            id: project.id,
+            project: project.name,
+            task: project.description,
+            date: project.deadline,
+            daysLeft,
+          };
+        })
+      );
+    } catch (err) {
+      console.error("Error fetching deadlines:", err);
+      setError("Failed to load deadlines.");
+    } finally {
+      setLoading(false);
+    }
+  }, [contractorId]);
+
+  useEffect(() => {
+    fetchContractorId();
+  }, [fetchContractorId]);
+
+  useEffect(() => {
+    if (contractorId) fetchDeadlines();
+  }, [contractorId, fetchDeadlines]);
+
+  // Loading Skeleton
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Upcoming Deadlines</h2>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="animate-pulse flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div className="h-5 w-5 bg-gray-300 rounded" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error UI
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 rounded-xl p-6">
+        <h2 className="text-lg font-semibold">Error</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">Upcoming Deadlines</h2>
       <div className="space-y-4">
-        {deadlines.map((deadline) => (
-          <div key={deadline.id} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
-            <div className="flex-shrink-0">
+        {deadlines.length > 0 ? (
+          deadlines.map((deadline) => (
+            <div key={deadline.id} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
               <Calendar className="h-5 w-5 text-orange-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900">{deadline.task}</p>
-              <p className="text-sm text-gray-500">{deadline.project}</p>
-              <div className="flex items-center mt-2 text-sm">
-                <Clock className="h-4 w-4 text-gray-400 mr-1" />
-                <span className={`
-                  font-medium
-                  ${deadline.daysLeft <= 5 ? 'text-red-600' : 'text-gray-600'}
-                `}>
-                  {deadline.daysLeft} days left
-                </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900">{deadline.task}</p>
+                <p className="text-sm text-gray-500">{deadline.project}</p>
+                <div className="flex items-center mt-2 text-sm">
+                  <Clock className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className={`${deadline.daysLeft <= 5 ? "text-red-600" : "text-gray-600"} font-medium`}>
+                    {deadline.daysLeft} days left
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-gray-500">No upcoming deadlines.</p>
+        )}
       </div>
     </div>
   );

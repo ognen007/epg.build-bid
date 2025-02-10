@@ -22,6 +22,7 @@ import { useAuthContext } from '../views/auth/useAuthContext';
 import { routes } from '../navigation/routes';
 import { EstimatorKanban } from '../components/admin/takeoffEstimator/kanban/ProjectKanbanView';
 import { ProjectManagement } from '../views/admin/ProjectManagement';
+import { AdminEstimator } from '../views/admin/components/AdminEstimator';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -116,6 +117,7 @@ export function AdminLayout() {
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />
                 <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
+                <Route path="/estimator-assign" element={<AdminEstimator/>}/>
               </>
             )}
 

@@ -1,15 +1,17 @@
 import { 
   BarChart3, 
   Users, 
-  Briefcase, 
+  Table2, 
   MessageCircle,
   Shell,
   Settings,
+  Briefcase,
   LineChart,
   Search,
   Waypoints,
   Wallet,
-  PlaneTakeoff
+  PlaneTakeoff,
+  Webhook
 } from 'lucide-react';
 
 export const routes = {
@@ -18,9 +20,10 @@ export const routes = {
     { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN", 'PROJECTSPECIALIST'] },
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
     { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
-    { path: '/admin/projects', label: 'Projects', icon: Briefcase, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
+    { path: '/admin/projects', label: 'Projects', icon: Table2, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
     // { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket, roles: ["ADMIN"] },
     { path: '/admin/takeoff/estimate', label: 'Takeoff', icon: PlaneTakeoff, roles:["ADMIN", "ESTIMATOR", 'PROJECTSPECIALIST', "CSM"] },
+    { path: '/admin/estimator-assign', label: 'Estimator Assignment', icon: Webhook, roles: ['ADMIN']  },
     { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'ESTIMATOR','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
     { path: '/admin/analytics', label: 'Reports & Analytics', icon: LineChart, roles: ["ADMIN"] },

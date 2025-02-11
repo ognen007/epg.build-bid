@@ -58,10 +58,11 @@ export function ContractorProjects() {
 
         console.log("Fetched projects response:", response.data);
 
-        if (Array.isArray(response.data.projects)) {
+        if (response.status === 200) {
           setProjects(response.data.projects);
+          console.log("FETCHED FAS",response.data.projects)
         } else {
-          setProjects([]); // If data format is unexpected, assume no projects
+          setProjects([]); // No error, just set empty tasks
         }
       } catch (err: any) {
         if (err.response?.status === 404) {
@@ -103,7 +104,7 @@ export function ContractorProjects() {
     <div className="max-w-7xl mx-auto space-y-8">
       <ProjectSearch searchQuery={searchQuery} onSearchChange={handleSearchChange} />
       <ProjectProposals proposals={projects} onAccept={handleAcceptProposal} onDecline={handleDeclineProposal} />
-      <ProjectWorkflowView contractorId={contractor?.id || ""} />
+      <ProjectWorkflowView setTasks={setProjects} tasks={projects}  contractorId={contractor?.id || ""} />
     </div>
   );
 }

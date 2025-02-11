@@ -6,6 +6,8 @@ import { AddCommentModal } from "../../../views/admin/components/contractorpipel
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
+  tasks: any,
+  setTasks: any
 }
 
 interface Task {
@@ -26,8 +28,7 @@ export interface ContractorType {
   email: string;
 }
 
-export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWorkflowProps) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -76,13 +77,14 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractor.fullName)}`
+          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractorId)}`
         );
   
         console.log("Fetched projects response:", response.data); // Log response
   
-        if (Array.isArray(response.data.projects)) {
+        if (response.status === 200) {
           setTasks(response.data.projects);
+          console.log("FETCHED FAS",response.data.projects)
         } else {
           setTasks([]); // No error, just set empty tasks
         }

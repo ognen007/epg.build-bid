@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ContractorSidebar } from '../components/navigation/ContractorSidebar';
 import { Header } from '../components/Header';
@@ -12,11 +12,13 @@ import { ContractorEarnings } from '../views/contractor/ContractorEarnings';
 import { ContractorMessages } from '../views/contractor/ContractorMessages';
 import { ContractorSettings } from '../views/contractor/ContractorSettings';
 import { ContractorTasks } from '../views/contractor/ContractorTasks';
+import axios from 'axios';
 
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [fullName, setFullName] = useState('');
+  const [contractorId, setContractorId] = useState('');
 
   useEffect(() => {
     const fetchFullNameByEmail = async () => {
@@ -46,6 +48,33 @@ export function ContractorLayout() {
     fetchFullNameByEmail();
   }, []);
 
+  const fetchContractorId = useCallback(async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) throw new Error("User not found");
+
+      const { email } = JSON.parse(storedUser);
+      const { data: contractors } = await axios.get(
+        "https://epg-backend.onrender.com/api/contractor/id"
+      );
+
+      const loggedInContractor = contractors.find(
+        (contractor: any) => contractor.email === email
+      );
+
+      if (!loggedInContractor) throw new Error("Contractor not found");
+
+      setContractorId(loggedInContractor.id);
+    } catch (err) {
+      console.error("Error fetching contractor ID:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchContractorId();
+    console.log(contractorId)
+  }, [fetchContractorId]);   
+
   return (
     <div className="flex h-screen bg-gray-50">
       {showWelcome && (
@@ -74,6 +103,7 @@ export function ContractorLayout() {
       
       <div className="flex-1 flex flex-col min-w-0">
         <Header userFullName={fullName}
+        userId={contractorId}
           onMenuClick={() => setIsSidebarOpen(true)}
           onTasksClick={() => {}}
           showTasksButton={false}

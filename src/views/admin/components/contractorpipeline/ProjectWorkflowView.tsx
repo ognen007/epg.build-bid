@@ -4,6 +4,7 @@ import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
 import { AddCommentModal } from "./AddCommentModal";
 import { ProjectDetailsModal } from "./ProjectDetailsModal"; // Import the new modal
+import { sendNotificationToUser } from "../../../../services/notificationEndpoints";
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
@@ -111,6 +112,8 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
       setTasks((prevTasks: any) =>
         prevTasks.map((task: any) => (task.id === taskId ? response.data : task))
       );
+      const formattedHold = newHold.replace(/_/g, " ");
+      await sendNotificationToUser(contractorId, "Project Status", `Hey, your project is in ${formattedHold}`);
     } catch (error) {
       console.error("Error updating task status:", error);
     }

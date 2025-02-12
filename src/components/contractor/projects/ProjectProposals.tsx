@@ -1,10 +1,9 @@
-import React from 'react';
 import { Calendar, X, Check } from 'lucide-react';
 import { ProjectType } from '../../../types/project';
 
 interface ProjectProposalsProps {
   proposals?: ProjectType[]; // Make proposals optional
-    onAccept: (id: string) => void;
+  onAccept: (id: string) => void;
   onDecline: () => void;
 }
 

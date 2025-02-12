@@ -25,6 +25,7 @@ export function ContractorPipeline() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedContractorFullName, setSelectedContractorFullName] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Sync selectedContractorId with search parameter
@@ -71,6 +72,15 @@ export function ContractorPipeline() {
     };
     fetchContractors();
   }, []);
+
+  useEffect(() => {
+    if (selectedContractorId) {
+      const selectedContractor = allContractors.find(contractor => contractor.id === selectedContractorId);
+      setSelectedContractorFullName(selectedContractor ? selectedContractor.fullName : null);
+    } else {
+      setSelectedContractorFullName(null);
+    }
+  }, [selectedContractorId, allContractors]);
 
   // Filter projects based on selected contractor
   useEffect(() => {
@@ -210,7 +220,7 @@ export function ContractorPipeline() {
           {selectedView === 'pipeline' ? (
             selectedContractorId ? (
               <>
-              <DraftedProjectSection proposals={filteredProjects}/>
+              <DraftedProjectSection contractorId={selectedContractorId} fullName={selectedContractorFullName} proposals={filteredProjects}/>
                 <ProjectProposals proposals={filteredProjects} />
                 <ProjectWorkflowView contractorId={selectedContractorId}/>
               </>

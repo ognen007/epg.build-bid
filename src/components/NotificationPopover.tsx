@@ -1,9 +1,6 @@
-import React from 'react';
-import { Bell } from 'lucide-react';
-
 interface Notification {
   id: string;
-  title: string;
+  messageTitle: string;
   message: string;
   from: string;
   timestamp: string;
@@ -34,7 +31,7 @@ export function NotificationPopover({ notifications, onNotificationClick }: Noti
                 `}
               >
                 <div className="flex justify-between">
-                  <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                  <p className="text-sm font-medium text-gray-900">{notification.messageTitle}</p>
                   <span className="text-xs text-gray-500">{notification.timestamp}</span>
                 </div>
                 <p className="mt-1 text-sm text-gray-500 line-clamp-2">{notification.message}</p>

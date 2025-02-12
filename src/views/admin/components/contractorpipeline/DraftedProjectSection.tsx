@@ -2,12 +2,15 @@ import React from 'react';
 import { Calendar, Forward } from 'lucide-react';
 import { ProjectType } from '../../../../types/project';
 import axios from 'axios'; // Import axios for making API calls
+import { sendNotificationToUser } from '../../../../services/notificationEndpoints';
 
 interface ProjectProposalsProps {
-  proposals?: ProjectType[]; // Make proposals optional
+  proposals?: ProjectType[];
+  fullName: any;
+  contractorId:string;
 }
 
-export function DraftedProjectSection({ proposals = [] }: ProjectProposalsProps) {
+export function DraftedProjectSection({ fullName, contractorId, proposals = [] }: ProjectProposalsProps) {
   // Filter proposals to only include projects with status "awaiting_approval"
   const filteredProposals = proposals.filter(
     (proposal) => proposal.status === 'awaiting_approval'
@@ -23,8 +26,8 @@ export function DraftedProjectSection({ proposals = [] }: ProjectProposalsProps)
 
       if (response.status === 200) {
         console.log('Project status updated successfully:', response.data);
-        // Optionally, you can refresh the project list or update the UI
-        window.location.reload(); // Reload the page to reflect the updated status
+        await sendNotificationToUser(contractorId, "New Project", `Hey, ${fullName}, you have a new Project that you can check out`);
+        window.location.reload();
       } else {
         console.error('Failed to update project status:', response.data);
       }

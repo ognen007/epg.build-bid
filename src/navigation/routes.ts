@@ -24,7 +24,7 @@ export const routes = {
     // { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket, roles: ["ADMIN"] },
     { path: '/admin/takeoff/estimate', label: 'Takeoff', icon: PlaneTakeoff, roles:["ADMIN", "ESTIMATOR", 'PROJECTSPECIALIST', "CSM"] },
     { path: '/admin/estimator-assign', label: 'Estimator Assignment', icon: Webhook, roles: ['ADMIN']  },
-    { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'ESTIMATOR','PROJECTSPECIALIST', "CSM"]  },
+    // { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'ESTIMATOR','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
     { path: '/admin/analytics', label: 'Reports & Analytics', icon: LineChart, roles: ["ADMIN"] },
     { path: '/admin/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'ESTIMATOR', 'PROJECTSPECIALIST', "CSM"]  },
@@ -33,7 +33,7 @@ export const routes = {
     { path: '/client', label: 'Dashboard', icon: BarChart3 },
     { path: '/client/projects', label: 'Projects', icon: Briefcase },
     { path: '/client/contractors', label: 'Find Contractors', icon: Search },
-    { path: '/client/messages', label: 'Messages', icon: MessageCircle },
+    // { path: '/client/messages', label: 'Messages', icon: MessageCircle },
     { path: '/client/settings', label: 'Settings', icon: Settings },
   ],
   contractor: [
@@ -42,7 +42,7 @@ export const routes = {
     { path: '/contractor/tasks', label: 'Tasks', icon: Waypoints },
     // { path: '/contractor/find-work', label: 'Find Work', icon: Hammer },
     { path: '/contractor/earnings', label: 'Earnings', icon: Wallet },
-    { path: '/contractor/messages', label: 'Messages', icon: MessageCircle },
+    // { path: '/contractor/messages', label: 'Messages', icon: MessageCircle },
     { path: '/contractor/settings', label: 'Settings', icon: Settings },
   ]
 };

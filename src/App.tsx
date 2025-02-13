@@ -8,9 +8,11 @@ import { ClientLayout } from './layouts/ClientLayout';
 import { ContractorLayout } from './layouts/ContractorLayout';
 import { ProtectedRoute } from './views/auth/ProtectedRoute';
 import { PublicRoute } from './views/auth/PublicRoute';
+import { Theme } from '@radix-ui/themes';
 
 export function App() {
   return (
+    <Theme>
     <AuthProvider>
       <Router>
       <Routes>
@@ -73,5 +75,6 @@ export function App() {
 
       </Router>
     </AuthProvider>
+    </Theme>
   );
 }

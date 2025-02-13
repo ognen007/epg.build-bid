@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { JobCard } from '../../components/contractor/find-work/JobCard';
 import { JobFilters } from '../../components/contractor/find-work/JobFilters';
 import { SubmittedBids } from '../../components/contractor/find-work/SubmittedBids';
+import { Skeleton } from '@radix-ui/themes';
 
 const sampleJobs = [
   {
@@ -28,7 +29,7 @@ const sampleBids = [
   // Add more sample bids
 ];
 
-export function FindWorkView() {
+export function FindWorkView({ loading }: { loading: boolean }) {
   const [filters, setFilters] = useState({
     search: '',
     budgetRange: { min: 0, max: 0 },
@@ -42,30 +43,36 @@ export function FindWorkView() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Find Work</h1>
+      {loading ? (
+        <>
+        <Skeleton className="w-full h-10 bg-gray-300 rounded-md" />
+        </>
+      ):(
+        <>      <h1 className="text-2xl font-semibold text-gray-900">Find Work</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <JobFilters
-            filters={filters}
-            onFilterChange={setFilters}
-          />
-        </div>
-        
-        <div className="lg:col-span-3 space-y-6">
-          <div className="grid gap-4">
-            {sampleJobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onSubmitProposal={handleSubmitProposal}
-              />
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1">
+            <JobFilters
+              filters={filters}
+              onFilterChange={setFilters}
+            />
           </div>
           
-          <SubmittedBids bids={sampleBids} />
-        </div>
-      </div>
+          <div className="lg:col-span-3 space-y-6">
+            <div className="grid gap-4">
+              {sampleJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onSubmitProposal={handleSubmitProposal}
+                />
+              ))}
+            </div>
+            
+            <SubmittedBids bids={sampleBids} />
+          </div>
+        </div></>
+      )}
     </div>
   );
 }

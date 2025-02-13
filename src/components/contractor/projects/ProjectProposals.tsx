@@ -1,5 +1,6 @@
 import { Calendar, X, Check } from 'lucide-react';
 import { ProjectType } from '../../../types/project';
+import { NoProposal } from '../components/holders/NoProposal';
 
 interface ProjectProposalsProps {
   proposals?: ProjectType[]; // Make proposals optional
@@ -19,9 +20,16 @@ export function ProjectProposals({ onAccept, onDecline, proposals = [] }: Projec
   // Log the filtered proposals
   console.log('Filtered Proposals:', filteredProposals);
 
+  if (filteredProposals.length === 0) {
+    return <>
+    <h2 className="text-2xl font-semibold text-gray-900">Project Proposals</h2>
+    <NoProposal label='No Proposal at the moment'/>
+    </>;
+  }
+
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Project Proposals</h2>
+      <h2 className="text-2xl font-semibold text-gray-900">Project Proposals</h2>
       <div className="grid gap-4">
         {filteredProposals.map((proposal) => (
           <div

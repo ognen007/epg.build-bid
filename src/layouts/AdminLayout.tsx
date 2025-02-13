@@ -30,6 +30,21 @@ export function AdminLayout() {
   const [fullName, setFullName] = useState('');
   const { user } = useAuthContext();
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        window.location.reload();
+      }
+    };
+  
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+  
+  
   // Determine which routes to use based on the user's role
   const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'ESTIMATOR' ? routes.admin.filter(route => route.roles?.includes('ESTIMATOR')) : [];
 

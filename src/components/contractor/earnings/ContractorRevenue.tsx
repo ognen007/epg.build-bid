@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Eye, X } from 'lucide-react';
+import { NoProjects } from '../components/holders/NoProjectsTable';
 
 interface Project {
   id: string;
@@ -262,7 +263,14 @@ export function ContractorRevenue() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredProjects.map((project) => (
+            {filteredProjects.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center py-4 text-gray-500">
+                  <NoProjects label='No Projects Available'/>
+                </td>
+              </tr>
+            ) : (
+              filteredProjects.map((project) => (
                 <tr key={project.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {project.name}
@@ -282,8 +290,9 @@ export function ContractorRevenue() {
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
           </table>
         </div>
       </div>

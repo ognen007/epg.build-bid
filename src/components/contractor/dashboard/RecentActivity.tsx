@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { MessageSquare, CheckCircle, Clock } from 'lucide-react';
+import { MessageSquare, CheckCircle, Clock, HardHat } from 'lucide-react';
 import axios from 'axios';
+import { ContractorCardHolder } from '../components/holders/ContractorCardHolder';
 
 interface Activity {
   id: string;
@@ -109,26 +110,6 @@ export function RecentActivity() {
     fetchRecentActivities();
   }, [contractorId]);
 
-  // Skeleton loader component
-  const SkeletonLoader = () => (
-    <div className="space-y-4 p-6">
-      {[...Array(3)].map((_, index) => (
-        <div key={index} className="flex items-start space-x-3">
-          <div
-            className="p-2 rounded-full bg-gray-300 animate-pulse"
-            style={{ width: '24px', height: '24px' }}
-          />
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-300 animate-pulse" style={{ width: '150px' }} />
-            <div className="h-3 bg-gray-200 animate-pulse" style={{ width: '100px' }} />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  if (loading) return <SkeletonLoader />;
-
   if (error) {
     return (
       <div className="bg-white border border-red-500 text-red-500 p-6 rounded-xl">
@@ -140,10 +121,10 @@ export function RecentActivity() {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
       <div className="space-y-4">
         {activities.length === 0 ? (
-          <p>No recent activities.</p>
+          <ContractorCardHolder label={"There are no activities at the moment"}/>
         ) : (
           activities.map((activity) => {
             const Icon = iconMap[activity.type];

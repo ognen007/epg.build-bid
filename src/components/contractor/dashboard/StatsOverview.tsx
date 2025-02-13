@@ -67,17 +67,6 @@ export function StatsOverview() {
     fetchStats();
   }, []);
 
-  // Skeleton loader for loading state
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[1, 2, 3].map((_, index) => (
-          <Skeleton key={index} />
-        ))}
-      </div>
-    );
-  }
-
   // Error state
   if (error) {
     return <div className="text-red-600">Error: {error}</div>;
@@ -88,26 +77,6 @@ export function StatsOverview() {
       {stats.map((stat) => (
         <StatCard key={stat.title} {...stat} />
       ))}
-    </div>
-  );
-}
-
-// Skeleton Loader Component
-function Skeleton() {
-  return (
-    <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm animate-pulse">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 sm:space-x-4">
-          <div className="p-2 bg-gray-200 rounded-lg flex-shrink-0">
-            <div className="h-5 w-5 sm:h-6 sm:w-6 bg-gray-300 rounded-full" />
-          </div>
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-3/4" />
-            <div className="h-6 bg-gray-200 rounded w-1/2" />
-          </div>
-        </div>
-        <div className="h-4 bg-gray-200 rounded w-1/4" />
-      </div>
     </div>
   );
 }

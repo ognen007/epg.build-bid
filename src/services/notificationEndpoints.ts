@@ -1,6 +1,6 @@
 export const markNotificationAsRead = async (notificationId: string) => {
   try {
-    const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/read/${notificationId}`, {
+    const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/mark-as-read/${notificationId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

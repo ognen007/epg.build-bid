@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ContractorRevenue } from '../../components/contractor/earnings/ContractorRevenue';
 import { EarningsOverview } from '../../components/contractor/earnings/EarningsOverview';
 import { ProjectType } from '../../types/project';
+import { LoadingCircle } from '../../components/contractor/components/holders/LoadingCircle';
 
 interface ContractorDetails {
   id: string;
@@ -17,9 +18,8 @@ interface ContractorDetails {
   projects: ProjectType[];
 }
 
-export function ContractorEarnings() {
+export function ContractorEarnings({ loading }: { loading: boolean }) {
   const [contractorData, setContractorData] = useState<ContractorDetails | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [contractorId, setContractorId] = useState<string>("");
 
@@ -29,7 +29,6 @@ export function ContractorEarnings() {
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
           setError('User not found');
-          setLoading(false);
           return;
         }
 
@@ -58,7 +57,6 @@ export function ContractorEarnings() {
       } catch (error) {
         console.error('Error fetching contractor ID:', error);
         setError('Failed to fetch contractor ID');
-        setLoading(false);
       }
     };
 
@@ -80,24 +78,18 @@ export function ContractorEarnings() {
       } catch (error) {
         console.error('Error fetching contractor data:', error);
         setError('Failed to fetch contractor data');
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchContractorData();
   }, [contractorId]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (error) {
     return <div>{error}</div>;
   }
 
   if (!contractorData) {
-    return <div>No data available</div>;
+    return <LoadingCircle label='Loading....'/>
   }
 
   // Calculate stats for EarningsOverview
@@ -109,13 +101,21 @@ export function ContractorEarnings() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Earnings</h1>
+      {loading ? (
+        <>
+          <LoadingCircle label='Loading....'/>
+        </>
+      ):(
+        <>
+        <h1 className="text-2xl font-semibold text-gray-900">Earnings</h1>
       
-      {/* Pass the fetched stats to EarningsOverview */}
-      <EarningsOverview stats={stats} />
-  
-      {/* Pass the fetched projects to ContractorRevenue */}
-      <ContractorRevenue projects={contractorData.projects} />
+        {/* Pass the fetched stats to EarningsOverview */}
+        <EarningsOverview stats={stats} />
+    
+        {/* Pass the fetched projects to ContractorRevenue */}
+        <ContractorRevenue projects={contractorData.projects} />
+        </>
+      )}
     </div>
   );
 }

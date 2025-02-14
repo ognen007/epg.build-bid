@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { AdminUser } from '../../../types/admin';
-import { updateAdminUser } from '../../../services/adminService';
 
 interface EditUserModalProps {
   user: AdminUser;
@@ -26,14 +25,14 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
     setLoading(true);
 
     try {
-      const { error: updateError } = await updateAdminUser(user.id, {
-        full_name: formData.full_name,
-        email: formData.email,
-        role: formData.role,
-        password: formData.password || undefined
-      });
+      // const { error: updateError } = await updateAdminUser(user.id, {
+      //   full_name: formData.full_name,
+      //   email: formData.email,
+      //   role: formData.role,
+      //   password: formData.password || undefined
+      // });
 
-      if (updateError) throw updateError;
+      // if (updateError) throw updateError;
 
       onSuccess();
       onClose();
@@ -110,7 +109,6 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
                 <option value="admin">Admin</option>
                 <option value="projectspecialist">Project Specialist</option>
                 <option value="csm">CSM</option>
-                <option value="estimator">Estimator</option>
               </select>
             </div>
 

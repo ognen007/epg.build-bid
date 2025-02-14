@@ -47,7 +47,7 @@ export function App() {
   <Route
     path="/admin/*"
     element={
-      <ProtectedRoute allowedRoles={['ADMIN', 'CSM', 'PROJECTSPECIALIST', 'ESTIMATOR']}>
+      <ProtectedRoute allowedRoles={['ADMIN', 'CSM', 'PROJECTSPECIALIST']}>
         <AdminLayout />
       </ProtectedRoute>
     }

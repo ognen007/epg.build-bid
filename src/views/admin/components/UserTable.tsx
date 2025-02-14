@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { Edit2, Trash2 } from 'lucide-react';
+import { AdminUser } from '../../../types/admin';
 
 interface User {
   id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
+  role: AdminUser['role'];
   createdAt: string;
 }
 

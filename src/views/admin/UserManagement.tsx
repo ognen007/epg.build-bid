@@ -5,12 +5,13 @@ import { UserTable } from './components/UserTable';
 import { UserFilters } from './components/UserFilters';
 import { AddUserModal } from '../../components/admin/users/AddUserModal';
 import { EditAdminUser } from './EditAdminUser';
+import { AdminUser } from '../../types/admin';
 
 interface User {
   id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
+  role: AdminUser['role'];
   createdAt: string;
 }
 
@@ -51,14 +52,14 @@ export function UserManagement() {
   const handleAddUser = async (userData: {
     email: string;
     fullName: string;
-    role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
+    role: AdminUser['role'];
   }) => {
     setError('');
     try {
       await axios.post('https://epg-backend.onrender.com/api/admin/register', {
         fullName: userData.fullName,
         email: userData.email,
-        role: userData.role.toUpperCase(),
+        role: userData.role,
       });
 
       await loadUsers();
@@ -89,14 +90,13 @@ export function UserManagement() {
 
   const filteredUsers = users.filter((user) => {
     const searchLower = searchQuery.toLowerCase();
-    const roleLower = roleFilter.toUpperCase();
 
     const matchesSearch =
       !searchQuery ||
       user.fullName.toLowerCase().includes(searchLower) ||
       user.email.toLowerCase().includes(searchLower);
 
-    const matchesRole = !roleFilter || user.role === roleLower;
+    const matchesRole = !roleFilter || user.role;
 
     return matchesSearch && matchesRole;
   });

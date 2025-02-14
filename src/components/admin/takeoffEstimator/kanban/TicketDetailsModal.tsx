@@ -7,9 +7,7 @@ interface Project {
   name: string;
   contractor: string;
   scope: string | null;
-  estimator: string;
   takeoff: string | null;
-  estimatorNotes: string | null;
   blueprints: string | null;
 }
 
@@ -71,8 +69,6 @@ export const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({ projectI
       const formData = new FormData();
       formData.append('contractor', editedProject.contractor);
       formData.append('scope', editedProject.scope || '');
-      formData.append('estimator', editedProject.estimator);
-      formData.append('estimatorNotes', editedProject.estimatorNotes || '');
 
       if (file) {
         formData.append('takeoff', file);
@@ -154,16 +150,6 @@ export const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({ projectI
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Estimator</label>
-                <input
-                  type="text"
-                  name="estimator"
-                  value={editedProject.estimator}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700">Blueprints</label>
                 {project.blueprints ? (
                   <a
@@ -201,15 +187,6 @@ export const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({ projectI
                     )}
                   </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Estimator Notes</label>
-                <textarea
-                  name="estimatorNotes"
-                  value={editedProject.estimatorNotes || ''}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                />
               </div>
             </div>
 

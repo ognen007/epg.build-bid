@@ -9,26 +9,22 @@ import { AdminDashboard } from '../views/admin/AdminDashboard';
 import { UserManagement } from '../views/admin/UserManagement';
 import { AdminMessages } from '../views/admin/AdminMessages';
 import { Analytics } from '../views/admin/Analytics';
-import { PlatformSettings } from '../views/admin/PlatformSettings';
-import { SupportTickets } from '../views/admin/SupportTickets';
 import { AdminSettings } from '../views/admin/AdminSettings';
 import { RevenueComponent } from '../components/admin/analytics/RevenueComponent';
 import { UserGrowthComponent } from '../components/admin/analytics/UserGrowthComponent';
 import { RevenueDetails } from '../components/admin/analytics/RevenueDetails';
 import { ProjectKanbanView } from '../components/admin/projects/ProjectKanbanView';
-import { TakeoffView } from '../components/admin/takeoff/TakeoffView';
 import { ContractorPipeline } from '../views/admin/components/contractorpipeline/ContractorPipeline';
 import { useAuthContext } from '../views/auth/useAuthContext';
 import { routes } from '../navigation/routes';
-import { EstimatorKanban } from '../components/admin/takeoffEstimator/kanban/ProjectKanbanView';
 import { ProjectManagement } from '../views/admin/ProjectManagement';
-import { AdminEstimator } from '../views/admin/components/AdminEstimator';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [fullName, setFullName] = useState('');
   const { user } = useAuthContext();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -46,7 +42,7 @@ export function AdminLayout() {
   
   
   // Determine which routes to use based on the user's role
-  const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'ESTIMATOR' ? routes.admin.filter(route => route.roles?.includes('ESTIMATOR')) : [];
+   const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'PROJECTSPECIALIST' ? routes.admin.filter(route => route.roles?.includes('PROJECTSPECIALIST')) : [];
 
   useEffect(() => {
     const fetchFullNameByEmail = async () => {
@@ -117,72 +113,18 @@ export function AdminLayout() {
             {/* Admin Routes */}
             {user?.role === 'ADMIN' && (
               <>
-                <Route path="/" element={<AdminDashboard />} />
-                <Route path="/users" element={<UserManagement />} />
-                <Route path="/projects/:id" element={<ProjectKanbanView />} />
+                <Route path="/" element={<AdminDashboard/>} />
+                <Route path="/users" element={<UserManagement/>} />
+                <Route path="/projects/:id" element={<ProjectKanbanView/>} />
                 <Route path="/projects/" element={<ProjectManagement />} />
-                <Route path="/messages" element={<AdminMessages />} />
+                {/* <Route path="/messages" element={<AdminMessages loading={loading}/>} /> */}
                 <Route path="/analytics" element={<Analytics />} />
-                <Route path="/platform-settings" element={<PlatformSettings />} />
-                <Route path="/support" element={<SupportTickets />} />
-                <Route path="/settings" element={<AdminSettings />} />
+                <Route path="/settings" element={<AdminSettings/>} />
                 <Route path="/analytics/revenue" element={<RevenueComponent />} />
                 <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
                 <Route path="/analytics/users" element={<UserGrowthComponent />} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />
-                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
-                <Route path="/estimator-assign" element={<AdminEstimator/>}/>
-              </>
-            )}
-
-{user?.role === 'PROJECTSPECIALIST' && (
-              <>
-                <Route path="/" element={<AdminDashboard />} />
-                <Route path="/users" element={<UserManagement />} />
-                <Route path="/projects/:id" element={<ProjectKanbanView />} />
-                <Route path="/projects/" element={<ProjectManagement />} />
-                <Route path="/messages" element={<AdminMessages />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/platform-settings" element={<PlatformSettings />} />
-                <Route path="/support" element={<SupportTickets />} />
-                <Route path="/settings" element={<AdminSettings />} />
-                <Route path="/analytics/revenue" element={<RevenueComponent />} />
-                <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
-                <Route path="/analytics/users" element={<UserGrowthComponent />} />
-                <Route path="/pipeline" element={<ContractorPipeline />} />
-                <Route path="/pipeline/:id" element={<ContractorPipeline />} />
-                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
-              </>
-            )}
-
-{user?.role === 'CSM' && (
-              <>
-                <Route path="/" element={<AdminDashboard />} />
-                <Route path="/users" element={<UserManagement />} />
-                <Route path="/projects/:id" element={<ProjectKanbanView />} />
-                <Route path="/projects/" element={<ProjectManagement />} />
-                <Route path="/messages" element={<AdminMessages />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/platform-settings" element={<PlatformSettings />} />
-                <Route path="/support" element={<SupportTickets />} />
-                <Route path="/settings" element={<AdminSettings />} />
-                <Route path="/analytics/revenue" element={<RevenueComponent />} />
-                <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
-                <Route path="/analytics/users" element={<UserGrowthComponent />} />
-                <Route path="/pipeline" element={<ContractorPipeline />} />
-                <Route path="/pipeline/:id" element={<ContractorPipeline />} />
-                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
-              </>
-            )}
-
-            {/* Estimator Routes */}
-            {user?.role === 'ESTIMATOR' && (
-              <>
-                <Route path="/" element={<AdminDashboard />} />
-                <Route path="/messages" element={<AdminMessages />} />
-                <Route path="/settings" element={<AdminSettings />} />
-                <Route path="/takeoff/estimate" element={<EstimatorKanban/>} />
               </>
             )}
           </Routes>

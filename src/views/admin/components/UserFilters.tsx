@@ -41,10 +41,9 @@ export function UserFilters({
   onChange={(e) => onRoleChange(e.target.value)}
 >
   <option value="">All Roles</option>
-  <option value="admin">Admin</option>
-  <option value="projectspecialist">Project Specialist</option>
-  <option value="csm">CSM</option>
-  <option value="estimator">Estimator</option>
+  <option value="ADMIN">Admin</option>
+  <option value="PROJECTSPECIALIST">Project Specialist</option>
+  <option value="CSM">CSM</option>
 </select>
 
       </div>

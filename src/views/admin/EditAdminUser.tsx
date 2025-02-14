@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import { AdminUser } from '../../types/admin';
 
 interface User {
   id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
+  role: AdminUser['role'];
   createdAt: string;
 }
 

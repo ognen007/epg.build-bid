@@ -19,8 +19,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
     valuation: '',
     description: '',
     highIntent: false,
-    estimator: '',
-    estimatorNotes: '',
     blueprintsFile: null as File | null,
   });
 
@@ -63,8 +61,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
       formDataToSend.append('valuation', formData.valuation);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('highIntent', String(formData.highIntent));
-      formDataToSend.append('estimator', formData.estimator);
-      formDataToSend.append('estimatorNotes', formData.estimatorNotes);
       if (formData.blueprintsFile) {
         formDataToSend.append('blueprintsFile', formData.blueprintsFile);
       }
@@ -88,8 +84,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
         valuation: '',
         description: '',
         highIntent: false,
-        estimator: '',
-        estimatorNotes: '',
         blueprintsFile: null,
       });
       setShowDropdown(false);
@@ -276,29 +270,6 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 <option value="gc_bidding">GC Bidding</option>
                 <option value="sub_bidding">Sub Bidding</option>
               </select>
-            </div>
-
-            {/* Estimator */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Estimator</label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.estimator}
-                onChange={(e) => setFormData({ ...formData, estimator: e.target.value })}
-              />
-            </div>
-
-            {/* Estimator Notes */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Estimator Notes</label>
-              <textarea
-                placeholder="Enter estimator notes..."
-                rows={4}
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                value={formData.estimatorNotes}
-                onChange={(e) => setFormData({ ...formData, estimatorNotes: e.target.value })}
-              />
             </div>
 
             {/* High Intent */}

@@ -1,33 +1,30 @@
 import { 
   BarChart3, 
   Users, 
-  Table2, 
+  BetweenHorizontalStart, 
   MessageCircle,
-  Shell,
+  Layers,
   Settings,
   Briefcase,
-  LineChart,
+  Text,
   Search,
+  GitGraph,
   Waypoints,
   Wallet,
-  PlaneTakeoff,
-  Webhook
 } from 'lucide-react';
 
 export const routes = {
   admin: [
-    { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['ADMIN', 'ESTIMATOR', 'PROJECTSPECIALIST', "CSM"] },
+    { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"] },
     { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN", 'PROJECTSPECIALIST'] },
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
-    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Shell, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
-    { path: '/admin/projects', label: 'Projects', icon: Table2, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
+    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Layers, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
+    { path: '/admin/projects', label: 'Projects', icon: BetweenHorizontalStart, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
     // { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket, roles: ["ADMIN"] },
-    { path: '/admin/takeoff/estimate', label: 'Takeoff', icon: PlaneTakeoff, roles:["ADMIN", "ESTIMATOR", 'PROJECTSPECIALIST', "CSM"] },
-    { path: '/admin/estimator-assign', label: 'Estimator Assignment', icon: Webhook, roles: ['ADMIN']  },
-    // { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'ESTIMATOR','PROJECTSPECIALIST', "CSM"]  },
+    // { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
-    { path: '/admin/analytics', label: 'Reports & Analytics', icon: LineChart, roles: ["ADMIN"] },
-    { path: '/admin/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'ESTIMATOR', 'PROJECTSPECIALIST', "CSM"]  },
+    { path: '/admin/analytics', label: 'Reports & Analytics', icon: GitGraph, roles: ["ADMIN"] },
+    { path: '/admin/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"]  },
   ],
   client: [
     { path: '/client', label: 'Dashboard', icon: BarChart3 },

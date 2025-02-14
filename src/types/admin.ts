@@ -2,7 +2,7 @@ export interface AdminUser {
   id: string;
   full_name: string;
   email: string;
-  role: 'admin' | 'projectspecialist' | 'csm' | 'estimator';
+  role: 'ADMIN' | 'PROJECTSPECIALIST' | 'CSM';
   created_at: string;
 }
 
@@ -11,4 +11,4 @@ export interface AdminUserUpdate {
   email: string;
   role: AdminUser['role'];
   password?: string;
-}
+} ///////

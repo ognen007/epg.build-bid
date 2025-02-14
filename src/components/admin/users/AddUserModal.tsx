@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { AdminUser } from '../../../types/admin';
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ export function AddUserModal({ isOpen, onClose, onAdd }: AddUserModalProps) {
     fullName: '',
     email: '',
     password: '',
-    role: 'ADMIN' as 'ADMIN' | 'PROJECTSPECIALIST' | 'CSM' | 'ESTIMATOR',
+    role: 'ADMIN' as AdminUser['role'],
   });
 
   if (!isOpen) return null;
@@ -83,14 +84,13 @@ export function AddUserModal({ isOpen, onClose, onAdd }: AddUserModalProps) {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    role: e.target.value as 'admin' | 'projectspecialist' | 'csm' | 'estimator',
+                    role: e.target.value as AdminUser['role'],
                   })
                 }
               >
-                <option value="admin">Admin</option>
-                <option value="projectspecialist">Project Specialist</option>
-                <option value="csm">CSM</option>
-                <option value="estimator">Estimator</option>
+                <option value="ADMIN">Admin</option>
+                <option value="PROJECTSPECIALIST">Project Specialist</option>
+                <option value="CSM">CSM</option>
               </select>
             </div>
 

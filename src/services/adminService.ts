@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { AdminUser } from '../types/admin';
 
 export async function loginAdmin(email: string) {
   try {
@@ -42,7 +43,7 @@ export async function getAdminUsers() {
 export async function createAdminUser(userData: {
   email: string;
   full_name: string;
-  role: 'ADMIN' | 'PROJECTSPECIALIST' | 'CSM' | 'ESTIMATOR';
+  role: AdminUser['role'];
 }) {
   try {
     const response = await axios.post(

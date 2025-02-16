@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { ProjectTable } from '../../components/admin/projects/ProjectTable';
 import { ProjectFilters } from '../../components/admin/projects/ProjectFilters';
 import { AddProjectModal } from '../../components/admin/projects/AddProjectModal';
 import { ProjectType } from '../../types/project';
 import { Plus } from 'lucide-react';
+import { fetchProjects } from '../../services/admin/projects/fetchProjectsEndpoint';
 
 export function ProjectManagement() {
   const [projects, setProjects] = useState<ProjectType[]>([]);
@@ -20,42 +20,21 @@ export function ProjectManagement() {
   const [error, setError] = useState(''); // Add error state
 
   useEffect(() => {
-    async function fetchProjects() {
-      setLoading(true); // Set loading to true when fetching starts
-      setError(''); // Clear any previous errors
+    async function loadProjects() {
+      setLoading(true);
+      setError('');
       try {
-        const response = await axios.get('https://epg-backend.onrender.com/api/project/display');
-        const data = response.data.projects;
-
-        if (Array.isArray(data)) {
-          const formattedProjects: ProjectType[] = data.map((project: any) => ({
-            id: project.id,
-            name: project.name,
-            contractor: project.contractor || null,
-            status: project.status,
-            stage: project.stage || '', // Ensure stage is included
-            valuation: project.valuation,
-            deadline: new Date(project.deadline).toISOString(),
-          }));
-
-          setProjects(formattedProjects);
-        } else {
-          throw new Error('Expected an array but got something else');
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        const errorMessage =
-          axios.isAxiosError(error) && error.response?.data?.message
-            ? error.response.data.message
-            : error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred';
-        setError(errorMessage); // Set the error message
+        const fetchedProjects = await fetchProjects();
+        setProjects(fetchedProjects);
+      } catch (error: any) {
+        console.error("Error loading projects:", error);
+        setError(error.message); // Set error message from service
+      } finally {
+        setLoading(false);
       }
-      setLoading(false); // Set loading to false when fetching is done
     }
 
-    fetchProjects();
+    loadProjects();
   }, []);
 
   // Filter projects based on filters

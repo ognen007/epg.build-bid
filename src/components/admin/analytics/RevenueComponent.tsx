@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { fetchContractorsRevenue } from '../../../services/admin/contractors/revenueEndpoint';
 
 interface Contractor {
   id: string;
@@ -22,24 +23,18 @@ export function RevenueComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch contractors data from the backend
   useEffect(() => {
-    const fetchData = async () => {
+    const loadContractors = async () => {
       try {
-        const response = await fetch('https://epg-backend.onrender.com/api/contractor-information');
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const data: Contractor[] = await response.json();
+        const data = await fetchContractorsRevenue();
         setContractors(data);
       } catch (error) {
-        setError(error instanceof Error ? error.message : 'An error occurred');
+        setError(error instanceof Error ? error.message : "An error occurred");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    loadContractors();
   }, []);
 
   // Filter contractors based on search query

@@ -3,6 +3,7 @@ import { DollarSign, ArrowRight } from 'lucide-react';
 import { MetricHeader } from './MetricHeader';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { fetchRevenueData } from '../../../services/admin/contractors/revenueEndpoint';
 
 // Define the structure of the monthly data
 interface MonthlyData {
@@ -32,30 +33,8 @@ export function RevenueChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch data from the backend API
-        const response = await fetch('https://epg-backend.onrender.com/api/project/sum');
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const result: ApiResponse = await response.json();
-
-        // Parse the API response
-        const currentMonthValuation = parseFloat(result.data.currentMonthValuation);
-        const previousMonthValuation = parseFloat(result.data.previousMonthValuation);
-        const percentageIncrease = parseFloat(result.data.percentageIncrease);
-
-        // Generate monthly data for the chart
-        const monthlyData = [
-          { month: 'Previous Month', revenue: previousMonthValuation },
-          { month: 'Current Month', revenue: currentMonthValuation },
-        ];
-
-        // Update state
-        setData({
-          totalRevenue: currentMonthValuation,
-          growth: percentageIncrease,
-          monthlyData,
-        });
+        const revenueData = await fetchRevenueData();
+        setData(revenueData);
       } catch (error) {
         console.error('Error fetching revenue data:', error);
       } finally {

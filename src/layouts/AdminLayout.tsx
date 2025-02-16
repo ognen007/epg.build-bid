@@ -18,6 +18,7 @@ import { ContractorPipeline } from '../views/admin/components/contractorpipeline
 import { useAuthContext } from '../views/auth/useAuthContext';
 import { routes } from '../navigation/routes';
 import { ProjectManagement } from '../views/admin/ProjectManagement';
+import { fetchAdminNameByEmail } from '../services/admin/adminInfo/adminInformationEndpoint';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -44,32 +45,21 @@ export function AdminLayout() {
   // Determine which routes to use based on the user's role
    const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'PROJECTSPECIALIST' ? routes.admin.filter(route => route.roles?.includes('PROJECTSPECIALIST')) : [];
 
-  useEffect(() => {
-    const fetchFullNameByEmail = async () => {
+   useEffect(() => {
+    async function loadFullName() {
       try {
+        setLoading(true);
         const storedUser = localStorage.getItem('user');
         if (!storedUser) return setFullName('Admin User');
 
         const { email } = JSON.parse(storedUser);
-
-        const response = await fetch(
-          `https://epg-backend.onrender.com/api/admin/name-by-email?email=${email}`
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setFullName(data.fullName || 'Admin User');
-        } else {
-          console.error('Error fetching full name:', response.statusText);
-          setFullName('Admin User');
-        }
-      } catch (error) {
-        console.error('Error fetching full name:', error);
-        setFullName('Admin User');
+        const name = await fetchAdminNameByEmail(email); 
+        setFullName(name);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    fetchFullNameByEmail();
+    }
+    loadFullName();
   }, []);
 
   return (

@@ -12,6 +12,8 @@ import { FindWorkView } from "../views/contractor/FindWorkView";
 import { ContractorEarnings } from "../views/contractor/ContractorEarnings";
 import { ContractorSettings } from "../views/contractor/ContractorSettings";
 import { ContractorTasks } from "../views/contractor/ContractorTasks";
+import { fetchContractorId } from "../services/contractor/contractorData/contractorIdEndpoint";
+import { fetchContractorNameByEmail } from "../services/contractor/contractorData/contractorFetchEmail";
 
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,63 +36,35 @@ export function ContractorLayout() {
   }, []);
 
   useEffect(() => {
-    const fetchFullNameByEmail = async () => {
+    async function loadFullName() {
       try {
         setLoading(true);
         const storedUser = localStorage.getItem("user");
         if (!storedUser) return setFullName("Contractor User");
 
         const { email } = JSON.parse(storedUser);
-        const response = await fetch(
-          `https://epg-backend.onrender.com/api/contractor/name-by-email?email=${email}`
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setFullName(data.fullName || "Admin User");
-        } else {
-          console.error("Error fetching full name:", response.statusText);
-          setFullName("Admin User");
-        }
-      } catch (error) {
-        console.error("Error fetching full name:", error);
-        setFullName("Admin User");
+        const name = await fetchContractorNameByEmail(email);
+        setFullName(name);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchFullNameByEmail();
+    }
+    loadFullName();
   }, []);
 
-  const fetchContractorId = useCallback(async () => {
+  const loadContractorId = useCallback(async () => {
     try {
-      setLoading(true);
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) throw new Error("User not found");
-
-      const { email } = JSON.parse(storedUser);
-      const { data: contractors } = await axios.get(
-        "https://epg-backend.onrender.com/api/contractor/id"
-      );
-
-      const loggedInContractor = contractors.find(
-        (contractor: any) => contractor.email === email
-      );
-
-      if (!loggedInContractor) throw new Error("Contractor not found");
-
-      setContractorId(loggedInContractor.id);
+      const id = await fetchContractorId();
+      setContractorId(id);
     } catch (err) {
-      console.error("Error fetching contractor ID:", err);
-    } finally {
+      console.error('Error fetching contractor ID:', err);
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchContractorId();
-  }, [fetchContractorId]);
+    loadContractorId();
+  }, [loadContractorId]);
 
   return (
     <div className="flex h-screen bg-gray-50">

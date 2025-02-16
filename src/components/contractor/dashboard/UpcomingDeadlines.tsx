@@ -2,8 +2,10 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Calendar, Clock } from "lucide-react";
 import { Deadline } from "../components/holders/Deadline";
+import { fetchContractorId } from "../../../services/contractor/contractorData/contractorIdEndpoint";
+import { fetchUpcomingDeadlines } from "../../../services/contractor/dashboard/upcomingDeadlinesEndpoint";
 
-interface Deadline {
+export interface Deadline {
   id: string;
   project: string;
   task: string;
@@ -17,72 +19,40 @@ export function UpcomingDeadlines() {
   const [error, setError] = useState<string | null>(null);
   const [contractorId, setContractorId] = useState<string | null>(null);
 
-  // Fetch contractor ID
-  const fetchContractorId = useCallback(async () => {
+  const loadContractorId = useCallback(async () => {
     try {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) throw new Error("User not found");
-
-      const { email } = JSON.parse(storedUser);
-      const { data: contractors } = await axios.get(
-        "https://epg-backend.onrender.com/api/contractor/id"
-      );
-
-      const loggedInContractor = contractors.find(
-        (contractor: any) => contractor.email === email
-      );
-
-      if (!loggedInContractor) throw new Error("Contractor not found");
-
-      setContractorId(loggedInContractor.id);
+      const id = await fetchContractorId();
+      setContractorId(id);
     } catch (err) {
-      console.error("Error fetching contractor ID:", err);
+      console.error('Error fetching contractor ID:', err);
       setError((err as Error).message);
+      setLoading(false);
     }
   }, []);
 
-  // Fetch deadlines
-  const fetchDeadlines = useCallback(async () => {
-    if (!contractorId) return;
+  useEffect(() => {
+    async function loadDeadlines() {
+      if (!contractorId) return;
 
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `https://epg-backend.onrender.com/api/contractor/upcoming/deadlines/${contractorId}`
-      );
-
-      setDeadlines(
-        data.map((project: any) => {
-          const deadlineDate = new Date(project.deadline);
-          const today = new Date();
-          const daysLeft = Math.ceil(
-            (deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-          );
-
-          return {
-            id: project.id,
-            project: project.name,
-            task: project.description,
-            date: project.deadline,
-            daysLeft,
-          };
-        })
-      );
-    } catch (err) {
-      console.error("Error fetching deadlines:", err);
-      setError("Failed to load deadlines.");
-    } finally {
-      setLoading(false);
+      try {
+        setLoading(true);
+        const fetchedDeadlines = await fetchUpcomingDeadlines(contractorId);
+        setDeadlines(fetchedDeadlines);
+      } catch (err: any) {
+        console.error("Error fetching deadlines:", err);
+        setError(err.message); // Use the error message from the service
+      } finally {
+        setLoading(false);
+      }
     }
+
+    loadDeadlines();
   }, [contractorId]);
 
-  useEffect(() => {
-    fetchContractorId();
-  }, [fetchContractorId]);
 
   useEffect(() => {
-    if (contractorId) fetchDeadlines();
-  }, [contractorId, fetchDeadlines]);
+    loadContractorId();
+  }, [loadContractorId]);
 
   // Error UI
   if (error) {

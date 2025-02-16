@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, MoreVertical, MessageSquare, X } from 'lucide-react';
-import axios from 'axios';
+import { addCommentToTicket, createClientTask, createColumn, createInternalTask, fetchColumns, updateTicketColumn } from '../../../services/admin/kanban/kanbanEndpoint';
 
-const API_BASE_URL = 'https://epg-backend.onrender.com/api'; // Update with your backend URL
-
-interface Contractor {
+export interface Contractor {
   id: string;
   name: string;
   projects: Project[];
-}
+} 
 
-interface Project {
+export interface Project {
   id: string;
   name: string;
 }
 
-interface ClientTask {
+export interface ClientTask {
   id: string;
   type: 'client';
   title: string;
@@ -28,7 +26,7 @@ interface ClientTask {
   createdAt: string;
 }
 
-interface InternalTask {
+export interface InternalTask {
   id: string;
   type: 'internal';
   title: string;
@@ -37,16 +35,16 @@ interface InternalTask {
   createdAt: string;
 }
 
-type Ticket = ClientTask | InternalTask;
+export type Ticket = ClientTask | InternalTask;
 
-interface Comment {
+export interface Comment {
   id: string;
   content: string;
   author: string;
   createdAt: string;
 }
 
-interface Column {
+export interface Column {
   id: string;
   title: string;
   tickets: Ticket[];
@@ -78,7 +76,7 @@ const CLIENT_TASK_TYPES = [
   { value: 'required_documentation', label: 'Required Documentation' }
 ] as const;
 
-interface AddClientTaskModalProps {
+export interface AddClientTaskModalProps {
   onClose: () => void;
   onAdd: (task: Omit<ClientTask, 'id' | 'comments' | 'createdAt'>) => void;
 }
@@ -319,31 +317,29 @@ export function ProjectKanbanView() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newComment, setNewComment] = useState('');
 
-  // Fetch columns and tickets from the backend
   useEffect(() => {
-    const fetchColumns = async () => {
+    async function loadColumns() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/columns`);
-        setColumns(response.data);
+        const fetchedColumns = await fetchColumns(); // Call the service function
+        setColumns(fetchedColumns);
       } catch (error) {
-        console.error('Failed to fetch columns:', error);
+        console.error("Error loading columns in component:", error);
+        // Handle error, e.g., display a message to the user
       }
-    };
-    fetchColumns();
-  }, []);
+    }
+    loadColumns();
+  }, []); // Empty dependency array means this runs once on mount
 
-  // Add a new column
   const handleAddColumn = async () => {
     if (newColumnTitle.trim()) {
       try {
-        const response = await axios.post(`${API_BASE_URL}/columns`, {
-          title: newColumnTitle,
-        });
-        setColumns([...columns, response.data]);
+        const newColumn = await createColumn(newColumnTitle); // Call the service function
+        setColumns([...columns, newColumn]);
         setNewColumnTitle('');
         setIsAddingColumn(false);
       } catch (error) {
-        console.error('Failed to create column:', error);
+        console.error("Error creating column in component:", error);
+        // Handle error
       }
     }
   };
@@ -351,47 +347,31 @@ export function ProjectKanbanView() {
   // Add a new client task
   const handleAddClientTask = async (task: Omit<ClientTask, 'id' | 'comments' | 'createdAt'>) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/tickets`, {
-        type: 'client',
-        title: task.title,
-        description: task.description,
-        columnId: columns[0].id, // Add to the first column by default
-        contractor: task.contractor,
-        project: task.project,
-        taskType: task.taskType,
-      });
+      const newTicket = await createClientTask(task, columns[0].id); // Call the service function
       setColumns((prevColumns) =>
         prevColumns.map((col) =>
-          col.id === columns[0].id
-            ? { ...col, tickets: [...col.tickets, response.data] }
-            : col
+          col.id === columns[0].id ? { ...col, tickets: [...col.tickets, newTicket] } : col
         )
       );
       setIsAddingClientTask(false);
     } catch (error) {
-      console.error('Failed to create client task:', error);
+      console.error("Error creating client task in component:", error);
+      // Handle error
     }
   };
 
-  // Add a new internal task
   const handleAddInternalTask = async (task: Omit<InternalTask, 'id' | 'comments' | 'createdAt'>) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/tickets`, {
-        type: 'internal',
-        title: task.title,
-        description: task.description,
-        columnId: columns[0].id, // Add to the first column by default
-      });
+      const newTicket = await createInternalTask(task, columns[0].id); // Call the service function
       setColumns((prevColumns) =>
         prevColumns.map((col) =>
-          col.id === columns[0].id
-            ? { ...col, tickets: [...col.tickets, response.data] }
-            : col
+          col.id === columns[0].id ? { ...col, tickets: [...col.tickets, newTicket] } : col
         )
       );
       setIsAddingInternalTask(false);
     } catch (error) {
-      console.error('Failed to create internal task:', error);
+      console.error("Error creating internal task in component:", error);
+      // Handle error
     }
   };
 
@@ -404,9 +384,7 @@ export function ProjectKanbanView() {
     if (sourceColumnId === targetColumnId) return;
 
     try {
-      await axios.put(`${API_BASE_URL}/tickets/${ticketId}/column`, {
-        columnId: targetColumnId,
-      });
+      await updateTicketColumn(ticketId, targetColumnId);
 
       setColumns((prevColumns) =>
         prevColumns.map((col) => {
@@ -435,34 +413,31 @@ export function ProjectKanbanView() {
     }
   };
 
-  // Add a comment to a ticket
   const handleAddComment = async () => {
     if (!selectedTicket || !newComment.trim()) return;
-
+  
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/tickets/${selectedTicket.id}/comments`,
-        {
-          content: newComment,
-          author: 'Current User', // Replace with actual user name
-        }
-      );
-
+      const newCommentData = await addCommentToTicket(selectedTicket.id, newComment, 'Current User'); // Call the service function
+  
       setColumns((prevColumns) =>
         prevColumns.map((col) => ({
           ...col,
           tickets: col.tickets.map((ticket) =>
             ticket.id === selectedTicket.id
-              ? { ...ticket, comments: [...ticket.comments, response.data] }
+              ? { ...ticket, comments: [...ticket.comments, newCommentData]}
               : ticket
           ),
         }))
       );
       setNewComment('');
     } catch (error) {
-      console.error('Failed to add comment:', error);
+      console.error("Error adding comment in component:", error);
     }
   };
+
+  if (!columns || columns.length === 0) {
+    return <div>No columns to display.</div>; // Or a more informative message
+  }
 
   return (
     <div className="p-6">

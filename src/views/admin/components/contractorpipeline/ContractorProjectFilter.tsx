@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { fetchContractorsList } from '../../../../services/admin/contractors/contractorListEndpoint';
 
-interface Contractor {
+export interface Contractor {
   id: string;
   fullName: string; // Updated to match the API response
 }
@@ -16,25 +17,17 @@ export function ContractorFilters({ selectedContractorId, onSelect }: Contractor
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredContractors, setFilteredContractors] = useState<Contractor[]>([]);
 
-  // Fetch contractors from the backend
   useEffect(() => {
-    axios.get('https://epg-backend.onrender.com/api/contractors/name')
-      .then(response => {
-        // Log the response to verify its structure
-        console.log('API Response:', response.data);
-
-        // Ensure the response is an array
-        if (Array.isArray(response.data)) {
-          setContractors(response.data);
-        } else {
-          console.error('Invalid API response format:', response.data);
-          setContractors([]); // Fallback to empty array
-        }
-      })
-      .catch(err => {
-        console.error('Error fetching contractors:', err);
-        setContractors([]); // Fallback to empty array
-      });
+    async function loadContractors() {
+      try {
+        const fetchedContractors = await fetchContractorsList();
+        setContractors(fetchedContractors);
+      } catch (err: any) {
+        console.error("Error loading contractors", err);
+        console.error(err.message);
+      }
+    }
+    loadContractors();
   }, []);
 
   // Filter contractors based on search term

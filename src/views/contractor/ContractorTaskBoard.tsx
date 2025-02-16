@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
+import { fetchContractorId } from '../../services/contractor/contractorData/contractorIdEndpoint';
+import { addComment, fetchTasks, updateTaskStatus } from '../../services/contractor/projects/contractorTask';
 
 interface Task {
   id: string;
@@ -31,141 +32,80 @@ export function TasksBoard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [newComment, setNewComment] = useState('');
 
-  // Fetch contractor ID based on user email
-  useEffect(() => {
-    const fetchContractorId = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) {
-          setError('User not found');
-          setLoading(false);
-          return;
-        }
-
-        const user = JSON.parse(storedUser);
-        const { email } = user;
-
-        // Fetch all contractors from the backend
-        const response = await axios.get('https://epg-backend.onrender.com/api/contractor/id');
-        console.log('All Contractors:', response.data);
-
-        // Find the logged-in contractor by email
-        const loggedInContractor = response.data.find(
-          (contractor: any) => contractor.email === email
-        );
-
-        if (!loggedInContractor) {
-          throw new Error('Logged-in contractor not found');
-        }
-
-        // Set the contractor ID in the state
-        setContractorId(loggedInContractor.id);
-        console.log('Logged-in Contractor ID:', loggedInContractor.id);
-      } catch (error) {
-        console.error('Error fetching contractor ID:', error);
-        setError('Failed to fetch contractor ID');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContractorId();
+  const loadContractorId = useCallback(async () => {
+    try {
+      const id = await fetchContractorId();
+      setContractorId(id);
+    } catch (err) {
+      console.error('Error fetching contractor ID:', err);
+      setError((err as Error).message);
+      setLoading(false);
+    }
   }, []);
 
-  // Fetch tickets for the contractor
   useEffect(() => {
-    if (!contractorId) return; // Don't fetch tickets if contractorId is not set
+    loadContractorId();
+  }, [loadContractorId]);
 
-    const fetchTickets = async () => {
+  useEffect(() => {
+    async function loadTasks() {
+      if (!contractorId) return;
+
       try {
-        const response = await axios.get(`https://epg-backend.onrender.com/api/tickets/${contractorId}`);
-        const data = response.data;
-
-        // Transform the data to match the Task interface
-        const transformedTasks = data.map((ticket: any) => ({
-          id: ticket.id,
-          title: ticket.title,
-          taskType: ticket.taskType,
-          status: ticket.stand === 'done' ? 'done' : 'todo', // Sync status with stand
-          project: ticket.project,
-          deadline: ticket.deadline,
-          comments: ticket.comments || [], // Include comments
-          stand: ticket.stand || '', // Include stand field
-        }));
-        setTasks(transformedTasks);
-      } catch (error) {
-        console.error('Failed to fetch tickets:', error);
-        setError('Failed to fetch tickets');
+        const fetchedTasks = await fetchTasks(contractorId);
+        setTasks(fetchedTasks);
+      } catch (error: any) {
+        setError(error.message || 'Failed to fetch tickets');
+      } finally {
+        setLoading(false); // Set loading to false regardless of success or failure
       }
-    };
+    }
 
-    fetchTickets();
-  }, [contractorId]);
-
-  // Handle adding a comment
+    loadTasks();
+  }, [contractorId]);  
+  
   const handleAddComment = async () => {
     if (!selectedTask || !newComment.trim()) return;
 
     try {
-      const response = await axios.post(`https://epg-backend.onrender.com/api/comments`, {
-        content: newComment,
-        author: 'Contractor', // Replace with actual author
-        ticketId: selectedTask.id,
-      });
-
-      // Update the task with the new comment
+      const addedComment = await addComment(selectedTask.id, newComment, 'Contractor'); // Call service function
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
-          task.id === selectedTask.id
-            ? { ...task, comments: [...(task.comments || []), response.data] }
-            : task
+          task.id === selectedTask.id ? { ...task, comments: [...(task.comments || []), addedComment] } : task
         )
       );
-
-      setNewComment(''); // Clear the comment input
-    } catch (error) {
+      setNewComment('');
+    } catch (error: any) {
       console.error('Error adding comment:', error);
+      setError(error.message || 'Error adding comment'); // Set error state
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, status: 'todo' | 'done') => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('taskId');
+
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task) return;
+
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId ? { ...task, status, stand: status === 'done' ? 'done' : '' } : task
+    );
+    setTasks(updatedTasks);
+
+    try {
+      await updateTaskStatus(taskId, status); // Call service function
+      console.log('Ticket updated successfully:', { status, stand: status === 'done' ? 'done' : '' });
+    } catch (error: any) {
+      console.error('Error updating ticket:', error);
+      setError(error.message || 'Error updating ticket'); // Set error state
+      setTasks(tasks); // Revert local state on error
     }
   };
 
   // Handle drag start
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
-  };
-
-  // Handle drop
-  const handleDrop = async (e: React.DragEvent, status: 'todo' | 'done') => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData('taskId');
-
-    // Find the task being moved
-    const task = tasks.find((task) => task.id === taskId);
-    if (!task) return;
-
-    // Update the task status and stand locally
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId
-        ? {
-            ...task,
-            status, // Update status
-            stand: status === 'done' ? 'done' : '', // Update stand
-          }
-        : task
-    );
-    setTasks(updatedTasks);
-
-    try {
-      // Update the task in the backend
-      await axios.put(`https://epg-backend.onrender.com/api/tickets/${taskId}`, {
-        status, // Send the new status
-        stand: status === 'done' ? 'done' : '', // Send the new stand
-      });
-      console.log('Ticket updated successfully:', { status, stand: status === 'done' ? 'done' : '' });
-    } catch (error) {
-      console.error('Error updating ticket:', error);
-      // Revert the local state if the API call fails
-      setTasks(tasks);
-    }
   };
 
   // Handle drag over
@@ -184,51 +124,6 @@ export function TasksBoard() {
   useEffect(() => {
     console.log('Tasks updated:', tasks);
   }, [tasks]);
-
-  // Skeleton loader for loading state
-  if (loading) {
-    return (
-      <div className="space-y-6 bg-gray-100 p-6 rounded-xl">
-        {/* Task Type Selector Skeleton */}
-        <div className="flex justify-center">
-          <div className="inline-flex p-1 bg-white rounded-full shadow-sm animate-pulse">
-            <div className="px-4 py-2 rounded-full bg-gray-200 w-24"></div>
-            <div className="px-4 py-2 rounded-full bg-gray-200 w-24 mx-2"></div>
-            <div className="px-4 py-2 rounded-full bg-gray-200 w-24"></div>
-          </div>
-        </div>
-
-        {/* Kanban Board Skeleton */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* To-Do Column Skeleton */}
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">To-Do</h3>
-            <div className="space-y-3">
-              {[1, 2, 3].map((_, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Done Column Skeleton */}
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Done</h3>
-            <div className="space-y-3">
-              {[1, 2, 3].map((_, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Error state
   if (error) {

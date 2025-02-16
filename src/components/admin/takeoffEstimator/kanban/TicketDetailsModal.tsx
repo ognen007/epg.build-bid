@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, X, ExternalLink } from 'lucide-react';
-import { CommentSection } from './CommentSection';
+import { fetchProjectForTakeoff, updateProjectTakeoff } from '../../../../services/admin/kanban/ticketDetailsEndpoint';
 
 interface Project {
   id: string;
@@ -24,26 +24,27 @@ export const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({ projectI
   const [error, setError] = useState<string | null>(null); // Error state
   const [file, setFile] = useState<File | null>(null); // State for the uploaded file
 
-  // Fetch project data on component mount
   useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const response = await fetch(`https://epg-backend.onrender.com/api/project/takeoff/${projectId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch project data');
+    if (projectId) { 
+      async function loadProject() {
+        setIsLoading(true);
+        setError(null);
+  
+        try {
+          const fetchedProject = await fetchProjectForTakeoff(projectId);
+          console.log()
+          setProject(fetchedProject);
+          setEditedProject(fetchedProject);
+        } catch (err: any) {
+          setError(err.message || 'An unknown error occurred');
+        } finally {
+          setIsLoading(false);
         }
-        const data = await response.json();
-        setProject(data);
-        setEditedProject(data); // Initialize editedProject with fetched data
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'An unknown error occurred');
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchProject();
-  }, [projectId]);
+  
+      loadProject();
+    }
+  }, [projectId]); 
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -61,34 +62,23 @@ export const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({ projectI
     }
   };
 
-  // Handle save button click
   const handleSave = async () => {
     if (!editedProject) return;
-
+  
     try {
-      const formData = new FormData();
-      formData.append('contractor', editedProject.contractor);
-      formData.append('scope', editedProject.scope || '');
-
-      if (file) {
-        formData.append('takeoff', file);
-      }
-
-      const response = await fetch(`https://epg-backend.onrender.com/api/project/takeoff/${projectId}`, {
-        method: 'PUT',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update project');
-      }
-
-      const updatedData = await response.json();
-      setProject(updatedData); // Update the project state with the new data
-      setFile(null); // Reset the file state
+      const updatedProject = await updateProjectTakeoff(
+        projectId!, // Non-null assertion since we've already checked editedProject
+        editedProject.contractor,
+        editedProject.scope,
+        file
+      );
+  
+      setProject(updatedProject);
+      setEditedProject(updatedProject);  // Update editedProject as well
+      setFile(null);
       alert('Project updated successfully!');
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } catch (error: any) {
+      setError(error.message || 'An unknown error occurred');
     }
   };
 

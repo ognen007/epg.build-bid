@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Eye, X } from 'lucide-react';
+import { fetchContractorDetails } from '../../../services/admin/contractors/revenueEndpoint';
 
 interface Project {
   id: string;
@@ -41,15 +42,10 @@ export function RevenueDetails() {
   const [showWonOnly, setShowWonOnly] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // Fetch detailed contractor data from the backend
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`https://epg-backend.onrender.com/api/contractor-information/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const data: ContractorDetails = await response.json();
+        const data = await fetchContractorDetails(id);
         setContractorData(data);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'An error occurred');

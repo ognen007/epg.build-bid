@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { ProfileSettings } from "../../components/settings/ProfileSettings";
 import { LogoutButton } from "../../components/settings/LogoutButton";
+import { fetchContractorProfile, updateContractorProfile } from "../../services/contractor/contractorData/contractorSettings";
 
 export function ContractorSettings() {
   const [contractorProfile, setContractorProfile] = useState({
@@ -13,12 +13,12 @@ export function ContractorSettings() {
   const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
-    const fetchContractorProfile = async () => {
+    async function loadContractorProfile() {
       try {
         const storedUser = localStorage.getItem("user");
 
         if (!storedUser) {
-          console.error("No user found in localStorage");
+          console.error("No user stored")
           return;
         }
 
@@ -29,64 +29,51 @@ export function ContractorSettings() {
           return;
         }
 
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/contractor/settings/?email=${parsedUser.email}`
-        );
+        const profile = await fetchContractorProfile(parsedUser.email);
 
-        if (response.status === 200) {
-          setContractorProfile(response.data);
+        if (profile) {
+          setContractorProfile(profile);
         } else {
-          console.error("Error fetching contractor profile:", response.statusText);
+          console.error("Failed to load profile.")
         }
-      } catch (error) {
-        console.error("Error fetching contractor profile:", error);
       } finally {
-        setLoading(false); // Set loading to false after fetching data
+        setLoading(false);
       }
-    };
+    }
 
-    fetchContractorProfile();
+    loadContractorProfile();
   }, []);
 
   const handleProfileUpdate = async (updatedProfile: typeof contractorProfile) => {
-    const payload = Object.fromEntries(
-      Object.entries(updatedProfile).filter(
-        ([_, value]) => value !== null && value !== undefined && value !== ""
-      )
-    );
-  
-    const storedUser = localStorage.getItem("user");
-  
-    if (!storedUser) {
-      console.error("No user found in localStorage");
-      return;
-    }
-  
-    const parsedUser = JSON.parse(storedUser);
-  
-    if (!parsedUser.email) {
-      console.error("Email not found in stored user data");
-      return;
-    }
-  
-    console.log("Payload being sent:", payload);
-  
     try {
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/contractor/settings/?email=${parsedUser.email}`,
-        payload
-      );
-  
-      if (response.status === 200) {
-        setContractorProfile(updatedProfile);
+      const storedUser = localStorage.getItem("user");
+
+      if (!storedUser) {
+        console.error("No user found in localStorage");
+        return;
+      }
+
+      const parsedUser = JSON.parse(storedUser);
+
+      if (!parsedUser.email) {
+        console.error("Email not found in stored user data");
+        return;
+      }
+
+      const updatedProfileFromServer = await updateContractorProfile(parsedUser.email, updatedProfile);
+
+      if (updatedProfileFromServer) {
+        setContractorProfile(updatedProfileFromServer); // Update with data from server
         console.log("Profile updated successfully");
       } else {
-        console.error("Error updating profile:", response.statusText);
+        console.error("Failed to update profile.")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
+      console.error(error.message || "Error updating profile"); // Set error state
     }
-  };  
+  };
+
 
   // Skeleton loader for loading state
   if (loading) {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, DollarSign, CheckCircle } from 'lucide-react';
-import axios from 'axios';
 import { ActivityItem } from './ActivityItem';
+import { fetchRecentActivities } from '../../../services/admin/dashboard/recentActivitesEndpoint';
 
-interface Activity {
+export interface Activity {
   id: string;
   type: 'user_signup' | 'project';
   content: string;
@@ -17,56 +16,18 @@ export function RecentActivities() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchActivities = async () => {
+    async function loadActivities() {
       try {
-        const response = await axios.get('https://epg-backend.onrender.com/api/admin/recent/activity');
-        const data = response.data; // Expected object with keys: newestContractor, latestTakeoffProject, latestWonProject
-
-        const formattedActivities: Activity[] = [];
-
-        // Newest registered contractor
-        if (data.newestContractor) {
-          formattedActivities.push({
-            id: '1',
-            type: 'user_signup',
-            content: `New contractor ${data.newestContractor.fullName} joined the platform`,
-            timestamp: new Date(data.newestContractor.createdAt).toLocaleString(),
-            icon: UserPlus,
-          });
-        }
-
-        // Most recent project with status "takeoff_in_progress"
-        if (data.latestTakeoffProject) {
-          formattedActivities.push({
-            id: '2',
-            type: 'project',
-            content: `Project "${data.latestTakeoffProject.name}" is in takeoff in progress`,
-            timestamp: new Date(data.latestTakeoffProject.deadline).toLocaleString(),
-            icon: CheckCircle,
-          });
-        }
-
-        // Most recent project with status "won"
-        if (data.latestWonProject) {
-          formattedActivities.push({
-            id: '3',
-            type: 'project',
-            content: `Project "${data.latestWonProject.name}" marked as won`,
-            timestamp: new Date(data.latestWonProject.deadline).toLocaleString(),
-            icon: DollarSign,
-          });
-        }
-
-        setActivities(formattedActivities);
-      } catch (err: any) {
-        console.error('Error fetching activities:', err);
-        setError('Error fetching recent activities.');
+        const activitiesData = await fetchRecentActivities();
+        setActivities(activitiesData);
+      } catch (err: any) { // Type the error as any if you're not sure of its type
+        setError(err.message); // Access the message property of the error
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchActivities();
+    loadActivities();
   }, []);
 
   // Skeleton loader component for the loading state

@@ -3,6 +3,7 @@ import { Users, ArrowRight } from 'lucide-react';
 import { MetricHeader } from './MetricHeader';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { fetchUserGrowthData } from '../../../services/admin/contractors/userGrowthEndpoint';
 
 // Define the structure of the monthly data
 interface MonthlyData {
@@ -12,7 +13,7 @@ interface MonthlyData {
 }
 
 // Define the structure of the API response
-interface ApiResponse {
+export interface ApiResponse {
   totalUsers: number;
   growth: number;
   monthlyData: MonthlyData[];
@@ -30,12 +31,7 @@ export function UserGrowthChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch data from the backend API
-        const response = await fetch('https://epg-backend.onrender.com/api/users');
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const result: ApiResponse = await response.json();
+        const result = await fetchUserGrowthData();
         setData(result);
       } catch (error) {
         console.error('Error fetching user growth data:', error);
@@ -46,6 +42,7 @@ export function UserGrowthChart() {
 
     fetchData();
   }, []);
+
 
   // Calculate growth percentage based on monthlyData
   const calculateGrowth = (monthlyData: MonthlyData[]): number => {

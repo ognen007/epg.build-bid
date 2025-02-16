@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import epgLogo from "../../../asset/epgLogo.png";
+import { registerContractor } from '../../../services/contractor/contractorData/contractorRegister';
 
 const specialties = [
   'Plumbing',
@@ -97,26 +98,13 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
     }
   
     try {
-      const response = await axios.post(
-        'https://epg-backend.onrender.com/api/contractors/register',
-        formPayload,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const response = await registerContractor(formPayload);
+      console.log(response);
 
-      console.log(response)
-  
-      if (response.status === 201) {
+      if (response.status === 201 || response.status === 200) {
         navigate('/login');
       } else {
         setError('Registration failed. Please try again.');
-      }
-
-      if(response.status === 200){
-        navigate('/login');
       }
     } catch (err: any) {
       console.error('Registration error:', err);
@@ -124,7 +112,7 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const handleChange = (field: string, value: any) => {
     setFormData(prevState => ({

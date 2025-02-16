@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit2 } from 'lucide-react';
+import { fetchContractors, updateContractor } from '../../../services/admin/contractors/userGrowthEndpoint';
 
-interface Contractor {
+export interface Contractor {
   id: string;
   fullName: string;
   email: string;
@@ -134,14 +135,10 @@ export function UserGrowthComponent() {
 
   // Fetch contractors from the backend
   useEffect(() => {
-    const fetchContractors = async () => {
+    const getContractors = async () => {
       setLoading(true);
       try {
-        const response = await fetch('https://epg-backend.onrender.com/api/contractors');
-        if (!response.ok) {
-          throw new Error('Failed to fetch contractors');
-        }
-        const data = await response.json();
+        const data = await fetchContractors();  // Calling the function from revenueEndpoint.ts
         setContractors(data);
       } catch (err) {
         setError('Error fetching contractors. Please try again.');
@@ -150,38 +147,24 @@ export function UserGrowthComponent() {
       }
     };
 
-    fetchContractors();
+    getContractors();
   }, []);
 
-  // Handle saving updated contractor data
   const handleSaveUser = async (updatedUser: Contractor) => {
     try {
-      const response = await fetch(`https://epg-backend.onrender.com/api/contractors/${updatedUser.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedUser),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update contractor');
-      }
-
-      const data = await response.json();
+      const data = await updateContractor(updatedUser); // Just pass updatedUser
       setContractors((prevContractors) =>
         prevContractors.map((contractor) =>
           contractor.id === updatedUser.id ? data : contractor
         )
       );
-      setSelectedUser(null); // Close the modal
+      setSelectedUser(null);
       alert('Contractor updated successfully!');
     } catch (err) {
       console.error('Error updating contractor:', err);
       alert('Failed to update contractor. Please try again.');
     }
   };
-
   // Filter contractors based on search query
   const filteredContractors = contractors.filter((contractor) => {
     const searchLower = searchQuery.toLowerCase();

@@ -1,26 +1,21 @@
 import { ProjectRow } from './ProjectRow';
 import { ProjectType } from '../../../types/project';
-import axios from 'axios';
+import { deleteProject } from '../../../services/admin/projects/projectTableEndpoint';
 
 interface ProjectTableProps {
   projects: ProjectType[];
 }
 
-const deleteProjectById = async (projectId: string) => {
-  const isConfirmed = window.confirm("Are you sure you want to delete this project?");
-  
-  if (isConfirmed) {
-    try {
-      await axios.delete(`https://epg-backend.onrender.com/api/project/delete/${projectId}`);
-      console.log('Project deleted successfully');
-  } catch (error) {
-      console.error('Error deleting project:', error);
-  }
-  }
-};
-
 export function ProjectTable({ projects }: ProjectTableProps) {
-  console.log('Projects:', projects); // Log to check the incoming data
+  console.log('Projects:', projects); 
+  
+    const handleDeleteProject = async (projectId: string) => {
+      try {
+        await deleteProject(projectId); 
+      } catch (error: any) {
+      }
+    };
+  
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -51,7 +46,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
           <tbody className="bg-white divide-y divide-gray-200">
             {projects.length > 0 ? (
               projects.map((project) => (
-                <ProjectRow key={project.id} project={project} deleteProject={deleteProjectById}/>
+                <ProjectRow key={project.id} project={project} deleteProject={handleDeleteProject}/>
               ))
             ) : (
               <tr>

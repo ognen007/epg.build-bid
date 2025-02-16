@@ -3,6 +3,7 @@ import { ProjectType } from '../../../../types/project';
 import axios from 'axios'; // Import axios for making API calls
 import { sendNotificationToUser } from '../../../../services/notificationEndpoints';
 import { DraftedCardHolder } from '../../../../components/contractor/components/holders/DraftedCardHolder';
+import { sendProjectToContractor } from '../../../../services/admin/contractorpipeline/contractorPipeline';
 
 interface ProjectProposalsProps {
   proposals?: ProjectType[];
@@ -16,23 +17,15 @@ export function DraftedProjectSection({ fullName, contractorId, proposals = [] }
     (proposal) => proposal.status === 'awaiting_approval'
   );
 
-  // Function to handle sending the project to the contractor
   const handleSendToContractor = async (projectId: string) => {
     try {
-      // Make a PUT request to update the project status
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/project/adminKanban/${projectId}`
-      );
-
-      if (response.status === 200) {
-        console.log('Project status updated successfully:', response.data);
-        await sendNotificationToUser(contractorId, "New Project", `Hey, ${fullName}, you have a new Project that you can check out`);
-        window.location.reload();
-      } else {
-        console.error('Failed to update project status:', response.data);
-      }
-    } catch (error) {
-      console.error('Error updating project status:', error);
+      const response = await sendProjectToContractor(projectId);
+      console.log('Project status updated successfully:', response);
+      await sendNotificationToUser(contractorId, "New Project", `Hey, ${fullName}, you have a new Project that you can check out`);
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Failed to update project status:', error);
+      alert(error.message || "Failed to send project.");
     }
   };
 

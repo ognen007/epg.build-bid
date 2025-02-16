@@ -9,6 +9,8 @@ import { ProjectType } from '../../../../types/project';
 import { useSearchParams } from 'react-router-dom';
 import { ProjectKanbanView } from '../../../../components/admin/projects/kanban/ProjectKanbanView';
 import { DraftedProjectSection } from './DraftedProjectSection';
+import { fetchContractors } from '../../../../services/admin/contractors/contractorListEndpoint';
+import { fetchProjects } from '../../../../services/admin/contractorpipeline/contractorPipeline';
 
 // Define ContractorType interface
 export interface ContractorType {
@@ -34,44 +36,38 @@ export function ContractorPipeline() {
     setSelectedContractorId(contractorId);
   }, [searchParams]);
 
-  // Fetch all projects from the backend
   useEffect(() => {
-    const fetchProjects = async () => {
+    async function loadProjects() {
+      setLoading(true);
+      setError(null); // Reset error state
       try {
-        setLoading(true);
-        const response = await axios.get('https://epg-backend.onrender.com/api/project/display');
-        if (response.data && Array.isArray(response.data.projects)) {
-          setAllProjects(response.data.projects);
-        } else {
-          throw new Error('Invalid data format: Expected an array of projects');
-        }
-      } catch (err) {
+        const fetchedProjects = await fetchProjects();
+        setAllProjects(fetchedProjects);
+      } catch (err: any) {
         console.error('Error fetching projects:', err);
         setError('Failed to fetch projects. Please try again later.');
       } finally {
         setLoading(false);
       }
-    };
-    fetchProjects();
+    }
+
+    loadProjects();
   }, []);
 
-  // Fetch all contractors from the backend
   useEffect(() => {
-    const fetchContractors = async () => {
+    async function loadContractors() {
       try {
-        const response = await axios.get('https://epg-backend.onrender.com/api/contractors/name');
-        if (response.data && Array.isArray(response.data)) {
-          setAllContractors(response.data);
-        } else {
-          throw new Error('Invalid data format: Expected an array of contractors');
-        }
-      } catch (err) {
+        const fetchedContractors = await fetchContractors();
+        setAllContractors(fetchedContractors);
+      } catch (err: any) {
         console.error('Error fetching contractors:', err);
         setError('Failed to fetch contractors. Please try again later.');
       }
-    };
-    fetchContractors();
+    }
+
+    loadContractors();
   }, []);
+
 
   useEffect(() => {
     if (selectedContractorId) {

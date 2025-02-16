@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Upload, X } from "lucide-react";
 import React, { useState } from "react";
+import { uploadProposal } from "../../../services/contractor/workflow/projectWorkflowServiceEndpoint";
 
 interface UploadProposalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function UploadProposalModal({
 }: UploadProposalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -25,40 +27,28 @@ export function UploadProposalModal({
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent default form submission
-    if (!file) return;
+    event.preventDefault();
+    if (!file) {
+      setUploadError("Please select a file.");
+      return;
+    }
 
     setIsSubmitting(true);
-
-    const formData = new FormData();
-    formData.append("file", file); // Append the file to the FormData object
+    setUploadError(null); // Clear any previous upload errors
 
     try {
-      // Step 1: Upload the file and update the project status
-      const response = await axios.post(
-        `https://epg-backend.onrender.com/api/project/upload-proposal/${projectId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Set the content type for file upload
-          },
-        }
-      );
-
-      console.log("File uploaded and project updated successfully:", response.data);
-
-      // Step 2: Notify the parent component of successful upload
+      await uploadProposal(projectId, file); // Call the service function
       onUploadSuccess();
-
-      // Step 3: Close the modal
       onClose();
-    } catch (error) {
-      console.error("Error uploading file or updating project:", error);
-      alert("Failed to upload proposal. Please try again.");
+    } catch (error: any) { // Type the error as any
+      console.error("Error uploading file:", error);
+      setUploadError(error.message || "Failed to upload proposal. Please try again."); // Set the error message
+      alert(error.message || "Failed to upload proposal. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   if (!isOpen) return null;
 

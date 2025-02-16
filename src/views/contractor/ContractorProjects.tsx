@@ -5,6 +5,7 @@ import { ProjectWorkflowView } from "../../components/contractor/projectworkflow
 import { ProjectSearch } from "./ProjectSearch";
 import { ProjectType } from "../../types/project";
 import { Skeleton } from "@radix-ui/themes";
+import { fetchContractorDataByEmail, fetchContractorIdByEmail, fetchProjectsByContractor, updateProjectStatus } from "../../services/contractor/projects/projectsEndpoint";
 
 export interface ContractorType {
   id: string;
@@ -19,7 +20,7 @@ export function ContractorProjects({ loading }: { loading: boolean }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchContractorData = async () => {
+    async function loadContractorData() {
       try {
         const storedUser = localStorage.getItem("user");
         if (!storedUser) {
@@ -29,62 +30,48 @@ export function ContractorProjects({ loading }: { loading: boolean }) {
         const user = JSON.parse(storedUser);
         const { email } = user;
 
-        const response = await axios.get("https://epg-backend.onrender.com/api/contractor/id");
-        const loggedInContractor = response.data.find((c: ContractorType) => c.email === email);
+        const contractorData = await fetchContractorDataByEmail(email); // Call the new function
 
-        if (!loggedInContractor) {
-          throw new Error("Logged-in contractor not found");
+        if (!contractorData) {
+          setError("Logged-in contractor not found");
+          return;
         }
-        setContractor(loggedInContractor);
-      } catch (err) {
-        setError("Failed to fetch contractor data");
+
+        setContractor(contractorData); // Set the contractor data
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch contractor data");
       }
-    };
-    fetchContractorData();
+    }
+
+    loadContractorData();
   }, []);
 
+
+
   useEffect(() => {
-    if (!contractor?.fullName) return;
+    async function loadProjects() {
+      if (!contractor?.fullName) return;
 
-    const fetchProjects = async () => {
       try {
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractor.fullName)}`
-        );
-
-        console.log("Fetched projects response:", response.data);
-
-        if (response.status === 200) {
-          setProjects(response.data.projects);
-          console.log("FETCHED FAS",response.data.projects)
-        } else {
-          setProjects([]); // No error, just set empty tasks
-        }
+        const fetchedProjects = await fetchProjectsByContractor(contractor.fullName);
+        setProjects(fetchedProjects);
       } catch (err: any) {
-        if (err.response?.status === 404) {
-          console.warn("No projects found, setting an empty list.");
-          setProjects([]); // Gracefully handle 404 without errors
-        } else {
-          console.error("Error fetching projects:", err);
-          setError("Failed to fetch projects");
-        }
+        setError(err.message || "Failed to fetch projects"); // More specific error message
       }
-    };
+    }
 
-    fetchProjects();
+    loadProjects();
   }, [contractor]);
+
 
   const handleAcceptProposal = async (taskId: string) => {
     try {
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/projects/hold/${taskId}`,
-        { status: "takeoff_in_progress", hold: "takeoff_in_progress" }
-      );
+      const updatedProject = await updateProjectStatus(taskId);
       setProjects((prev) =>
-        prev.map((p) => (p.id === taskId ? { ...p, hold: response.data.hold, status: response.data.status } : p))
+        prev.map((p) => (p.id === taskId ? { ...p, hold: updatedProject.hold, status: updatedProject.status } : p))
       );
-    } catch (error) {
-      setError("Failed to update task");
+    } catch (error: any) {
+      setError(error.message || "Failed to update task"); // More specific error message
     }
   };
 

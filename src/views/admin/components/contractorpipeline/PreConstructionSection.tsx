@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Clock, FileText, CheckCircle, Bolt } from "lucide-react";
+import { Clock, FileText, CheckCircle, Bolt, MessageSquare } from "lucide-react";
 import { RightClickPopup } from "./RightClickPopup";
-import axios from "axios";
+import { updateTaskStatusEndpoint } from "../../../../services/admin/contractorpipeline/contractorPipeline";
 
-export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
+export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick, onCommentClick }: any) {
   const statuses = [
     { hold: "takeoff_in_progress", label: "Takeoff in Progress" },
     { hold: "ready_for_proposal", label: "Ready for Proposal" },
@@ -34,49 +34,30 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
   const handleContextMenuAction = async (action: string, taskId: string) => {
     let newHold = "none";
     let newStatus = "";
-  
+
     switch (action) {
       case "abandoned":
-        newStatus = "abandoned"; // Set status to abandoned
+        newStatus = "abandoned";
         break;
       case "loss":
-        newStatus = "lost"; // Set status to lost
+        newStatus = "lost";
         break;
       default:
         console.error(`Invalid action: ${action}`);
         return;
     }
-  
-    console.log("Sending payload:", { hold: newHold, status: newStatus });
-  
+
     try {
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/projects/pipeline/${taskId}`,
-        {
-          hold: newHold,
-          status: newStatus,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-  
-      console.log("Backend response:", response.data);
-  
-      // Update the task in the state
-      updateTaskStatus(taskId, newHold, newStatus); // Pass both newHold and newStatus
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error response data:", error.response?.data);
-      } else {
-        console.error("Error updating task:", error);
-      }
+      const response = await updateTaskStatusEndpoint(taskId, newHold, newStatus);
+      updateTaskStatus(taskId, newHold, newStatus);
+    } catch (error: any) {
+      console.error("Error updating task:", error);
+      alert(error.message || "Failed to update task.");
     }
-  
+
     setContextMenu({ visible: false, position: { x: 0, y: 0 }, taskId: null });
   };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "takeoff_in_progress":
@@ -148,13 +129,14 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick }:
                       Deadline: {new Date(task.deadline).toLocaleDateString()}
                     </div>
                     {task.hold === "negotiating" && (
-                      <div
-                        className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block cursor-pointer"
-                        onClick={() => onTaskClick(task.id)} // Call onTaskClick when "View Comments" is clicked
-                      >
-                        View Comments
-                      </div>
-                    )}
+                 <MessageSquare // Use the MessageSquare icon
+                    className="text-sm text-orange-600 hover:text-orange-700 mt-2 inline-block cursor-pointer h-5 w-5"  // Add styling for size and cursor
+                    onClick={(e) => {
+                      e.stopPropagation(); 
+                      onCommentClick(task.id);
+                    }}
+                    />
+                  )}
                   </div>
                 ))}
               </div>

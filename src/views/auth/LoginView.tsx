@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuthContext } from './useAuthContext';
 import epgLogo from '../../asset/epgLogo.png';
+import { loginUserEndpoint } from '../../services/authService';
 
 export function LoginView() {
   const [formData, setFormData] = useState({
@@ -51,26 +51,16 @@ export function LoginView() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        'https://epg-backend.onrender.com/api/login',
-        formData
-      );
+      const userData = await loginUserEndpoint(formData.email, formData.password); // Call service function
+      login(userData.email, userData.role);
 
-      console.log(response.data); // Log the response data
-
-      if (response.status === 200) {
-        const { email, role } = response.data;
-        login(email, role);
-
-        // Navigate based on role
-        if (role === 'CLIENT') {
-          navigate('/client');
-        } else if (role === 'CONTRACTOR') {
-          navigate('/contractor');
-        }
+      if (userData.role === 'CLIENT') {
+        navigate('/client');
+      } else if (userData.role === 'CONTRACTOR') {
+        navigate('/contractor');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'An error occurred');
+    } catch (error: any) {
+      setError(error.message); // Set error message from service
     } finally {
       setLoading(false);
     }

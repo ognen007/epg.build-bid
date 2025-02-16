@@ -3,6 +3,7 @@ import axios from "axios";
 import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
 import { AddCommentModal } from "../../../views/admin/components/contractorpipeline/AddCommentModal";
+import { addComment, fetchComments, fetchProjects, fetchProjectsById } from "../../../services/contractor/workflow/projectWorkflowServiceEndpoint";
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
@@ -10,12 +11,12 @@ export interface ProjectWorkflowProps {
   setTasks: any
 }
 
-interface Task {
+export interface Task {
   id: string;
   // Add other task properties here
 }
 
-interface Comment {
+export interface Comment {
   id: string;
   content: string;
   author: string;
@@ -37,116 +38,72 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!contractor?.fullName) return;
-  
-    const fetchProjects = async () => {
+    async function loadProjects() {
+      if (!contractor?.fullName) return; // Handle null contractor
+
       try {
         setLoading(true);
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractor.fullName)}`
-        );
-  
-        console.log("Fetched projects response:", response.data); // Log response
-  
-        if (Array.isArray(response.data.projects)) {
-          setTasks(response.data.projects);
-        } else {
-          setTasks([]); // No error, just set empty tasks
-        }
+        const fetchedProjects = await fetchProjects(contractor.fullName);
+        setTasks(fetchedProjects);
       } catch (err: any) {
-        if (err.response?.status === 404) {
-          console.warn("No projects found, continuing without error."); // Log as a warning, not an error
-          setTasks([]); // Gracefully handle no projects
-        } else {
-          console.error("Error fetching projects:", err);
-          setError("Failed to fetch projects");
+        if (err.message !== "No projects found, continuing without error.") {
+          setError(err.message);
         }
       } finally {
         setLoading(false);
       }
-    };
-  
-    fetchProjects();
+    }
+
+    loadProjects();
   }, [contractor]);
   
-
   useEffect(() => {
-    if (!contractor?.fullName) return;
-  
-    const fetchProjects = async () => {
+    async function loadProjectsById() {
+      if (!contractorId) return;
+
       try {
         setLoading(true);
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/project/contractor/${encodeURIComponent(contractorId)}`
-        );
-  
-        console.log("Fetched projects response:", response.data); // Log response
-  
-        if (response.status === 200) {
-          setTasks(response.data.projects);
-          console.log("FETCHED FAS",response.data.projects)
-        } else {
-          setTasks([]); // No error, just set empty tasks
-        }
+        const fetchedProjects = await fetchProjectsById(contractorId);
+        setTasks(fetchedProjects);
+        console.log("FETCHED FAS", fetchedProjects);
       } catch (err) {
         console.error("Error fetching projects:", err);
-        setTasks([]); // Ensure tasks are empty instead of throwing an error
       } finally {
         setLoading(false);
       }
-    };
-  
-    fetchProjects();
-  }, [contractor]);
+    }
 
-  // Fetch comments for the selected project
+    loadProjectsById();
+  }, [contractorId]); 
+
   useEffect(() => {
-    if (!selectedTaskId) return;
+    async function loadComments() {
+      if (!selectedTaskId) return;
 
-    console.log("Fetching comments for Task ID:", selectedTaskId); // Debugging
-
-    const fetchComments = async () => {
       try {
-        const response = await axios.get<Comment[]>(
-          `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTaskId}/comments`
-        );
-        console.log("Fetched Comments:", response.data); // Debugging
-        setComments(response.data || []);
+        const fetchedComments = await fetchComments(selectedTaskId);
+        setComments(fetchedComments);
       } catch (error) {
         console.error("Error fetching comments:", error);
       }
-    };
+    }
 
-    fetchComments();
-  }, [selectedTaskId, isCommentModalOpen]); // Fetch comments when the modal opens or projectId changes
+    loadComments();
+  }, [selectedTaskId, isCommentModalOpen]);
 
-  // Handle task click
-  const handleTaskClick = (taskId: string) => {
-    console.log("Selected Task ID:", taskId); // Debugging
-    setSelectedTaskId(taskId); // Set the selected task ID
-    setIsCommentModalOpen(true); // Open the modal
+  const handleTaskClick = (taskId: string) => { // Only ONE declaration
+    console.log("Selected Task ID:", taskId);
+    setSelectedTaskId(taskId);
+    setIsCommentModalOpen(true);
   };
 
-  // Handle adding a comment
   const handleAddComment = async (comment: string) => {
     if (!selectedTaskId) return;
 
-    console.log("Adding comment for Task ID:", selectedTaskId); // Debugging
-
     try {
-      // Send the comment to the backend
-      const response = await axios.post<Comment>(
-        `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTaskId}/comments`,
-        { content: comment, author: "User" } // Replace "User" with the actual author
-      );
-
-      console.log("Comment added successfully:", response.data);
-
-      // Refresh comments after adding a new one
-      const updatedComments = await axios.get<Comment[]>(
-        `https://epg-backend.onrender.com/api/projects/comment/pipeline/${selectedTaskId}/comments`
-      );
-      setComments(updatedComments.data || []);
+      await addComment(selectedTaskId, comment);
+      const updatedComments = await fetchComments(selectedTaskId);
+      setComments(updatedComments);
     } catch (error) {
       console.error("Error adding comment:", error);
     }

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Edit2, Trash2 } from 'lucide-react';
 import { AdminUser } from '../../../types/admin';
+import { deleteUser } from '../../../services/admin/adminInfo/adminInformationEndpoint';
 
 interface User {
   id: string;
@@ -21,18 +22,14 @@ export function UserTable({ users, onRefresh, onEdit }: UserTableProps) {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      const response = await axios.delete(
-        `https://epg-backend.onrender.com/api/admin/delete/${id}`
-      );
-      if (response.status === 200) {
-        alert('User deleted successfully');
-        if (onRefresh) {
-          onRefresh();
-        }
+      await deleteUser(id); // Call the service function
+      alert('User deleted successfully');
+      if (onRefresh) {
+        onRefresh();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
-      alert('Failed to delete the user. Please try again.');
+      alert(error.message || 'Failed to delete the user. Please try again.'); // Display specific error message or default
     }
   };
 

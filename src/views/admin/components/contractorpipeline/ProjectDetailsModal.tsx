@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { X, ExternalLink } from "lucide-react";
+import { fetchProjectDetails } from "../../../../services/admin/contractorpipeline/contractorPipeline";
 
 interface ProjectDetailsModalProps {
   isOpen: boolean;
@@ -11,23 +12,19 @@ interface ProjectDetailsModalProps {
 export function ProjectDetailsModal({ isOpen, onClose, taskId }: ProjectDetailsModalProps) {
   const [project, setProject] = useState<any>(null);
 
-  // Fetch project details when the taskId changes
   useEffect(() => {
-    if (!taskId) return;
-
-    const fetchProjectDetails = async () => {
+    async function loadProjectDetails() {
+        if (!taskId) return;
       try {
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/project/fetch/${taskId}`
-        );
-        setProject(response.data);
-      } catch (error) {
-        console.error("Error fetching project details:", error);
+        const fetchedProject = await fetchProjectDetails(taskId);
+        setProject(fetchedProject);
+      } catch (error: any) {
+        console.error("Error loading project details:", error);
       }
-    };
-
-    fetchProjectDetails();
+    }
+    loadProjectDetails();
   }, [taskId]);
+
 
   // Don't render the modal if it's not open
   if (!isOpen) return null;

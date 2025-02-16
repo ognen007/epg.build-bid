@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { MessageSquare, CheckCircle, Clock, HardHat } from 'lucide-react';
 import axios from 'axios';
 import { ContractorCardHolder } from '../components/holders/ContractorCardHolder';
+import { fetchRecentActivities } from '../../../services/contractor/analytics/recentActivitiesEndpoint';
+import { fetchContractorId } from '../../../services/contractor/contractorData/contractorIdEndpoint';
 
 interface Activity {
   id: string;
@@ -23,24 +25,10 @@ export function RecentActivity() {
   const [contractorId, setContractorId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch contractor ID on mount
-  const fetchContractorId = useCallback(async () => {
+  const loadContractorId = useCallback(async () => {
     try {
-      const storedUser = localStorage.getItem('user');
-      if (!storedUser) throw new Error('User not found');
-
-      const { email } = JSON.parse(storedUser);
-      const { data: contractors } = await axios.get(
-        'https://epg-backend.onrender.com/api/contractor/id'
-      );
-
-      const loggedInContractor = contractors.find(
-        (contractor: any) => contractor.email === email
-      );
-
-      if (!loggedInContractor) throw new Error('Contractor not found');
-
-      setContractorId(loggedInContractor.id);
+      const id = await fetchContractorId();
+      setContractorId(id);
     } catch (err) {
       console.error('Error fetching contractor ID:', err);
       setError((err as Error).message);
@@ -48,66 +36,27 @@ export function RecentActivity() {
     }
   }, []);
 
-  // Call fetchContractorId when component mounts
   useEffect(() => {
-    fetchContractorId();
-  }, [fetchContractorId]);
+    loadContractorId();
+  }, [loadContractorId]);
 
-  // Fetch recent activities when contractorId becomes available
   useEffect(() => {
-    if (!contractorId) return;
+    async function loadActivities() {
+      if (!contractorId) return;
 
-    const fetchRecentActivities = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/contractor/recent/activity/${contractorId}`
-        );
-        const data = response.data;
-
-        // Format the fetched data to match the Activity interface
-        const formattedActivities: Activity[] = [];
-
-        if (data.latestWonProject) {
-          formattedActivities.push({
-            id: '1',
-            type: 'update',
-            content: `Completed project: ${data.latestWonProject.name}`,
-            timestamp: new Date(data.latestWonProject.deadline).toLocaleString(),
-            project: data.latestWonProject.name,
-          });
-        }
-
-        if (data.latestTask) {
-          formattedActivities.push({
-            id: '2',
-            type: 'message',
-            content: `New task: ${data.latestTask.title}`,
-            timestamp: new Date(data.latestTask.createdAt).toLocaleString(),
-            project: data.latestTask.title,
-          });
-        }
-
-        if (data.latestDeadline) {
-          formattedActivities.push({
-            id: '3',
-            type: 'deadline',
-            content: `Upcoming deadline: ${data.latestDeadline.name}`,
-            timestamp: new Date(data.latestDeadline.deadline).toLocaleString(),
-            project: data.latestDeadline.name,
-          });
-        }
-
-        setActivities(formattedActivities);
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-        setError('Failed to fetch activities');
+        const fetchedActivities = await fetchRecentActivities(contractorId);
+        setActivities(fetchedActivities);
+      } catch (err: any) {
+        console.error("Error loading activities:", err);
+        setError(err.message); // Set error message in component state
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchRecentActivities();
+    loadActivities();
   }, [contractorId]);
 
   if (error) {

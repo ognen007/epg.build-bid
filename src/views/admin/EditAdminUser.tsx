@@ -2,6 +2,7 @@ import axios from 'axios';
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import { AdminUser } from '../../types/admin';
+import { updateAdminPassword } from '../../services/admin/adminInfo/adminInformationEndpoint';
 
 interface User {
   id: string;
@@ -23,21 +24,16 @@ export function EditAdminUser({ user, onClose }: EditAdminUserProps) {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError('');
 
     try {
-      // Send the current and new password to the backend
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/admin/edit-password/${user.id}`,
-        { currentPassword, newPassword }
-      );
-
-      if (response.status === 200) {
-        alert('Password updated successfully');
-        onClose(); // Close the modal after successful update
-      }
-    } catch (err) {
+      await updateAdminPassword(user.id, currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setTimeout(onClose, 1500);
+    } catch (err: any) {
       console.error('Error updating password:', err);
-      setError('Failed to update the password. Please try again.');
+      setError(err.message);
     }
   };
 

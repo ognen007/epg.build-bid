@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuthContext } from './useAuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import epgLogo from "../../asset/epgLogo.png";
+import { adminLogin } from '../../services/admin/adminInfo/adminSettings';
 
 export function AdminLoginView() {
   const [formData, setFormData] = useState({
@@ -21,31 +22,19 @@ export function AdminLoginView() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        'https://epg-backend.onrender.com/api/admin/login',
-        formData
-      );
+      const user = await adminLogin(formData.email, formData.password); 
 
-      if (response.data && response.data.user) {
-        const { email, role } = response.data.user;
-
-        // Save user details in localStorage
-        localStorage.setItem(
-          'user',
-          JSON.stringify({ email, role })
-        );
-
-        // Log the user in via context
-        login(email, role);
-
-        setLoading(false);
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+        login(user.email, user.role);
         navigate('/admin');
       } else {
-        throw new Error('Invalid response from server');
+        setError('Login failed. Please try again.');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Invalid credentials');
+      setError(err.message);
+    } finally {
       setLoading(false);
     }
   };

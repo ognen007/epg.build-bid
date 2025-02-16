@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Briefcase, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Briefcase } from 'lucide-react';
 import { CategoryBar } from './CategoryBar';
 import { MetricHeader } from './MetricHeader';
-
-// Define the structure of the API response
-interface ApiResponse {
-  totalProjects: number;
-  growth: number;
-  categories: {
-    name: string;
-    count: number;
-    percentage: number;
-  }[];
-}
+import { fetchProjectMetrics } from '../../../services/admin/projects/projectMetrixEndpoints';
 
 export function ProjectMetrics() {
   const [metrics, setMetrics] = useState({
@@ -23,23 +13,18 @@ export function ProjectMetrics() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const getMetrics = async () => {
       try {
-        // Fetch data from the backend API
-        const response = await fetch('https://epg-backend.onrender.com/api/projects/metrics');
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const result: ApiResponse = await response.json();
-        setMetrics(result);
+        const data = await fetchProjectMetrics();
+        setMetrics(data);
       } catch (error) {
-        console.error('Error fetching project metrics:', error);
+        console.error('Failed to fetch metrics');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    getMetrics();
   }, []);
 
   // Skeleton loader for loading state

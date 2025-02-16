@@ -6,6 +6,7 @@ import { UserFilters } from './components/UserFilters';
 import { AddUserModal } from '../../components/admin/users/AddUserModal';
 import { EditAdminUser } from './EditAdminUser';
 import { AdminUser } from '../../types/admin';
+import { addUser, fetchUsers } from '../../services/admin/adminInfo/adminInformationEndpoint';
 
 interface User {
   id: string;
@@ -25,56 +26,30 @@ export function UserManagement() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  async function loadUsers() {
+    setLoading(true);
+    setError('');
+    try {
+      const fetchedUsers = await fetchUsers();
+      setUsers(fetchedUsers);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
   useEffect(() => {
     loadUsers();
   }, []);
 
-  const loadUsers = async () => {
-    setLoading(true);
+  const handleAddUser = async (userData: { email: string; fullName: string; role: AdminUser['role'] }) => {
     setError('');
     try {
-      const response = await axios.get<User[]>(
-        'https://epg-backend.onrender.com/api/admin/users'
-      );
-      setUsers(response.data);
-    } catch (err) {
-      const errorMessage =
-        axios.isAxiosError(err) && err.response?.data?.message
-          ? err.response.data.message
-          : err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred';
-      setError(errorMessage);
-    }
-    setLoading(false);
-  };
-
-  const handleAddUser = async (userData: {
-    email: string;
-    fullName: string;
-    role: AdminUser['role'];
-  }) => {
-    setError('');
-    try {
-      await axios.post('https://epg-backend.onrender.com/api/admin/register', {
-        fullName: userData.fullName,
-        email: userData.email,
-        role: userData.role,
-      });
-
-      await loadUsers();
+      await addUser(userData); // Call service function
+      await loadUsers(); // Refresh user list after adding
       setIsModalOpen(false);
-    } catch (err: unknown) {
-      console.error('API Error:', err);
-      let errorMessage = 'Failed to add user. Please try again.';
-
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Upload, X } from 'lucide-react';
 import { ProjectType } from '../../../types/project';
+import { createProjectModal, fetchContractorsProjectModal } from '../../../services/admin/projects/addProjectEndpoint';
 
 interface AddProjectModalProps {
   isOpen: boolean;
@@ -30,19 +31,20 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setLoadingContractors(true);
-      fetch('https://epg-backend.onrender.com/api/contractors/name')
-        .then((response) => response.json())
-        .then((data) => {
-          setContractors(data);
+    async function loadContractors() {
+      if (isOpen) {
+        setLoadingContractors(true);
+        try {
+          const fetchedContractors = await fetchContractorsProjectModal();
+          setContractors(fetchedContractors);
+        } catch (error) {
+          console.log(error)
+        } finally {
           setLoadingContractors(false);
-        })
-        .catch((err) => {
-          console.error('Error fetching contractors:', err);
-          setLoadingContractors(false);
-        });
+        }
+      }
     }
+    loadContractors();
   }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,6 +97,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
       setLoading(false);
     }
   };
+
 
   const handleContractorInputChange = (input: string) => {
     setFormData({ ...formData, contractor: input });

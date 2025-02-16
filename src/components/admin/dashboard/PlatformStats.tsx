@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Users, Briefcase, DollarSign } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { toast, ToastContainer } from 'react-toastify'; // For error notifications
 import 'react-toastify/dist/ReactToastify.css'; // Toast styles
+import { fetchPlatformStats } from '../../../services/admin/dashboard/platformStatusEndpoint';
 
 export function PlatformStats() {
   const [totalUsers, setTotalUsers] = useState({ contractors: 0, clients: 0 });
@@ -12,26 +12,16 @@ export function PlatformStats() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch data from the endpoints
   useEffect(() => {
-    const fetchData = async () => {
+    async function loadData() {
       try {
-        // Fetch total users (contractors and clients)
-        const usersResponse = await axios.get('https://epg-backend.onrender.com/api/clients/contractors');
-        const { totalContractors, totalClients } = usersResponse.data.data;
-        setTotalUsers({ contractors: totalContractors, clients: totalClients });
-
-        // Fetch active projects
-        const projectsResponse = await axios.get('https://epg-backend.onrender.com/api/project/number');
-        const { awaitingBidCount, bidSubmittedCount } = projectsResponse.data.data;
-        setActiveProjects({ awaitingBid: awaitingBidCount, bidSubmitted: bidSubmittedCount });
-
-        // Fetch total earnings
-        const earningsResponse = await axios.get('https://epg-backend.onrender.com/api/project/sum');
-        const { currentMonthValuation, percentageIncrease } = earningsResponse.data.data;
-        setTotalEarnings({ currentMonthValuation: parseFloat(currentMonthValuation), percentageIncrease: parseFloat(percentageIncrease) });
-      } catch (err) {
-        toast.error(`Error: ${err}`, {
+        const stats = await fetchPlatformStats(); // Call the function from the service file
+        setTotalUsers(stats.totalUsers);
+        setActiveProjects(stats.activeProjects);
+        setTotalEarnings(stats.totalEarnings);
+      } catch (err:any) {
+        setError(err);
+        toast.error(`Error: ${err.message || 'Failed to load data'}`, {
           position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
@@ -43,9 +33,9 @@ export function PlatformStats() {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchData();
+    loadData();
   }, []);
 
   // Format the stats data

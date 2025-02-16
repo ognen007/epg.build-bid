@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Calendar, Hammer, CheckSquare, Bolt } from "lucide-react";
 import { RightClickPopup } from "./RightClickPopup";
-import axios from "axios";
+import { updateTaskStatusEndpoint } from "../../../../services/admin/contractorpipeline/contractorPipeline";
 
 export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
   const statuses = [
@@ -34,50 +34,30 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
   const handleContextMenuAction = async (action: string, taskId: string) => {
     let newHold = "none";
     let newStatus = "";
-  
+
     switch (action) {
       case "abandoned":
-        newStatus = "abandoned"; // Set status to abandoned
+        newStatus = "abandoned";
         break;
       case "loss":
-        newStatus = "lost"; // Set status to lost
+        newStatus = "lost";
         break;
       default:
         console.error(`Invalid action: ${action}`);
         return;
     }
-  
-    console.log("Sending payload:", { hold: newHold, status: newStatus });
-  
+
     try {
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/projects/pipeline/${taskId}`,
-        {
-          hold: newHold,
-          status: newStatus,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-  
-      console.log("Backend response:", response.data);
-  
-      // Update the task in the state
-      updateTaskStatus(taskId, newHold, newStatus); // Pass both newHold and newStatus
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error response data:", error.response?.data);
-      } else {
-        console.error("Error updating task:", error);
-      }
+      const response = await updateTaskStatusEndpoint(taskId, newHold, newStatus); // Call the service function
+      updateTaskStatus(taskId, newHold, newStatus); // Call the parent's update function to refresh the tasks
+    } catch (error: any) {
+      console.error("Error updating task:", error);
+      // Handle the error appropriately, e.g., display an error message to the user
+      alert(error.message || "Failed to update task.");
     }
-  
+
     setContextMenu({ visible: false, position: { x: 0, y: 0 }, taskId: null });
   };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "scheduled_projects":

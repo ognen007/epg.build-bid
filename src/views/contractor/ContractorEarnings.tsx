@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ContractorRevenue } from '../../components/contractor/earnings/ContractorRevenue';
 import { EarningsOverview } from '../../components/contractor/earnings/EarningsOverview';
 import { ProjectType } from '../../types/project';
 import { LoadingCircle } from '../../components/contractor/components/holders/LoadingCircle';
+import { fetchContractorId } from '../../services/contractor/contractorData/contractorIdEndpoint';
+import { fetchContractorEarningsData } from '../../services/contractor/analytics/contractorEarnings';
 
-interface ContractorDetails {
+export interface ContractorDetails {
   id: string;
   contractor: {
     name: string;
@@ -23,66 +25,37 @@ export function ContractorEarnings({ loading }: { loading: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [contractorId, setContractorId] = useState<string>("");
 
-  useEffect(() => {
-    const fetchContractorId = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) {
-          setError('User not found');
-          return;
-        }
-
-        const user = JSON.parse(storedUser);
-        const { email } = user;
-
-        // Fetch all contractors from the backend
-        const response = await fetch('https://epg-backend.onrender.com/api/contractor/id');
-        if (!response.ok) {
-          throw new Error('Failed to fetch contractors');
-        }
-
-        const contractors = await response.json();
-
-        // Find the logged-in contractor by email
-        const loggedInContractor = contractors.find(
-          (contractor: any) => contractor.email === email
-        );
-
-        if (!loggedInContractor) {
-          throw new Error('Logged-in contractor not found');
-        }
-
-        // Set the contractor ID in the state
-        setContractorId(loggedInContractor.id);
-      } catch (error) {
-        console.error('Error fetching contractor ID:', error);
-        setError('Failed to fetch contractor ID');
-      }
-    };
-
-    fetchContractorId();
+  const loadContractorId = useCallback(async () => {
+    try {
+      const id = await fetchContractorId();
+      setContractorId(id);
+    } catch (err) {
+      console.error('Error fetching contractor ID:', err);
+      setError((err as Error).message);
+    }
   }, []);
 
   useEffect(() => {
-    const fetchContractorData = async () => {
+    loadContractorId();
+  }, [loadContractorId]);
+
+  useEffect(() => {
+    async function loadContractorEarningsData() {
       if (!contractorId) return;
 
       try {
-        const response = await fetch(`https://epg-backend.onrender.com/api/contractor-information/${contractorId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch contractor data');
-        }
-
-        const data = await response.json();
+        const data = await fetchContractorEarningsData(contractorId);
         setContractorData(data);
-      } catch (error) {
-        console.error('Error fetching contractor data:', error);
-        setError('Failed to fetch contractor data');
-      }
-    };
 
-    fetchContractorData();
+      } catch (error: any) {
+        console.error('Error fetching contractor data:', error);
+        setError(error.message || 'Failed to fetch contractor data');
+      }
+    }
+
+    loadContractorEarningsData();
   }, [contractorId]);
+
 
   if (error) {
     return <div>{error}</div>;

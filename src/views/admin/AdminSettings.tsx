@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ProfileSettings } from "../../components/settings/ProfileSettings";
 import { LogoutButton } from "../../components/settings/LogoutButton";
+import { fetchAdminProfile, updateAdminProfile } from "../../services/admin/adminInfo/adminSettings";
 
 export function AdminSettings() {
   const [adminProfile, setAdminProfile] = useState({
@@ -10,83 +11,70 @@ export function AdminSettings() {
     phoneNumber: "",
     companyName: "",
   });
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchAdminProfile = async () => {
+    async function loadAdminProfile() {
       try {
         const storedUser = localStorage.getItem("user");
 
         if (!storedUser) {
-          console.error("No user found in localStorage");
+          setError("No user found in localStorage");
           return;
         }
 
         const parsedUser = JSON.parse(storedUser);
 
         if (!parsedUser.email) {
-          console.error("Email not found in stored user data");
+          setError("Email not found in stored user data");
           return;
         }
 
-        const response = await axios.get(
-          `https://epg-backend.onrender.com/api/admin/settings/?email=${parsedUser.email}`
-        );
-
-        if (response.status === 200) {
-          setAdminProfile(response.data);
+        const profile = await fetchAdminProfile(parsedUser.email);
+        if (profile) {
+          setAdminProfile(profile);
         } else {
-          console.error("Error fetching admin profile:", response.statusText);
+          setError("Failed to load profile.")
         }
-      } catch (error) {
-        console.error("Error fetching admin profile:", error);
-      } finally {
-        setLoading(false); // Set loading to false after fetching data
-      }
-    };
 
-    fetchAdminProfile();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAdminProfile();
   }, []);
 
   const handleProfileUpdate = async (updatedProfile: typeof adminProfile) => {
-    const payload = Object.fromEntries(
-      Object.entries(updatedProfile).filter(
-        ([_, value]) => value !== null && value !== undefined && value !== ""
-      )
-    );
-  
-    const storedUser = localStorage.getItem("user");
-  
-    if (!storedUser) {
-      console.error("No user found in localStorage");
-      return;
-    }
-  
-    const parsedUser = JSON.parse(storedUser);
-  
-    if (!parsedUser.email) {
-      console.error("Email not found in stored user data");
-      return;
-    }
-  
-    console.log("Payload being sent:", payload);
-  
     try {
-      const response = await axios.put(
-        `https://epg-backend.onrender.com/api/admin/settings/change/?email=${parsedUser.email}`,
-        payload
-      );
-  
-      if (response.status === 200) {
-        setAdminProfile(updatedProfile);
+      const storedUser = localStorage.getItem("user");
+
+      if (!storedUser) {
+        setError("No user found in localStorage");
+        return;
+      }
+
+      const parsedUser = JSON.parse(storedUser);
+
+      if (!parsedUser.email) {
+        setError("Email not found in stored user data");
+        return;
+      }
+
+      const updatedProfileFromServer = await updateAdminProfile(parsedUser.email, updatedProfile);
+      if (updatedProfileFromServer) {
+        setAdminProfile(updatedProfileFromServer);
         console.log("Profile updated successfully");
       } else {
-        console.error("Error updating profile:", response.statusText);
+        setError("Failed to update profile.")
       }
-    } catch (error) {
+
+    } catch (error: any) {
       console.error("Error updating profile:", error);
+      setError(error.message || "Error updating profile");
     }
-  };  
+  };
 
   // Skeleton loader for loading state
   if (loading) {

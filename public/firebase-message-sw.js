@@ -1,10 +1,6 @@
 /// <reference lib="webworker" />
 
-// Declare firebase as any since we're using the compat libraries loaded via importScripts.
-declare var firebase: any;
-declare var self: ServiceWorkerGlobalScope;
-
-// Import the Firebase scripts using importScripts
+// Import the Firebase scripts
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js");
 
@@ -26,13 +22,13 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 // Handle background messages
-messaging.onBackgroundMessage((payload: any) => {
-  console.log("[firebase-messaging-sw.ts] Received background message ", payload);
+messaging.onBackgroundMessage((payload) => {
+  console.log("[firebase-messaging-sw.js] Received background message ", payload);
 
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.icon || "/logo192.png",
+    icon: payload.notification.icon,
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

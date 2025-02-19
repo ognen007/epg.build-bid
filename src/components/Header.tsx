@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Bell, Menu, ListTodo } from "lucide-react";
 import { NotificationPopover } from "./NotificationPopover";
-import { fetchUserNotifications, markNotificationAsRead, sendNotificationToUser } from "../services/notificationEndpoints";
+import { fetchUserNotifications, markNotificationAsRead } from "../services/notificationEndpoints";
 import NotificationAudio from "../../src/asset/down.mp3";
 
 interface HeaderProps {
@@ -33,7 +33,7 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
       try {
         const userNotifications = await fetchUserNotifications(userId);
 
-        const formattedNotifications = userNotifications.map((n: any) => ({
+        const formattedNotifications = userNotifications.map((n:any) => ({
           id: n.id,
           messageTitle: n.title || "No Title",
           message: n.message || "",
@@ -42,13 +42,10 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
           read: n.read ?? false,
         }));
 
-        // Check if there's a new notification
+        // 🔥 Check if there's a NEW notification
         if (prevNotifications.length > 0 && formattedNotifications.length > prevNotifications.length) {
-          // Instead of playing a sound, call your backend to send a push notification via Firebase.
-          // Ensure you have implemented this endpoint to send FCM messages.
-          sendNotificationToUser(userId, "New Notification", "You have a new notification")
-            .then((result:any) => console.log("Firebase notification triggered", result))
-            .catch((err) => console.error("Failed to trigger Firebase notification", err));
+          const audio = new Audio(NotificationAudio); // Path to sound file
+          audio.play().catch((err) => console.error("Sound play error:", err));
         }
 
         setPrevNotifications(formattedNotifications);

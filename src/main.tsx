@@ -17,6 +17,19 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/firebase-messaging-sw.js') // Register Firebase messaging SW
+      .then((registration) => {
+        console.log('Firebase Service Worker registered:', registration);
+      })
+      .catch((error) => {
+        console.error('Firebase Service Worker registration failed:', error);
+      });
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

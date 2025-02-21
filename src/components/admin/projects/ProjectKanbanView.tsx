@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, MoreVertical, MessageSquare, X } from 'lucide-react';
 import { addCommentToTicket, createClientTask, createColumn, createInternalTask, fetchColumns, updateTicketColumn } from '../../../services/admin/kanban/kanbanEndpoint';
+import { fetchAdminNameByEmail } from '../../../services/admin/adminInfo/adminInformationEndpoint';
 
 export interface Contractor {
   id: string;
@@ -316,6 +317,7 @@ export function ProjectKanbanView() {
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [fullName,setFullName] = useState('')
 
   useEffect(() => {
     async function loadColumns() {
@@ -413,11 +415,25 @@ export function ProjectKanbanView() {
     }
   };
 
+  useEffect(() => {
+    async function loadFullName() {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) return setFullName('Admin User');
+
+        const { email } = JSON.parse(storedUser);
+        const name = await fetchAdminNameByEmail(email); 
+        setFullName(name);
+      }catch{}
+    }
+    loadFullName();
+  }, []);
+
   const handleAddComment = async () => {
     if (!selectedTicket || !newComment.trim()) return;
   
     try {
-      const newCommentData = await addCommentToTicket(selectedTicket.id, newComment, 'Current User'); // Call the service function
+      const newCommentData = await addCommentToTicket(selectedTicket.id, newComment, fullName);
   
       setColumns((prevColumns) =>
         prevColumns.map((col) => ({

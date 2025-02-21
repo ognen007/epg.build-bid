@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchContractorId } from '../../services/contractor/contractorData/contractorIdEndpoint';
 import { addComment, fetchTasks, updateTaskStatus } from '../../services/contractor/projects/contractorTask';
+import { fetchContractorProfile } from '../../services/contractor/contractorData/contractorSettings';
 
 interface Task {
   id: string;
@@ -31,6 +32,44 @@ export function TasksBoard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [contractorProfile, setContractorProfile] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    companyName: "",
+  });
+
+  useEffect(() => {
+    async function loadContractorProfile() {
+      try {
+        const storedUser = localStorage.getItem("user");
+
+        if (!storedUser) {
+          console.error("No user stored")
+          return;
+        }
+
+        const parsedUser = JSON.parse(storedUser);
+
+        if (!parsedUser.email) {
+          console.error("Email not found in stored user data");
+          return;
+        }
+
+        const profile = await fetchContractorProfile(parsedUser.email);
+
+        if (profile) {
+          setContractorProfile(profile);
+        } else {
+          console.error("Failed to load profile.")
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadContractorProfile();
+  }, []);
 
   const loadContractorId = useCallback(async () => {
     try {
@@ -68,7 +107,7 @@ export function TasksBoard() {
     if (!selectedTask || !newComment.trim()) return;
 
     try {
-      const addedComment = await addComment(selectedTask.id, newComment, 'Contractor'); // Call service function
+      const addedComment = await addComment(selectedTask.id, newComment, contractorProfile.fullName);
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
           task.id === selectedTask.id ? { ...task, comments: [...(task.comments || []), addedComment] } : task
@@ -214,7 +253,7 @@ export function TasksBoard() {
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
                 onClick={() => setSelectedTask(task)}
-                className="bg-gray-50 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
+                className="bg-green-100 p-4 rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow border border-gray-100"
               >
                 <h4 className="font-medium text-gray-900">{task.title}</h4>
                 {task.project && (

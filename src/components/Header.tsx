@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Menu, ListTodo } from "lucide-react";
 import { NotificationPopover } from "./NotificationPopover";
 import { fetchUserNotifications, markNotificationAsRead } from "../services/notificationEndpoints";
@@ -28,48 +28,56 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
 
   useEffect(() => {
     if (!userId) return;
-
+  
     const loadNotifications = async () => {
       try {
         const userNotifications = await fetchUserNotifications(userId);
-
-        const formattedNotifications = userNotifications.map((n:any) => ({
+  
+        const formattedNotifications = userNotifications.map((n: any) => ({
           id: n.id,
           messageTitle: n.title || "No Title",
-          message: n.message || "",
+          message: n.message || "No content",
           from: n.from || "Unknown",
-          timestamp: n.timestamp || "Just now",
+          timestamp: n.timestamp || new Date().toLocaleString(),
           read: n.read ?? false,
         }));
-
+  
         // 🔥 Check if there's a NEW notification
         if (prevNotifications.length > 0 && formattedNotifications.length > prevNotifications.length) {
-          const audio = new Audio(NotificationAudio); // Path to sound file
-          audio.play().catch((err) => console.error("Sound play error:", err));
+          const latestNotification = formattedNotifications[0]; // Get the latest one
+  
+          if (latestNotification) {
+            Notification.requestPermission().then((perm) => {
+              if (perm === "granted") {
+                new Notification(latestNotification.messageTitle, {
+                  body: latestNotification.message,
+                  data: { from: latestNotification.from },
+                  icon: "/path-to-your-icon.png", // Optional: Add an icon
+                });
+              }
+            });
+  
+            const audio = new Audio(NotificationAudio); // Path to sound file
+            audio.play().catch((err) => console.error("Sound play error:", err));
+          }
         }
-
+  
         setPrevNotifications(formattedNotifications);
         setNotifications(formattedNotifications);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
     };
-
-    // Poll every 10 seconds for new notifications (adjust as needed)
-    const interval = setInterval(loadNotifications, 10000);
+  
     loadNotifications();
-
-    return () => clearInterval(interval);
-  }, [userId, prevNotifications]);
+  }, [userId, prevNotifications]);  
 
   const hasUnreadNotifications = notifications.some((n) => !n.read);
 
   const handleNotificationClick = async (id: string) => {
     try {
-      // Update in backend
       await markNotificationAsRead(id);
   
-      // Update state to reflect the change
       setNotifications(
         notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
       );

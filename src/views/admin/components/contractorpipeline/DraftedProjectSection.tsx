@@ -21,7 +21,7 @@ export function DraftedProjectSection({ fullName, contractorId, proposals = [] }
     try {
       const response = await sendProjectToContractor(projectId);
       console.log('Project status updated successfully:', response);
-      await sendNotificationToUser(contractorId, "New Project", `Hey, ${fullName}, you have a new Project that you can check out`);
+      await sendNotificationToUser(contractorId);
       window.location.reload();
     } catch (error: any) {
       console.error('Failed to update project status:', error);

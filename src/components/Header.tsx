@@ -21,39 +21,6 @@ interface Notification {
   read: boolean;
 }
 
-function requestPushNotificationPermission(userId: string) {
-  if ('serviceWorker' in navigator && 'PushManager' in window) {
-    navigator.serviceWorker.ready.then((registration) => {
-      return registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array('epceblb3yJo7p28dlAU0DtDc1_OHftNn4SQjxYaXaNE'),
-      });
-    }).then((subscription) => {
-      console.log('Push subscription:', subscription);
-
-      // Send the subscription object to your backend
-      fetch(`https://epg-backend.onrender.com/notifications/${userId}`, {
-        method: 'POST',
-        body: JSON.stringify({ userId, subscription }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }).catch((error) => {
-      console.error('Error subscribing to push notifications:', error);
-    });
-  }
-}
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
 export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -61,74 +28,63 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
 
   useEffect(() => {
     if (!userId) return;
-
-    // Request permission and subscribe to push notifications
-    Notification.requestPermission().then((permission) => {
-      if (permission === 'granted') {
-        requestPushNotificationPermission(userId);
+  
+    const loadNotifications = async () => {
+      try {
+        const userNotifications = await fetchUserNotifications(userId);
+  
+        const formattedNotifications = userNotifications.map((n: any) => ({
+          id: n.id,
+          messageTitle: n.title || "No Title",
+          message: n.message || "No content",
+          from: n.from || "Unknown",
+          timestamp: n.timestamp || new Date().toLocaleString(),
+          read: n.read ?? false,
+        }));
+  
+        // 🔥 Check if there's a NEW notification
+        if (prevNotifications.length > 0 && formattedNotifications.length > prevNotifications.length) {
+          const latestNotification = formattedNotifications[0]; // Get the latest one
+  
+          if (latestNotification) {
+            Notification.requestPermission().then((perm) => {
+              if (perm === "granted") {
+                new Notification(latestNotification.messageTitle, {
+                  body: latestNotification.message,
+                  data: { from: latestNotification.from },
+                  icon: "/path-to-your-icon.png", // Optional: Add an icon
+                });
+              }
+            });
+  
+            const audio = new Audio(NotificationAudio); // Path to sound file
+            audio.play().catch((err) => console.error("Sound play error:", err));
+          }
+        }
+  
+        setPrevNotifications(formattedNotifications);
+        setNotifications(formattedNotifications);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
       }
-    });
-  }, [userId]);
+    };
+  
+    loadNotifications();
+  }, [userId, prevNotifications]);  
 
-  // useEffect(() => {
-  //   if (!userId) return;
-  
-  //   const loadNotifications = async () => {
-  //     try {
-  //       const userNotifications = await fetchUserNotifications(userId);
-  
-  //       const formattedNotifications = userNotifications.map((n: any) => ({
-  //         id: n.id,
-  //         messageTitle: n.title || "No Title",
-  //         message: n.message || "No content",
-  //         from: n.from || "Unknown",
-  //         timestamp: n.timestamp || new Date().toLocaleString(),
-  //         read: n.read ?? false,
-  //       }));
-  
-  //       // 🔥 Check if there's a NEW notification
-  //       if (prevNotifications.length > 0 && formattedNotifications.length > prevNotifications.length) {
-  //         const latestNotification = formattedNotifications[0]; // Get the latest one
-  
-  //         if (latestNotification) {
-  //           Notification.requestPermission().then((perm) => {
-  //             if (perm === "granted") {
-  //               new Notification(latestNotification.messageTitle, {
-  //                 body: latestNotification.message,
-  //                 data: { from: latestNotification.from },
-  //                 icon: "/path-to-your-icon.png", // Optional: Add an icon
-  //               });
-  //             }
-  //           });
-  
-  //           const audio = new Audio(NotificationAudio); // Path to sound file
-  //           audio.play().catch((err) => console.error("Sound play error:", err));
-  //         }
-  //       }
-  
-  //       setPrevNotifications(formattedNotifications);
-  //       setNotifications(formattedNotifications);
-  //     } catch (error) {
-  //       console.error("Error fetching notifications:", error);
-  //     }
-  //   };
-  
-  //   loadNotifications();
-  // }, [userId, prevNotifications]);  
+  const hasUnreadNotifications = notifications.some((n) => !n.read);
 
-  // const hasUnreadNotifications = notifications.some((n) => !n.read);
-
-  // const handleNotificationClick = async (id: string) => {
-  //   try {
-  //     await markNotificationAsRead(id);
+  const handleNotificationClick = async (id: string) => {
+    try {
+      await markNotificationAsRead(id);
   
-  //     setNotifications(
-  //       notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-  //     );
-  //   } catch (error) {
-  //     console.error("Failed to mark notification as read:", error);
-  //   }
-  // };
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
+  };
   
 
   return (
@@ -153,17 +109,17 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
             onClick={() => setShowNotifications(!showNotifications)}
           >
             <Bell className="h-5 w-5" />
-            {/* {hasUnreadNotifications && (
+            {hasUnreadNotifications && (
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
-            )} */}
+            )}
           </button>
 
-          {/* {showNotifications && (
+          {showNotifications && (
             <NotificationPopover
               notifications={notifications}
               onNotificationClick={handleNotificationClick}
             />
-          )} */}
+          )}
         </div>
 
         {showTasksButton && (

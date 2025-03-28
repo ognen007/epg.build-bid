@@ -35,6 +35,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/service-worker.js")
+      .then((registration) => {
+        console.log("2Service Worker registered:", registration);
+      })
+      .catch((error) => {
+        console.error("2Service Worker registration failed:", error);
+      });
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

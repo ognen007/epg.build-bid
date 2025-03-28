@@ -23,6 +23,26 @@ export function ContractorLayout() {
   const [contractorId, setContractorId] = useState("");
   const [loading, setLoading] = useState(true);
 
+  function requestNotificationPermission() {
+    if (Notification.permission === "granted") {
+      console.log("Permission already granted");
+      return;
+    }
+  
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        console.log("Notification permission granted");
+      } else {
+        console.error("Notification permission denied");
+      }
+    });
+  }
+  
+  // Call this function when the app loads or when the user opts in for notifications
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
   useEffect(() => {
     generateToken();
   },[])
@@ -71,6 +91,82 @@ export function ContractorLayout() {
     loadContractorId();
   }, [loadContractorId]);
 
+  async function sendNotificationToUser(userId: string, messageTitle: string, message: string) {
+    try {
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messageTitle, message }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to send notification");
+      }
+  
+      console.log("Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  }
+
+  async function subscribeUserToPushNotifications(userId: string) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+  
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array("BI97IO6U9VAW0woyQ3RCVO7aiBydV55n4NogtcuQ-U9IQoaXBQ-WKnlsRSwAkhxBMaG86T7fjNgwAqP9rLrcUAE"!), // Replace with your VAPID public key
+      });
+  
+      // Send the subscription object to the backend
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.toJSON().keys?.p256dh,
+            auth: subscription.toJSON().keys?.auth,
+          },
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to store push subscription");
+      }
+  
+      console.log("Push subscription stored successfully");
+    } catch (error) {
+      console.error("Error subscribing user to push notifications:", error);
+    }
+  }
+  
+  // Helper function to convert VAPID key
+  function urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+  
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  useEffect(() => {
+    requestNotificationPermission();
+    subscribeUserToPushNotifications(contractorId);
+  }, []);
+
+  useEffect(() => {
+    sendNotificationToUser(contractorId, "test","testing")
+  }, [])
+
   return (
     <div className="flex h-screen bg-gray-50">
       {showWelcome && (
@@ -97,7 +193,6 @@ export function ContractorLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <Header
           userFullName={fullName}
-          userId={contractorId}
           onMenuClick={() => setIsSidebarOpen(true)}
           onTasksClick={() => {}}
           showTasksButton={false}

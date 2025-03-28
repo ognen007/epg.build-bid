@@ -4,7 +4,7 @@ import { UserPlus, DollarSign, CheckCircle } from 'lucide-react';
 
 export async function fetchRecentActivities(): Promise<Activity[]> {
   try {
-    const response = await axios.get('https://epg-backend.onrender.com/api/admin/recent/activity');
+    const response = await axios.get('https://epg-backend.onrender.com/api/recent/activity');
     const data = response.data;
 
     const formattedActivities: Activity[] = [];

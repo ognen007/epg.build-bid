@@ -6,11 +6,12 @@ import {
   Layers,
   Settings,
   Briefcase,
-  Text,
+  LayoutList,
   Search,
   GitGraph,
   Waypoints,
   Wallet,
+  CalendarRange
 } from 'lucide-react';
 
 export const routes = {
@@ -20,10 +21,11 @@ export const routes = {
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
     { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Layers, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
     { path: '/admin/projects', label: 'Projects', icon: BetweenHorizontalStart, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
-    // { path: '/admin/takeoff', label: 'Takeoff', icon: Rocket, roles: ["ADMIN"] },
-    // { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN','PROJECTSPECIALIST', "CSM"]  },
+    { path: '/admin/tasks', label: 'Tasks', icon: LayoutList, roles: ["ADMIN", 'PROJECTSPECIALIST', 'CSM'] },
+    { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
     { path: '/admin/analytics', label: 'Reports & Analytics', icon: GitGraph, roles: ["ADMIN"] },
+    { path: '/admin/email-calender', label: 'Email & Calender', icon: CalendarRange, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"]  },
     { path: '/admin/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"]  },
   ],
   client: [

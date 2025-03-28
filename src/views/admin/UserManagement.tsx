@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import axios from 'axios';
 import { UserTable } from './components/UserTable';
 import { UserFilters } from './components/UserFilters';
 import { AddUserModal } from '../../components/admin/users/AddUserModal';
@@ -8,7 +7,7 @@ import { EditAdminUser } from './EditAdminUser';
 import { AdminUser } from '../../types/admin';
 import { addUser, fetchUsers } from '../../services/admin/adminInfo/adminInformationEndpoint';
 
-interface User {
+export interface User {
   id: string;
   fullName: string;
   email: string;

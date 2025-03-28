@@ -18,6 +18,7 @@ import { useAuthContext } from '../views/auth/useAuthContext';
 import { routes } from '../navigation/routes';
 import { ProjectManagement } from '../views/admin/ProjectManagement';
 import { fetchAdminNameByEmail } from '../services/admin/adminInfo/adminInformationEndpoint';
+import { AdminTasks } from '../components/admin/tasks/AdminTasks';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -112,6 +113,7 @@ export function AdminLayout() {
                 <Route path="/analytics/revenue" element={<RevenueComponent />} />
                 {/* <Route path='/messages' element={<MessagesView/>}/> */}
                 <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
+                <Route path="/tasks" element={<AdminTasks />} />
                 <Route path="/analytics/users" element={<UserGrowthComponent />} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />

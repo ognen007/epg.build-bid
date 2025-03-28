@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MessagesList } from '../components/messages/MessagesList';
 import { ChatWindow } from '../components/messages/ChatWindow';
-import { Message, Conversation } from '../types/message';
+import { Conversation } from '../types/message';
 import { ArrowLeft } from 'lucide-react';
 
 export function MessagesView() {

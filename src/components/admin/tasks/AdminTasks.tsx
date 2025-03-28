@@ -4,7 +4,7 @@ import * as HoverCard from '@radix-ui/react-hover-card';
 import { User } from '../../../views/admin/UserManagement';
 import { fetchUsers } from '../../../services/admin/adminInfo/adminInformationEndpoint';
 
-interface Task {
+export interface Task {
   id: string;
   header: string;
   status: 'todo' | 'in-progress' | 'completed';

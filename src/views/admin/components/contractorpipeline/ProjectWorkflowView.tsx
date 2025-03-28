@@ -3,7 +3,6 @@ import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
 import { AddCommentModal } from "./AddCommentModal";
 import { ProjectDetailsModal } from "./ProjectDetailsModal";
-import { sendNotificationToUser } from "../../../../services/notificationEndpoints";
 import { addCommentToTask, fetchCommentsForTask, fetchContractorTasks, updateTaskStatusFunction } from "../../../../services/admin/projects/projectWorkflowEndpoint";
 
 export interface ProjectWorkflowProps {
@@ -16,6 +15,26 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [isProjectDetailsModalOpen, setIsProjectDetailsModalOpen] = useState(false);
   const [comments, setComments] = useState<any[]>([]);
+
+  async function sendNotificationToUser(userId: string, messageTitle: string, message: string) {
+    try {
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messageTitle, message }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to send notification");
+      }
+  
+      console.log("Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  }
 
   useEffect(() => {
     async function loadTasks() {

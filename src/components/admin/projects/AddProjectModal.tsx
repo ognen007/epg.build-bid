@@ -30,6 +30,38 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  async function createProjectTracker(projectName:string, description:string) {
+    try {
+      // Validate required fields
+      if (!projectName || !description) {
+        throw new Error("Missing required fields");
+      }
+  
+      // Make a POST request to the backend API
+      const response = await fetch(`https://epg-backend.onrender.com/api/project/create/${projectName}/${description}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ projectName, description }),
+      });
+  
+      // Check if the response is successful
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create project");
+      }
+  
+      // Parse and return the response data
+      const data = await response.json();
+      console.log("Project created successfully:", data);
+      return data;
+    } catch (error) {
+      console.error("Error creating project:", error);
+      throw error; // Re-throw the error for further handling
+    }
+  }
+
   useEffect(() => {
     async function loadContractors() {
       if (isOpen) {
@@ -73,7 +105,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
       });
 
       if (!response.ok) throw new Error('Failed to create project');
-
+      createProjectTracker(formData.name, formData.description)
       const data = await response.json();
       onAdd(formData);
       setFormData({

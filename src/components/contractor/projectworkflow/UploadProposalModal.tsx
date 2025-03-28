@@ -8,6 +8,7 @@ interface UploadProposalProps {
   onClose: () => void;
   projectId: string;
   onUploadSuccess: () => void; // Callback to notify parent of successful upload
+  contractorFullName: string;
 }
 
 export function UploadProposalModal({
@@ -15,10 +16,31 @@ export function UploadProposalModal({
   onClose,
   projectId,
   onUploadSuccess,
+  contractorFullName
 }: UploadProposalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function sendNotificationToUser(messageTitle: string, message: string) {
+    try {
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/admins`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messageTitle, message }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to send notification");
+      }
+  
+      console.log("Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -39,6 +61,11 @@ export function UploadProposalModal({
     try {
       await uploadProposal(projectId, file); // Call the service function
       onUploadSuccess();
+      const currentDate = new Date().toLocaleDateString();
+      sendNotificationToUser(
+        "Proposal Submit",
+        `${contractorFullName} submitted a proposal for his recent project on ${currentDate}`
+      );
       onClose();
     } catch (error: any) { // Type the error as any
       console.error("Error uploading file:", error);

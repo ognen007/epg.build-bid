@@ -114,6 +114,7 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
       <PreConstructionSection
         tasks={tasks}
         onTaskClick={handleTaskClick}
+        fullName={contractor?.fullName}
       />
       <ConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
 

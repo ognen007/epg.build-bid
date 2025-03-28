@@ -11,7 +11,8 @@ import {
   GitGraph,
   Waypoints,
   Wallet,
-  CalendarRange
+  CalendarRange,
+  FolderRoot
 } from 'lucide-react';
 
 export const routes = {
@@ -25,6 +26,7 @@ export const routes = {
     { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },
     { path: '/admin/analytics', label: 'Reports & Analytics', icon: GitGraph, roles: ["ADMIN"] },
+    { path: '/admin/projects-overview', label: 'Projects Overview', icon: FolderRoot, roles: ["ADMIN"] },
     { path: '/admin/email-calender', label: 'Email & Calender', icon: CalendarRange, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"]  },
     { path: '/admin/settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"]  },
   ],

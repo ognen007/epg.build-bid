@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import epgLogo from "../../../asset/epgLogo.png";
 import { registerContractor } from '../../../services/contractor/contractorData/contractorRegister';
+import { Task } from '../../../components/admin/tasks/AdminTasks';
 
 const specialties = [
   'Plumbing',
@@ -39,6 +40,71 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
     insuranceCertificateFile: null as File | null,
     termsAccepted: false
   });
+
+  async function sendNotificationToUser(userId: string, messageTitle: string, message: string) {
+    try {
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messageTitle, message }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to send notification");
+      }
+  
+      console.log("Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  }
+  
+  const addTask1 = async () => {
+    const task: Task = {
+      id: Date.now().toString(), // Temporary ID
+      header: `Assign new Project to ${formData.fullName}`,
+      status: 'todo',
+      assignee: "James Patnongon",
+      description: `Assign a Task to ${formData.fullName} in under 24h`,
+      timeSpent: 0
+    };}
+
+    const addTask2 = async () => {
+      const task: Task = {
+        id: Date.now().toString(), // Temporary ID
+        header: `Assign new Project to ${formData.fullName}`,
+        status: 'todo',
+        assignee: "James Patnongon",
+        description: `Assign a Task to ${formData.fullName} in under 14 days`,
+        timeSpent: 0
+      };
+
+      const addTask3 = async () => {
+        const task: Task = {
+          id: Date.now().toString(), // Temporary ID
+          header: `Assign new Project to ${formData.fullName}`,
+          status: 'todo',
+          assignee: "James Patnongon",
+          description: `Assign a Task to ${formData.fullName} in under 14`,
+          timeSpent: 0
+        };
+
+    try {
+      const response = await fetch('https://epg-backend.onrender.com/api/admin/adminTasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task)
+      });
+      const createdTask = await response.json();
+      
+    } catch (error) {
+      setError('Failed to create task');
+      console.error('Error creating task:', error);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +167,11 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
       const response = await registerContractor(formPayload);
       console.log(response);
 
-      if (response.status === 201 || response.status === 200) {
+      if (response.status !== 400 || response.status !== 404) {
+        sendNotificationToUser('67a22d7e2ba533059f313c8e', `New Contractor ${formData.fullName} Signed In with EPG`, `Check your new Projects`)
+        addTask1();
+        addTask2();
+        addTask3();
         navigate('/login');
       } else {
         setError('Registration failed. Please try again.');
@@ -113,7 +183,7 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
       setLoading(false);
     }
   };
-
+// 67a22d7e2ba533059f313c8e
   const handleChange = (field: string, value: any) => {
     setFormData(prevState => ({
       ...prevState,
@@ -368,4 +438,4 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
       </div>
     </div>
   );
-}
+}}

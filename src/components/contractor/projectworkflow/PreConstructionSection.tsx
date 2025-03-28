@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Clock, FileText, CheckCircle, Bolt, HandHelping } from "lucide-react";
 import { UploadProposalModal } from "./UploadProposalModal";
 
-export function PreConstructionSection({ tasks, onTaskClick, refreshTasks }: any) {
+export function PreConstructionSection({ tasks, onTaskClick, refreshTasks, fullName }: any) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
@@ -110,6 +110,7 @@ export function PreConstructionSection({ tasks, onTaskClick, refreshTasks }: any
         onClose={() => setIsUploadModalOpen(false)}
         projectId={selectedProjectId || ""}
         onUploadSuccess={handleUploadSuccess} // Pass the success handler
+        contractorFullName={fullName}
       />
     </div>
   );

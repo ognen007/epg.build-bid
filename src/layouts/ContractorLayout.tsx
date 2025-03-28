@@ -14,7 +14,6 @@ import { ContractorSettings } from "../views/contractor/ContractorSettings";
 import { ContractorTasks } from "../views/contractor/ContractorTasks";
 import { fetchContractorId } from "../services/contractor/contractorData/contractorIdEndpoint";
 import { fetchContractorNameByEmail } from "../services/contractor/contractorData/contractorFetchEmail";
-import { generateToken } from "../services/firebase";
 
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,10 +41,6 @@ export function ContractorLayout() {
   useEffect(() => {
     requestNotificationPermission();
   }, []);
-
-  useEffect(() => {
-    generateToken();
-  },[])
 
   useEffect(() => {
     const handleVisibilityChange = () => {

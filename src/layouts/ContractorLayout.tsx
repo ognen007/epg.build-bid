@@ -95,6 +95,7 @@ async function subscribeUserToPushNotifications(userId: string) {
     });
 
     // Send the subscription object to the backend
+    console.log(userId)
     const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {
       method: "POST",
       headers: {
@@ -147,13 +148,16 @@ useEffect(() => {
 
 async function sendNotificationToUser(userId: string, messageTitle: string, message: string) {
   try {
-    console.log(userId)
+    // Send the notification
     const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ messageTitle, message }),
+      body: JSON.stringify({
+        messageTitle,
+        message,
+      }),
     });
 
     if (!response.ok) {

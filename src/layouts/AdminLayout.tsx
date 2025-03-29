@@ -125,26 +125,16 @@ export function AdminLayout() {
             )}
             {user?.role === 'CSM' && (
               <>
-                <Route path="/projects/:id" element={<ProjectKanbanView/>} />
-                <Route path="/projects/" element={<ProjectManagement />} />
-                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/tasks" element={<AdminTasks />} />
                 <Route path="/settings" element={<AdminSettings/>} />
-                <Route path="/analytics/revenue" element={<RevenueComponent />} />
-                <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
-                <Route path="/analytics/users" element={<UserGrowthComponent />} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />
               </>
             )}
             {user?.role === 'PROJECTSPECIALIST' && (
               <>
-                <Route path="/projects/:id" element={<ProjectKanbanView/>} />
-                <Route path="/projects/" element={<ProjectManagement />} />
-                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/tasks" element={<AdminTasks />} />
                 <Route path="/settings" element={<AdminSettings/>} />
-                <Route path="/analytics/revenue" element={<RevenueComponent />} />
-                <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
-                <Route path="/analytics/users" element={<UserGrowthComponent />} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />
               </>

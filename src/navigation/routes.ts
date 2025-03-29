@@ -17,11 +17,11 @@ import {
 
 export const routes = {
   admin: [
-    { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['ADMIN', 'PROJECTSPECIALIST', "CSM"] },
-    { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN", 'PROJECTSPECIALIST'] },
+    { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['ADMIN'] },
+    { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN"] },
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
-    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Layers, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
-    { path: '/admin/projects', label: 'Projects', icon: BetweenHorizontalStart, roles: ["ADMIN", 'PROJECTSPECIALIST'] },
+    { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Layers, roles: ["ADMIN", 'PROJECTSPECIALIST', 'CSM'] },
+    { path: '/admin/projects', label: 'Projects', icon: BetweenHorizontalStart, roles: ["ADMIN"] },
     { path: '/admin/tasks', label: 'Tasks', icon: LayoutList, roles: ["ADMIN", 'PROJECTSPECIALIST', 'CSM'] },
     // { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },

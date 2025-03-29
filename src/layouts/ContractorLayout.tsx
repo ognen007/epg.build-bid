@@ -110,10 +110,10 @@ async function subscribeUserToPushNotifications(userId: string) {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to store push subscription");
+      throw new Error(await response.text());
     }
 
-    console.log("Push subscription stored successfully");
+    console.log("Push subscription stored/updated successfully");
   } catch (error) {
     console.error("Error subscribing user to push notifications:", error);
   }
@@ -133,13 +133,21 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 useEffect(() => {
-  const userId = "USER_ID"; // Replace with the actual user ID
+  const userId = contractorId;
   requestNotificationPermission();
   subscribeUserToPushNotifications(userId);
-}, []);
+
+  // Refresh subscription every hour
+  const interval = setInterval(() => {
+    subscribeUserToPushNotifications(userId);
+  }, 60 * 60 * 1000); 
+
+  return () => clearInterval(interval);
+}, [contractorId]);
 
 async function sendNotificationToUser(userId: string, messageTitle: string, message: string) {
   try {
+    console.log(userId)
     const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
       method: "POST",
       headers: {
@@ -190,7 +198,7 @@ async function sendNotificationToUser(userId: string, messageTitle: string, mess
         />
 
         <main className="flex-1 p-4 md:p-6 overflow-auto">
-        <button onClick={() => sendNotificationToUser("USER_ID", "Test Title", "This is a test notification.")}>
+        <button onClick={() => sendNotificationToUser(contractorId, "Test Title", "This is a test notification.")}>
   Send Notification
 </button>
           <Routes>

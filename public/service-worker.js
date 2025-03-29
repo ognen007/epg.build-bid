@@ -46,6 +46,6 @@ self.addEventListener('notificationclick', (event) => {
 
   // Open the app or a specific URL
   event.waitUntil(
-    clients.openWindow('https://epgbuildbid-2eui--5173--33edf5bb.local-credentialless.webcontainer.io/') // Replace with your app's URL
+    clients.openWindow('https://app.epg.build/') // Replace with your app's URL
   );
 });

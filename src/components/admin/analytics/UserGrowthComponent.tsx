@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit2 } from 'lucide-react';
 import { fetchContractors, updateContractor } from '../../../services/admin/contractors/userGrowthEndpoint';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 export interface Contractor {
   id: string;
@@ -132,6 +133,7 @@ export function UserGrowthComponent() {
   const [selectedUser, setSelectedUser] = useState<Contractor | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate()
 
   // Fetch contractors from the backend
   useEffect(() => {
@@ -194,7 +196,6 @@ export function UserGrowthComponent() {
             />
           </div>
         </div>
-
         {loading && <p>Loading contractors...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
@@ -213,7 +214,10 @@ export function UserGrowthComponent() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredContractors.map((contractor) => (
-                <tr key={contractor.id} className="hover:bg-gray-50">
+                <tr 
+                key={contractor.id} 
+                className="hover:bg-gray-50"
+                onClick={() => navigate(`/admin/analytics/users/timeline/${contractor.fullName}`)}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{contractor.fullName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.companyName}</td>

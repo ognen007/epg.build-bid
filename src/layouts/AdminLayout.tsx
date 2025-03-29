@@ -20,6 +20,7 @@ import { ProjectManagement } from '../views/admin/ProjectManagement';
 import { fetchAdminNameByEmail } from '../services/admin/adminInfo/adminInformationEndpoint';
 import { AdminTasks } from '../components/admin/tasks/AdminTasks';
 import { ProjectsOverview } from '../views/admin/components/ProjectsOverview';
+import { ContractorProjectTimeline } from '../components/admin/analytics/ContractorProjectTimeline';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -115,6 +116,7 @@ export function AdminLayout() {
                 {/* <Route path='/messages' element={<MessagesView/>}/> */}
                 <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
                 <Route path="/projects-overview" element={<ProjectsOverview />} />
+                <Route path='/analytics/users/timeline/:contractorFullName' element={<ContractorProjectTimeline />}/>
                 <Route path="/tasks" element={<AdminTasks />} />
                 <Route path="/analytics/users" element={<UserGrowthComponent />} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />

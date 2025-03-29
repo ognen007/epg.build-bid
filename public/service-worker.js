@@ -29,11 +29,11 @@ self.addEventListener('fetch', (event) => {
 // Push event: Handle incoming push notifications
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
-  const title = data.title || 'Default Title';
+  const title = data.title || 'You have a new notification';
   const options = {
-    body: data.body || 'No content',
-    icon: '/icon.png', // Path to your app's icon
-    badge: '/badge.png', // Small icon for notifications
+    body: data.body || 'You have a new notification',
+    icon: '/favicon.svg', // Path to your app's icon
+    badge: '/favicon.ico', // Small icon for notifications
   };
 
   // Show the notification

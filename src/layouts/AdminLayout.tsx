@@ -115,7 +115,7 @@ export function AdminLayout() {
                 <Route path="/analytics/revenue" element={<RevenueComponent />} />
                 {/* <Route path='/messages' element={<MessagesView/>}/> */}
                 <Route path="/analytics/revenue/:id" element={<RevenueDetails />} />
-                <Route path="/projects-overview" element={<ProjectsOverview />} />
+                {/* <Route path="/projects-overview" element={<ProjectsOverview />} /> */}
                 <Route path='/analytics/users/timeline/:contractorFullName' element={<ContractorProjectTimeline />}/>
                 <Route path="/tasks" element={<AdminTasks />} />
                 <Route path="/analytics/users" element={<UserGrowthComponent />} />

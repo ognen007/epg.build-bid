@@ -93,7 +93,7 @@ async function subscribeUserToPushNotifications(userId: string) {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array("BI97IO6U9VAW0woyQ3RCVO7aiBydV55n4NogtcuQ-U9IQoaXBQ-WKnlsRSwAkhxBMaG86T7fjNgwAqP9rLrcUAE"), // Replace with your VAPID public key
     });
-
+    console.log(subscription)
     // Send the subscription object to the backend
     console.log(userId)
     const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {

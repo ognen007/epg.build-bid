@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import { ContractorSidebar } from "../components/navigation/ContractorSidebar";
 import { Header } from "../components/Header";
 import { WelcomePopup } from "../components/welcome/WelcomePopup";
-import axios from "axios";
 
 // Import contractor views
 import { ContractorDashboard } from "../views/contractor/ContractorDashboard";
@@ -22,12 +21,13 @@ export function ContractorLayout() {
   const [contractorId, setContractorId] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Request notification permission
   function requestNotificationPermission() {
     if (Notification.permission === "granted") {
       console.log("Permission already granted");
       return;
     }
-  
+
     Notification.requestPermission().then((permission) => {
       if (permission === "granted") {
         console.log("Notification permission granted");
@@ -36,7 +36,7 @@ export function ContractorLayout() {
       }
     });
   }
-  
+
   useEffect(() => {
     requestNotificationPermission();
   }, []);
@@ -64,6 +64,8 @@ export function ContractorLayout() {
         const { email } = JSON.parse(storedUser);
         const name = await fetchContractorNameByEmail(email);
         setFullName(name);
+      } catch (error) {
+        console.error("Error loading full name:", error);
       } finally {
         setLoading(false);
       }
@@ -74,9 +76,10 @@ export function ContractorLayout() {
   const loadContractorId = useCallback(async () => {
     try {
       const id = await fetchContractorId();
+      if (!id) throw new Error("Failed to fetch contractor ID");
       setContractorId(id);
     } catch (err) {
-      console.error('Error fetching contractor ID:', err);
+      console.error("Error fetching contractor ID:", err);
       setLoading(false);
     }
   }, []);
@@ -85,90 +88,108 @@ export function ContractorLayout() {
     loadContractorId();
   }, [loadContractorId]);
 
-async function subscribeUserToPushNotifications(userId: string) {
-  try {
-    const registration = await navigator.serviceWorker.ready;
+  // Helper function to convert VAPID key
+  function urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
 
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array("BI97IO6U9VAW0woyQ3RCVO7aiBydV55n4NogtcuQ-U9IQoaXBQ-WKnlsRSwAkhxBMaG86T7fjNgwAqP9rLrcUAE"), // Replace with your VAPID public key
-    });
-    console.log(subscription)
-    // Send the subscription object to the backend
-    console.log(userId)
-    const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: subscription.toJSON().keys?.p256dh,
-          auth: subscription.toJSON().keys?.auth,
-        },
-      }),
-    });
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
 
-    if (!response.ok) {
-      throw new Error(await response.text());
+  // Subscribe user to push notifications
+  async function subscribeUserToPushNotifications(userId: string) {
+    if (!userId) {
+      console.warn("Cannot subscribe to push notifications: userId is missing");
+      return;
     }
 
-    console.log("Push subscription stored/updated successfully");
-  } catch (error) {
-    console.error("Error subscribing user to push notifications:", error);
+    try {
+      const registration = await navigator.serviceWorker.ready;
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          "BI97IO6U9VAW0woyQ3RCVO7aiBydV55n4NogtcuQ-U9IQoaXBQ-WKnlsRSwAkhxBMaG86T7fjNgwAqP9rLrcUAE"
+        ),
+      });
+
+      console.log("Push subscription created:", subscription);
+
+      // Send the subscription object to the backend
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.toJSON().keys?.p256dh,
+            auth: subscription.toJSON().keys?.auth,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      console.log("Push subscription stored/updated successfully");
+    } catch (error) {
+      console.error("Error subscribing user to push notifications:", error);
+    }
   }
-}
-
-// Helper function to convert VAPID key
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-useEffect(() => {
-  const userId = contractorId;
-  requestNotificationPermission();
-  subscribeUserToPushNotifications(userId);
 
   // Refresh subscription every hour
-  const interval = setInterval(() => {
-    subscribeUserToPushNotifications(userId);
-  }, 60 * 60 * 1000); 
-
-  return () => clearInterval(interval);
-}, [contractorId]);
-
-async function sendNotificationToUser(userId: string, messageTitle: string, message: string) {
-  try {
-    // Send the notification
-    const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messageTitle,
-        message,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to send notification");
+  useEffect(() => {
+    if (!contractorId) {
+      console.warn("Cannot refresh subscription: contractorId is missing");
+      return;
     }
 
-    console.log("Notification sent successfully");
-  } catch (error) {
-    console.error("Error sending notification:", error);
+    requestNotificationPermission();
+    subscribeUserToPushNotifications(contractorId);
+
+    const interval = setInterval(() => {
+      subscribeUserToPushNotifications(contractorId);
+    }, 60 * 60 * 1000); // Every hour
+
+    return () => clearInterval(interval);
+  }, [contractorId]);
+
+  // Send notification to user
+  async function sendNotificationToUser(messageTitle: string, message: string) {
+    if (!contractorId) {
+      console.warn("Cannot send notification: contractorId is missing");
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${contractorId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messageTitle,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      console.log("Notification sent successfully");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
   }
-}
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -202,9 +223,13 @@ async function sendNotificationToUser(userId: string, messageTitle: string, mess
         />
 
         <main className="flex-1 p-4 md:p-6 overflow-auto">
-        <button onClick={() => sendNotificationToUser(contractorId, "Test Title", "This is a test notification.")}>
-  Send Notification
-</button>
+          <button
+            onClick={() =>
+              sendNotificationToUser("Test Title", "This is a test notification.")
+            }
+          >
+            Send Notification
+          </button>
           <Routes>
             <Route path="/" element={<ContractorDashboard loading={loading} />} />
             <Route path="/projects" element={<ContractorProjects loading={loading} />} />

@@ -12,4 +12,5 @@ export interface ProjectType {
   highIntent?: boolean;
   valuation: string;
   blueprintsFile: any;
+  createdAt?:any;
 }

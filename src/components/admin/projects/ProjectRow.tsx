@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { Edit2, Trash2 } from 'lucide-react';
 import { ProjectStatus } from './ProjectStatus';
 import { ProjectType } from '../../../types/project';
@@ -9,13 +8,6 @@ interface ProjectRowProps {
 }
 
 export function ProjectRow({ project, deleteProject }: ProjectRowProps) {
-  const navigate = useNavigate(); // Initialize useNavigate
-
-  // Handle row click to navigate to the project details page
-  const handleRowClick = () => {
-    navigate(`/admin/projects/${project.id}`);
-  };
-
   // Handle delete button click (stop event propagation to prevent row click)
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent the row click event from firing
@@ -24,7 +16,6 @@ export function ProjectRow({ project, deleteProject }: ProjectRowProps) {
 
   return (
     <tr
-      onClick={handleRowClick} // Add onClick handler for the row
       className="hover:bg-gray-50 cursor-pointer" // Add cursor-pointer for better UX
     >
       <td className="px-6 py-4 whitespace-nowrap">
@@ -47,6 +38,11 @@ export function ProjectRow({ project, deleteProject }: ProjectRowProps) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-500">${project.valuation}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-gray-500">
+          {new Date(project.createdAt).toLocaleDateString()}
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex items-center justify-end space-x-2">

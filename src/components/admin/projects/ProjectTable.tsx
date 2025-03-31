@@ -38,6 +38,9 @@ export function ProjectTable({ projects }: ProjectTableProps) {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Valuation
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Created
+              </th>
               <th className="relative px-6 py-3">
                 <span className="sr-only">Actions</span>
               </th>

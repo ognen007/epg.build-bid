@@ -35,7 +35,6 @@ export function NotificationPopover({ notifications, onNotificationClick }: Noti
                   <span className="text-xs text-gray-500">{notification.timestamp}</span>
                 </div>
                 <p className="mt-1 text-sm text-gray-500 line-clamp-2">{notification.message}</p>
-                <p className="mt-1 text-xs text-gray-400">From: {notification.from}</p>
               </div>
             ))
           )}

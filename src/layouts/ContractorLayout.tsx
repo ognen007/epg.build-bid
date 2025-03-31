@@ -223,6 +223,7 @@ export function ContractorLayout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header
+        userId={contractorId}
           userFullName={fullName}
           onMenuClick={() => setIsSidebarOpen(true)}
           onTasksClick={() => {}}

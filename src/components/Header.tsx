@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Bell, Menu, ListTodo } from "lucide-react";
 import { NotificationPopover } from "./NotificationPopover";
-import { fetchUserNotifications, markNotificationAsRead } from "../services/notificationEndpoints";
-import NotificationAudio from "../../src/asset/down.mp3";
+import axios from "axios";
+import { markNotificationAsRead } from "../services/notificationEndpoints";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -16,7 +16,6 @@ interface Notification {
   id: string;
   messageTitle: string;
   message: string;
-  from: string;
   timestamp: string;
   read: boolean;
 }
@@ -31,44 +30,60 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
   
     const loadNotifications = async () => {
       try {
-        const userNotifications = await fetchUserNotifications(userId);
-  
+        // Fetch notifications for the user
+        const response = await axios.get(`https://epg-backend.onrender.com/api/notify/notifications/${userId}`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+    
+        const userNotifications = response.data;
+    
+        // Format the notifications
         const formattedNotifications = userNotifications.map((n: any) => ({
           id: n.id,
-          messageTitle: n.title || "No Title",
+          messageTitle: n.messageTitle || "No Title",
           message: n.message || "No content",
-          from: n.from || "Unknown",
-          timestamp: n.timestamp || new Date().toLocaleString(),
+          createdAt: n.createdAt || new Date().toLocaleString(),
           read: n.read ?? false,
         }));
-  
+    
         // 🔥 Check if there's a NEW notification
-        if (prevNotifications.length > 0 && formattedNotifications.length > prevNotifications.length) {
+        if (
+          prevNotifications.length > 0 &&
+          formattedNotifications.length > prevNotifications.length
+        ) {
           const latestNotification = formattedNotifications[0]; // Get the latest one
-  
+    
           if (latestNotification) {
             Notification.requestPermission().then((perm) => {
               if (perm === "granted") {
                 new Notification(latestNotification.messageTitle, {
                   body: latestNotification.message,
-                  data: { from: latestNotification.from },
                   icon: "/path-to-your-icon.png", // Optional: Add an icon
                 });
               }
             });
-  
-            const audio = new Audio(NotificationAudio); // Path to sound file
+    
+            const audio = new Audio("/path-to-notification-sound.mp3"); // Path to sound file
             audio.play().catch((err) => console.error("Sound play error:", err));
           }
         }
-  
+    
+        // Update state with the new notifications
         setPrevNotifications(formattedNotifications);
         setNotifications(formattedNotifications);
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        if (axios.isAxiosError(error)) {
+          console.error(
+            "Error fetching notifications:",
+            error.response?.data || error.message
+          );
+        } else {
+          console.error("Error fetching notifications:", error);
+        }
       }
     };
-  
     loadNotifications();
   }, [userId, prevNotifications]);  
 
@@ -76,13 +91,19 @@ export function Header({ onMenuClick, onTasksClick, showTasksButton, userId }: H
 
   const handleNotificationClick = async (id: string) => {
     try {
+      // Mark the notification as read on the backend
       await markNotificationAsRead(id);
   
-      setNotifications(
-        notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+      // Update the local state to reflect the change
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((n) =>
+          n.id === id ? { ...n, read: true } : n
+        )
       );
+  
+      console.log(`Notification ${id} marked as read`);
     } catch (error) {
-      console.error("Failed to mark notification as read:", error);
+      console.error("Failed to handle notification click:", error);
     }
   };
   

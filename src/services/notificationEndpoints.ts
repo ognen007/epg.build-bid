@@ -1,18 +1,25 @@
-export const markNotificationAsRead = async (notificationId: string) => {
+import axios from "axios";
+
+export const markNotificationAsRead = async (id: string) => {
   try {
-    const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/mark-as-read/${notificationId}`, {
-      method: 'PUT',
+    const response = await axios.put(`https://epg-backend.onrender.com/api/notify/notifications/${id}`, {}, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
-    if (!response.ok) throw new Error('Failed to mark notification as read');
-
-    return await response.json();
+    console.log("Notification marked as read:", response.data);
+    return response.data; // Return the updated notification if needed
   } catch (error) {
-    console.error(error);
-    return { error: 'Failed to mark notification as read' };
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Failed to mark notification as read:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Failed to mark notification as read:", error);
+    }
+    throw error; // Re-throw the error for handling in the calling function
   }
 };
 

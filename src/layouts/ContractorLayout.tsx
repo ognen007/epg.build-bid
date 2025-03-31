@@ -12,6 +12,7 @@ import { ContractorSettings } from "../views/contractor/ContractorSettings";
 import { ContractorTasks } from "../views/contractor/ContractorTasks";
 import { fetchContractorId } from "../services/contractor/contractorData/contractorIdEndpoint";
 import { fetchContractorNameByEmail } from "../services/contractor/contractorData/contractorFetchEmail";
+import axios from "axios";
 
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -167,32 +168,33 @@ export function ContractorLayout() {
     return () => clearInterval(interval);
   }, [contractorId]);
 
-  // Send notification to user
   async function sendNotificationToUser(messageTitle: string, message: string) {
     if (!contractorId) {
       console.warn("Cannot send notification: contractorId is missing");
       return;
     }
-
+  
     try {
-      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/${contractorId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        `https://epg-backend.onrender.com/api/notify/notifications/${contractorId}`,
+        {
           messageTitle,
           message,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-
-      console.log("Notification sent successfully");
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("Notification sent successfully:", response.data);
     } catch (error) {
-      console.error("Error sending notification:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Error sending notification:", error.response?.data || error.message);
+      } else {
+        console.error("Error sending notification:", error);
+      }
     }
   }
 

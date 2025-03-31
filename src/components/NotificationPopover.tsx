@@ -14,10 +14,16 @@ interface NotificationPopoverProps {
 
 export function NotificationPopover({ notifications, onNotificationClick }: NotificationPopoverProps) {
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
+    <div
+      className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-[9999]"
+      // The z-[9999] ensures the popover is above all other elements
+    >
       <div className="p-4">
         <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-        <div className="mt-2 divide-y divide-gray-200">
+        <div
+          className="mt-2 divide-y divide-gray-200 max-h-[40vh] overflow-y-auto"
+          // Fixed height with scrollable behavior
+        >
           {notifications.length === 0 ? (
             <p className="py-4 text-sm text-gray-500 text-center">No notifications</p>
           ) : (

@@ -54,28 +54,44 @@ export function UploadProposalModal({
       setUploadError("Please select a file.");
       return;
     }
-
+  
     setIsSubmitting(true);
-    setUploadError(null); // Clear any previous upload errors
-
+    setUploadError(null);
+  
+    const currentDate = new Date().toLocaleDateString();
+  
+    const task = {
+      id: Date.now().toString(),
+      header: "Proposal Submited!",
+      status: "todo",
+      assignee: "Hunter Sears",
+      description: `${contractorFullName} uploaded a proposal on ${currentDate}`,
+      timeSpent: 0,
+    };
+  
     try {
-      await uploadProposal(projectId, file); // Call the service function
+      await uploadProposal(projectId, file);
+  
+      const response = await fetch("https://epg-backend.onrender.com/api/admin/adminTasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to create task: ${response.statusText}`);
+      }
+  
+      const createdTask = await response.json();
+      console.log("Task created successfully:", createdTask);
+  
       onUploadSuccess();
-      const currentDate = new Date().toLocaleDateString();
-      sendNotificationToUser(
-        "Proposal Submit",
-        `${contractorFullName} submitted a proposal for his recent project on ${currentDate}`
-      );
       onClose();
-    } catch (error: any) { // Type the error as any
-      console.error("Error uploading file:", error);
-      setUploadError(error.message || "Failed to upload proposal. Please try again."); // Set the error message
-      alert(error.message || "Failed to upload proposal. Please try again.");
+    } catch (error: any) {
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   if (!isOpen) return null;
 

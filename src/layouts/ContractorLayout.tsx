@@ -231,13 +231,6 @@ export function ContractorLayout() {
         />
 
         <main className="flex-1 p-4 md:p-6 overflow-auto">
-          <button
-            onClick={() =>
-              sendNotificationToUser("Test Title", "This is a test notification.")
-            }
-          >
-            Send Notification
-          </button>
           <Routes>
             <Route path="/" element={<ContractorDashboard loading={loading} />} />
             <Route path="/projects" element={<ContractorProjects loading={loading} />} />

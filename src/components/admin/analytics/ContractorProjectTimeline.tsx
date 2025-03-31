@@ -7,13 +7,14 @@ import { Clock, AlertCircle, Loader2 } from "lucide-react";
 interface Hold {
   hold: string;
   counter: number;
-  timestamp: string;
+  timestamp: string; // ISO timestamp string
 }
 
 interface Project {
   id: string;
   name: string;
   time: Hold[];
+  createdAt: any;
 }
 
 export const ContractorProjectTimeline = () => {
@@ -51,6 +52,60 @@ export const ContractorProjectTimeline = () => {
     }
   };
 
+  async function sendNotificationToUser(adminId: string, messageTitle: string, message: string) {
+    if (!adminId) {
+      console.warn("Cannot send notification: contractorId is missing");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `https://epg-backend.onrender.com/api/notify/notifications/${adminId}`,
+        {
+          messageTitle,
+          message,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Notification sent successfully:", response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error sending notification:", error.response?.data || error.message);
+      } else {
+        console.error("Error sending notification:", error);
+      }
+    }
+  }
+
+  // Check if any project has a hold of "ready_for_proposal" for exactly 3 days
+  useEffect(() => {
+    if (!loading && projects.length > 0) {
+      projects.forEach((project) => {
+        project.time.forEach((hold) => {
+          if (hold.hold === "ready_for_proposal") {
+            const holdTimestamp = new Date(hold.timestamp);
+            const currentDate = new Date();
+            const timeDifference = currentDate.getTime() - holdTimestamp.getTime();
+            const daysDifference = timeDifference / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+            if (Math.floor(daysDifference) === 3) {
+              sendNotificationToUser(
+                "67e80bc2688450393477aaee",
+                `Proposal from ${contractorFullName}`,
+                "Proposal hasn't been sent in 3 days"
+              );
+            }
+          }
+        });
+      });
+    }
+  }, [projects, loading]);
+
   // Fetch data when the component mounts or when the contractorFullName changes
   useEffect(() => {
     fetchHoldDurations();
@@ -77,6 +132,16 @@ export const ContractorProjectTimeline = () => {
     );
   }
 
+  // Helper function to format date
+  const formatDate = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   // Render the main content
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -85,9 +150,7 @@ export const ContractorProjectTimeline = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {contractorFullName || "Unknown Contractor"}
           </h1>
-          <p className="text-lg text-gray-600">
-            Project Timeline Overview
-          </p>
+          <p className="text-lg text-gray-600">Project Timeline Overview</p>
         </div>
 
         {projects.length === 0 ? (
@@ -100,8 +163,13 @@ export const ContractorProjectTimeline = () => {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-white rounded-xl shadow-lg p-6 transition-all hover:shadow-xl"
+                className="bg-white rounded-xl shadow-lg p-6 transition-all hover:shadow-xl relative"
               >
+                {/* Display createdAt date in the top-right corner */}
+                <div className="absolute top-4 right-6 text-sm text-gray-500">
+                  Created on: {formatDate(project.createdAt)}
+                </div>
+
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 pb-4 border-b">
                   {project.name}
                 </h2>

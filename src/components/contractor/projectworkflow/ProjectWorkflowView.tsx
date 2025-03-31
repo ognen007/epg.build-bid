@@ -34,16 +34,18 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [contractor, setContractor] = useState<ContractorType | null>(null);
+  const [contractorName, setContractorName] = useState('')
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProjects() {
-      if (!contractor?.fullName) return; // Handle null contractor
+      if (!contractor?.fullName) return;
 
       try {
         setLoading(true);
         const fetchedProjects = await fetchProjects(contractor.fullName);
+        setContractorName(contractor.fullName)
         setTasks(fetchedProjects);
       } catch (err: any) {
         if (err.message !== "No projects found, continuing without error.") {
@@ -114,7 +116,7 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
       <PreConstructionSection
         tasks={tasks}
         onTaskClick={handleTaskClick}
-        fullName={contractor?.fullName}
+        fullName={contractorName}
       />
       <ConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
 

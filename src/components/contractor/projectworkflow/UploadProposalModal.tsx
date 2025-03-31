@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Upload, X } from "lucide-react";
 import React, { useState } from "react";
 import { uploadProposal } from "../../../services/contractor/workflow/projectWorkflowServiceEndpoint";
@@ -7,7 +6,6 @@ interface UploadProposalProps {
   isOpen: boolean;
   onClose: () => void;
   projectId: string;
-  onUploadSuccess: () => void; // Callback to notify parent of successful upload
   contractorFullName: string;
 }
 
@@ -15,32 +13,11 @@ export function UploadProposalModal({
   isOpen,
   onClose,
   projectId,
-  onUploadSuccess,
   contractorFullName
 }: UploadProposalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  async function sendNotificationToUser(messageTitle: string, message: string) {
-    try {
-      const response = await fetch(`https://epg-backend.onrender.com/api/notify/notifications/admins`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messageTitle, message }),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to send notification");
-      }
-  
-      console.log("Notification sent successfully");
-    } catch (error) {
-      console.error("Error sending notification:", error);
-    }
-  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -63,7 +40,7 @@ export function UploadProposalModal({
     const task = {
       id: Date.now().toString(),
       header: "Proposal Submited!",
-      status: "todo",
+      status: "in-progress",
       assignee: "Hunter Sears",
       description: `${contractorFullName} uploaded a proposal on ${currentDate}`,
       timeSpent: 0,
@@ -84,8 +61,6 @@ export function UploadProposalModal({
   
       const createdTask = await response.json();
       console.log("Task created successfully:", createdTask);
-  
-      onUploadSuccess();
       onClose();
     } catch (error: any) {
     } finally {

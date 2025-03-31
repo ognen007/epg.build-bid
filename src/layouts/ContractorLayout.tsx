@@ -168,36 +168,6 @@ export function ContractorLayout() {
     return () => clearInterval(interval);
   }, [contractorId]);
 
-  async function sendNotificationToUser(messageTitle: string, message: string) {
-    if (!contractorId) {
-      console.warn("Cannot send notification: contractorId is missing");
-      return;
-    }
-  
-    try {
-      const response = await axios.post(
-        `https://epg-backend.onrender.com/api/notify/notifications/${contractorId}`,
-        {
-          messageTitle,
-          message,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-  
-      console.log("Notification sent successfully:", response.data);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error sending notification:", error.response?.data || error.message);
-      } else {
-        console.error("Error sending notification:", error);
-      }
-    }
-  }
-
   return (
     <div className="flex h-screen bg-gray-50">
       {showWelcome && (

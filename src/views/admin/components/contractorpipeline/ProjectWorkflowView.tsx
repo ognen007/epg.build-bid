@@ -91,7 +91,7 @@ export function ProjectWorkflowView({ contractorId }: ProjectWorkflowProps) {
 
   const updateTaskStatus = async (taskId: any, newHold: any, newStatus?: string) => {
     try {
-      const updatedTask = await updateTaskStatusFunction(taskId, newHold, newStatus);
+      const updatedTask = await updateTaskStatusFunction(taskId, newHold, newStatus);//
       setTasks((prevTasks: any) =>
         prevTasks.map((task: any) => (task.id === taskId ? updatedTask : task))
       );

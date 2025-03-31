@@ -4,6 +4,7 @@ import { PreConstructionSection } from "./PreConstructionSection";
 import { ConstructionSection } from "./ConstructionSection";
 import { AddCommentModal } from "../../../views/admin/components/contractorpipeline/AddCommentModal";
 import { addComment, fetchComments, fetchProjects, fetchProjectsById } from "../../../services/contractor/workflow/projectWorkflowServiceEndpoint";
+import { sendNotificationToUser } from "../../../services/notificationEndpoints";
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
@@ -104,6 +105,7 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
 
     try {
       await addComment(selectedTaskId, comment);
+      sendNotificationToUser("67e80bc2688450393477aaee", "Contractor Project", `${contractorName} left a comment on his project`)
       const updatedComments = await fetchComments(selectedTaskId);
       setComments(updatedComments);
     } catch (error) {

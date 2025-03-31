@@ -79,20 +79,35 @@ export const fetchGeneralNotifications = async () => {
     return outputArray;
   }
   
-  export const sendNotificationToUser = async (
-    userId: string,
-  ) => {
-    try {
-      Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-          requestPushNotificationPermission(userId);
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      return { error: 'Failed to send notification to user' };
+  export async function sendNotificationToUser(contractorId:string, messageTitle: string, message: string) {
+    if (!contractorId) {
+      console.warn("Cannot send notification: contractorId is missing");
+      return;
     }
-  };
+  
+    try {
+      const response = await axios.post(
+        `https://epg-backend.onrender.com/api/notify/notifications/${contractorId}`,
+        {
+          messageTitle,
+          message,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("Notification sent successfully:", response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error sending notification:", error.response?.data || error.message);
+      } else {
+        console.error("Error sending notification:", error);
+      }
+    }
+  }
 
   
   export const sendNotificationToContractors = async (

@@ -56,6 +56,64 @@ export function ProjectManagement() {
     setFilteredProjects(filtered);
   }, [filters, projects]);
 
+  const currentDate = new Date();
+
+  const task = {
+    id: Date.now().toString(),
+    header: "Proposal Submited!",
+    status: "in-progress",
+    assignee: "Hunter Sears",
+    description: `${filteredProjects} uploaded a proposal on ${currentDate}`,
+    timeSpent: 0,
+  };
+
+
+  useEffect(() => {
+    const currentDate = new Date(); // Define currentDate here
+  
+    if (!loading && projects.length > 0) {
+      const createTasks = async () => {
+        try {
+          for (const project of projects) {
+            const createdAtDate = new Date(project.createdAt); // Parse createdAt as a Date object
+            const timeDifference = currentDate.getTime() - createdAtDate.getTime(); // Difference in milliseconds
+            const daysDifference = timeDifference / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+  
+            if (Math.floor(daysDifference) === 7) {  
+              // Construct the task object
+              const task = {
+                id: Date.now().toString(), // Temporary ID
+                header: "Project Created 7 Days Ago",
+                status: "todo",
+                assignee: "Admin",
+                description: `Project ${project.name} was created 7 days ago.`,
+                timeSpent: 0,
+              };
+  
+              // Send POST request to create the task
+              const response = await fetch("https://epg-backend.onrender.com/api/admin/adminTasks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(task),
+              });
+  
+              if (!response.ok) {
+                throw new Error(`Failed to create task: ${response.statusText}`);
+              }
+  
+              const createdTask = await response.json();
+              console.log("Task created successfully:", createdTask);
+            }
+          }
+        } catch (error: any) {
+          console.error("Error creating tasks:", error.message || "An unexpected error occurred.");
+        }
+      };
+  
+      createTasks(); // Call the async function
+    }
+  }, [projects, loading]);
+
   const handleAddProject = (project: Omit<ProjectType, 'id'>) => {
     const newProject = {
       ...project,

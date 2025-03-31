@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Plus, MoreVertical, MessageSquare, X } from 'lucide-react';
 import { addCommentToTicket, createClientTask, createColumn, createInternalTask, fetchColumns, updateTicketColumn } from '../../../services/admin/kanban/kanbanEndpoint';
 import { fetchAdminNameByEmail } from '../../../services/admin/adminInfo/adminInformationEndpoint';
+import { sendNotificationToUser } from '../../../services/notificationEndpoints';
 
 export interface Contractor {
   id: string;

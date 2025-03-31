@@ -6,6 +6,7 @@ import { TicketDetailsModal } from './TicketDetailsModal';
 import { AddInternalTaskModal } from './AddInternalTaskModal';
 import { AddContractorTaskModal } from './AddContractorTaskModal';
 import { ContractorTask, Column, InternalTask, Ticket } from './types';
+import { sendNotificationToUser } from '../../../../services/notificationEndpoints';
 
 interface ProjectKanbanProps {
   contractorId: string;
@@ -46,6 +47,7 @@ export const ProjectKanbanView: React.FC<ProjectKanbanProps> = ({ contractorId }
         title: newColumnTitle,
         contractorId,
       });
+      sendNotificationToUser(contractorId, "New Comment", "New Comment left by Admin on your Project")
       setColumns([...columns, response.data]);
       setNewColumnTitle('');
       setIsAddingColumn(false);

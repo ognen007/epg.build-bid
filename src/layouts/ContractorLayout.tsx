@@ -7,7 +7,6 @@ import { WelcomePopup } from "../components/welcome/WelcomePopup";
 // Import contractor views
 import { ContractorDashboard } from "../views/contractor/ContractorDashboard";
 import { ContractorProjects } from "../views/contractor/ContractorProjects";
-import { FindWorkView } from "../views/contractor/FindWorkView";
 import { ContractorEarnings } from "../views/contractor/ContractorEarnings";
 import { ContractorSettings } from "../views/contractor/ContractorSettings";
 import { ContractorTasks } from "../views/contractor/ContractorTasks";
@@ -114,11 +113,17 @@ export function ContractorLayout() {
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(
-          "BI97IO6U9VAW0woyQ3RCVO7aiBydV55n4NogtcuQ-U9IQoaXBQ-WKnlsRSwAkhxBMaG86T7fjNgwAqP9rLrcUAE"
+          "BMdPsUFVF8sdr-hRgdcM_8uGmbyPvWoeMgk3A0Kya_yCwpLalU8pcKLAO7dJ34dqF2oYnmFc7wtuMbCmUh0eZWg"
         ),
       });
 
       console.log("Push subscription created:", subscription);
+
+      // Validate the subscription object
+      const { endpoint, keys } = subscription.toJSON();
+      if (!endpoint || !keys?.p256dh || !keys?.auth) {
+        throw new Error("Invalid push subscription data");
+      }
 
       // Send the subscription object to the backend
       const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {
@@ -127,10 +132,10 @@ export function ContractorLayout() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          endpoint: subscription.endpoint,
+          endpoint,
           keys: {
-            p256dh: subscription.toJSON().keys?.p256dh,
-            auth: subscription.toJSON().keys?.auth,
+            p256dh: keys.p256dh,
+            auth: keys.auth,
           },
         }),
       });

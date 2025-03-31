@@ -29,9 +29,9 @@ self.addEventListener('fetch', (event) => {
 // Push event: Handle incoming push notifications
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
-  const title = data.title || 'You have a new notification';
+  const title = data.title || 'You have a new Message';
   const options = {
-    body: data.body || 'You have a new notification',
+    body: data.body || 'Open the bidding app to see the new about your app',
     icon: '/favicon.svg', // Path to your app's icon
     badge: '/favicon.ico', // Small icon for notifications
   };
@@ -46,6 +46,6 @@ self.addEventListener('notificationclick', (event) => {
 
   // Open the app or a specific URL
   event.waitUntil(
-    clients.openWindow('https://app.epg.build/contractor') // Replace with your app's URL
+    clients.openWindow('https://app.epg.build') // Replace with your app's URL
   );
 });

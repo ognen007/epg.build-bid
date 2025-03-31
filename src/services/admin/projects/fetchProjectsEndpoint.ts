@@ -20,7 +20,10 @@ export async function fetchProjects(): Promise<ProjectType[]> {
       stage: project.stage || '',
       valuation: project.valuation,
       deadline: new Date(project.deadline).toISOString(),
+      createdAt: project.createdAt || ""
     }));
+
+    console.log(formattedProjects)
 
     return formattedProjects;
   } catch (error: any) {

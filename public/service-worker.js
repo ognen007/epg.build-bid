@@ -1,51 +1,31 @@
-// // Cache assets for offline functionality
-// const CACHE_NAME = 'my-pwa-cache-v1';
-// const ASSETS_TO_CACHE = [
-//   '/',
-//   '/index.html',
-//   '/styles.css',
-//   '/app.js',
-//   '/icon.png',
-// ];
+// sw.js (or service-worker.js)
+importScripts("https://www.gstatic.com/firebasejs/9.x/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/9.x/firebase-messaging.js");
 
-// // Install event: Cache assets
-// self.addEventListener('install', (event) => {
-//   event.waitUntil(
-//     caches.open(CACHE_NAME).then((cache) => {
-//       return cache.addAll(ASSETS_TO_CACHE);
-//     })
-//   );
-// });
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDZySvF0SYvE4BdU57Of4P1_ekfOCnGvio",
+  authDomain: "epgghl.firebaseapp.com",
+  projectId: "epgghl",
+  storageBucket: "epgghl.appspot.com",
+  messagingSenderId: "1027773975545",
+  appId: "1:1027773975545:web:721e84a865e1d24874cb28",
+  measurementId: "G-V6N9RPV8S5"
+};
 
-// // Fetch event: Serve cached assets or fetch from network
-// self.addEventListener('fetch', (event) => {
-//   event.respondWith(
-//     caches.match(event.request).then((response) => {
-//       return response || fetch(event.request);
-//     })
-//   );
-// });
+const app = firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging(app);
 
-// // Push event: Handle incoming push notifications
-// self.addEventListener('push', (event) => {
-//   const data = event.data?.json() || {};
-//   const title = data.title || 'You have a new Message';
-//   const options = {
-//     body: data.body || 'Open the bidding app to see the new about your app',
-//     icon: '/favicon.svg', // Path to your app's icon
-//     badge: '/favicon.ico', // Small icon for notifications
-//   };
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
+  console.log("Background Message Received:", payload);
 
-//   // Show the notification
-//   event.waitUntil(self.registration.showNotification(title, options));
-// });
+  // Customize notification content
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: "/path/to/icon.png", // Replace with your app's icon
+  };
 
-// // Notification click event: Handle when the user clicks the notification
-// self.addEventListener('notificationclick', (event) => {
-//   event.notification.close(); // Close the notification
-
-//   // Open the app or a specific URL
-//   event.waitUntil(
-//     clients.openWindow('https://app.epg.build') // Replace with your app's URL
-//   );
-// });
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});

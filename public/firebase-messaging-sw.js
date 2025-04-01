@@ -11,10 +11,20 @@ const firebaseConfig = {
   measurementId: "G-V6N9RPV8S5"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 // Optional: Customize background message handling
-messaging.setBackgroundMessageHandler((payload) => {
+messaging.onBackgroundMessage((payload) => {
   console.log("Background Message Received:", payload);
+
+  // Customize notification content
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: "favicon.ico", // Replace with your app's icon
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });

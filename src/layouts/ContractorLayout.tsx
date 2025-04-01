@@ -57,8 +57,8 @@ export function ContractorLayout() {
   }, [loadContractorId]);
 
   // Subscribe user to push notifications using FCM
-  async function subscribeUserToPushNotifications(userId: string) {
-    if (!userId) {
+  async function subscribeUserToPushNotifications() {
+    if (!contractorId) {
       console.warn("Cannot subscribe to push notifications: userId is missing");
       return;
     }
@@ -77,7 +77,7 @@ export function ContractorLayout() {
 
       // Send the FCM token to the backend
       const response = await axios.post(
-        `https://epg-backend.onrender.com/api/notify/fcm-tokens/${userId}`,
+        `https://epg-backend.onrender.com/api/notify/fcm-tokens/${contractorId}`,
         {
           fcmToken,
         },
@@ -101,10 +101,10 @@ export function ContractorLayout() {
       return;
     }
 
-    subscribeUserToPushNotifications(contractorId);
+    subscribeUserToPushNotifications();
 
     const interval = setInterval(() => {
-      subscribeUserToPushNotifications(contractorId);
+      subscribeUserToPushNotifications();
     }, 60 * 60 * 1000); // Every hour
 
     return () => clearInterval(interval);

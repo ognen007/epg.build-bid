@@ -13,6 +13,7 @@ import { ContractorTasks } from "../views/contractor/ContractorTasks";
 import { fetchContractorId } from "../services/contractor/contractorData/contractorIdEndpoint";
 import { fetchContractorNameByEmail } from "../services/contractor/contractorData/contractorFetchEmail";
 import axios from "axios";
+import { requestNotificationPermission, getFcmToken } from "../firebaseConfig"; // Import Firebase functions
 
 export function ContractorLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -20,39 +21,6 @@ export function ContractorLayout() {
   const [fullName, setFullName] = useState("");
   const [contractorId, setContractorId] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // Request notification permission
-  function requestNotificationPermission() {
-    if (Notification.permission === "granted") {
-      console.log("Permission already granted");
-      return;
-    }
-
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        console.log("Notification permission granted");
-      } else {
-        console.error("Notification permission denied");
-      }
-    });
-  }
-
-  useEffect(() => {
-    requestNotificationPermission();
-  }, []);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        window.location.reload();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
 
   useEffect(() => {
     async function loadFullName() {
@@ -88,20 +56,7 @@ export function ContractorLayout() {
     loadContractorId();
   }, [loadContractorId]);
 
-  // Helper function to convert VAPID key
-  function urlBase64ToUint8Array(base64String: string): Uint8Array {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  }
-
-  // Subscribe user to push notifications
+  // Subscribe user to push notifications using FCM
   async function subscribeUserToPushNotifications(userId: string) {
     if (!userId) {
       console.warn("Cannot subscribe to push notifications: userId is missing");
@@ -109,43 +64,31 @@ export function ContractorLayout() {
     }
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      // Request notification permission
+      await requestNotificationPermission();
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          "BMdPsUFVF8sdr-hRgdcM_8uGmbyPvWoeMgk3A0Kya_yCwpLalU8pcKLAO7dJ34dqF2oYnmFc7wtuMbCmUh0eZWg"
-        ),
-      });
-
-      console.log("Push subscription created:", subscription);
-
-      // Validate the subscription object
-      const { endpoint, keys } = subscription.toJSON();
-      if (!endpoint || !keys?.p256dh || !keys?.auth) {
-        throw new Error("Invalid push subscription data");
+      // Get FCM token
+      const fcmToken = await getFcmToken();
+      if (!fcmToken) {
+        throw new Error("Failed to retrieve FCM token");
       }
 
-      // Send the subscription object to the backend
-      const response = await fetch(`https://epg-backend.onrender.com/api/notify/push-subscriptions/${userId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      console.log("FCM Token created:", fcmToken);
+
+      // Send the FCM token to the backend
+      const response = await axios.post(
+        `https://epg-backend.onrender.com/api/notify/fcm-tokens/${userId}`,
+        {
+          fcmToken,
         },
-        body: JSON.stringify({
-          endpoint,
-          keys: {
-            p256dh: keys.p256dh,
-            auth: keys.auth,
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
-      });
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-
-      console.log("Push subscription stored/updated successfully");
+      console.log("FCM token stored/updated successfully");
     } catch (error) {
       console.error("Error subscribing user to push notifications:", error);
     }
@@ -158,7 +101,6 @@ export function ContractorLayout() {
       return;
     }
 
-    requestNotificationPermission();
     subscribeUserToPushNotifications(contractorId);
 
     const interval = setInterval(() => {

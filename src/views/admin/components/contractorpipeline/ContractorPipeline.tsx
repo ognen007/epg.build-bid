@@ -23,7 +23,6 @@ export function ContractorPipeline() {
   const [allContractors, setAllContractors] = useState<ContractorType[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<ProjectType[]>([]);
   const [selectedContractorId, setSelectedContractorId] = useState<any>();
-  const [selectedView, setSelectedView] = useState<'pipeline' | 'tasks'>('pipeline');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -175,33 +174,11 @@ export function ContractorPipeline() {
 
       {/* Toggle Buttons */}
       <div className="flex justify-center">
-        <div className="inline-flex p-1 bg-white rounded-full shadow-sm">
-          <button
-            onClick={() => setSelectedView('pipeline')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedView === 'pipeline'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            Pipeline
-          </button>
-          <button
-            onClick={() => setSelectedView('tasks')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedView === 'tasks'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            Tasks
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Contractor Filters */}
-        {selectedView === 'pipeline' && (
+
           <div className="lg:col-span-1">
             <ContractorFilters
               contractors={allContractors}
@@ -209,28 +186,22 @@ export function ContractorPipeline() {
               onSelect={handleContractorSelect}
             />
           </div>
-        )}
 
         {/* Projects View */}
-        <div className={selectedView === 'pipeline' ? 'lg:col-span-3' : 'lg:col-span-4'}>
-          {selectedView === 'pipeline' ? (
-            selectedContractorId ? (
-              <>
+        <div className={'lg:col-span-3'}>
+            {selectedContractorId ?              
+            <>
               <DraftedProjectSection contractorId={selectedContractorId} fullName={selectedContractorFullName} proposals={filteredProjects}/>
                 <ProjectProposals proposals={filteredProjects} />
                 <ProjectWorkflowView contractorId={selectedContractorId}/>
               </>
-            ) : (
+              :
               <div className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center justify-center h-full">
                 <Search className="h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-500 text-lg text-center">
                   No contractor selected. Start typing to search for contractors.
                 </p>
-              </div>
-            )
-          ) : (
-            <ProjectKanbanView contractorId={selectedContractorId}/>
-          )}
+              </div>}
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import './index.css';
 import "@radix-ui/themes/styles.css";
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
+import React from 'react';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDZySvF0SYvE4BdU57Of4P1_ekfOCnGvio",
@@ -16,33 +17,42 @@ const firebaseConfig = {
   measurementId: "G-V6N9RPV8S5"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 // Register the service worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
-    .register("/sw.js") // Ensure this matches the name of your service worker file
+    .register("/service-worker.js") // Use the same file name as in your project
     .then((registration) => {
       console.log("Service Worker registered with scope:", registration.scope);
 
-      // Retrieve FCM token
-      return getToken(messaging, {
-        vapidKey: "BKs6fImd8pb2-bkztLR99893-3GHacanTpWkm9M0G7L-7bwYR9juPZ63olumvdiI-52sOA55iY-CORlDoVWvTss",
-        serviceWorkerRegistration: registration, // Pass the service worker registration
+      // Request notification permission
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Notification permission granted");
+
+          // Retrieve FCM token
+          return getToken(messaging, {
+            vapidKey: "BKs6fImd8pb2-bkztLR99893-3GHacanTpWkm9M0G7L-7bwYR9juPZ63olumvdiI-52sOA55iY-CORlDoVWvTss",
+            serviceWorkerRegistration: registration, // Pass the service worker registration
+          });
+        } else {
+          console.error("Notification permission denied");
+        }
+      }).then((token) => {
+        if (token) {
+          console.log("FCM Token:", token);
+          // Send the token to your backend (e.g., via an API call)
+        } else {
+          console.error("No FCM token available. Check permissions or browser compatibility.");
+        }
+      }).catch((error) => {
+        console.error("Error retrieving FCM token:", error);
       });
     })
-    .then((token) => {
-      if (token) {
-        console.log("FCM Token:", token);
-        // Send the token to your backend
-      } else {
-        console.error("No FCM token available. Check permissions or browser compatibility.");
-      }
-    })
     .catch((error) => {
-      console.error("Error registering service worker or retrieving FCM token:", error);
+      console.error("Service Worker registration failed:", error);
     });
 }
 

@@ -5,7 +5,7 @@ import { ProjectWorkflowView } from "../../components/contractor/projectworkflow
 import { ProjectSearch } from "./ProjectSearch";
 import { ProjectType } from "../../types/project";
 import { Skeleton } from "@radix-ui/themes";
-import { fetchContractorDataByEmail, fetchContractorIdByEmail, fetchProjectsByContractor, updateProjectStatus } from "../../services/contractor/projects/projectsEndpoint";
+import { denyProjectStatus, fetchContractorDataByEmail, fetchContractorIdByEmail, fetchProjectsByContractor, updateProjectStatus } from "../../services/contractor/projects/projectsEndpoint";
 
 export interface ContractorType {
   id: string;
@@ -75,7 +75,16 @@ export function ContractorProjects({ loading }: { loading: boolean }) {
     }
   };
 
-  const handleDeclineProposal = () => console.log("Proposal declined");
+  const handleDeclineProposal = async (taskId: string) => {
+    try {
+      await denyProjectStatus(taskId);
+  
+      setProjects((prev) => prev.filter((p) => p.id !== taskId));
+    } catch (error: any) {
+      setError(error.message || "Failed to decline proposal");
+    }
+  };
+
   const handleSearchChange = (query: string) => setSearchQuery(query);
 
   if (error) return <div className="text-red-600 p-6">Error: {error}</div>;

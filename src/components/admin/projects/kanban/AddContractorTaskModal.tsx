@@ -58,7 +58,6 @@ export const AddContractorTaskModal: React.FC<AddContractorTaskModalProps> = ({
               >
                 <option value="quote_verification">Quote Verification</option>
                 <option value="price_negotiation">Price Negotiation</option>
-                <option value="required_documentation">Required Documentation</option>
               </select>
             </div>
 

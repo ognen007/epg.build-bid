@@ -5,7 +5,7 @@ import { NoProposal } from '../components/holders/NoProposal';
 interface ProjectProposalsProps {
   proposals?: ProjectType[]; // Make proposals optional
   onAccept: (id: string) => void;
-  onDecline: () => void;
+  onDecline: (id: string) => void;
 }
 
 export function ProjectProposals({ onAccept, onDecline, proposals = [] }: ProjectProposalsProps) {
@@ -54,7 +54,7 @@ export function ProjectProposals({ onAccept, onDecline, proposals = [] }: Projec
 
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => onDecline()}
+                onClick={() => onDecline(proposal.id)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
               >
                 <X className="h-4 w-4 inline-block mr-1" />

@@ -52,6 +52,20 @@ export async function updateProjectStatus(taskId: string): Promise<any> {
   }
 }
 
+export async function denyProjectStatus(taskId: string): Promise<any> { 
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/projects/hold/${taskId}`,
+      { status: "denied", hold: "denied" }
+    );
+
+    return response.data ?? {}; // Return empty object if response is missing
+  } catch (error) {
+    console.error("Error updating task status:", error);
+    return { error: "Failed to update task" }; // Return an error object instead of throwing
+  }
+}
+
 export async function fetchContractorDataByEmail(email: string) {
   try {
     const response = await axios.get(`${API_BASE_URL}/contractor/id`);

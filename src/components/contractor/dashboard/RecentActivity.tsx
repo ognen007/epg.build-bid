@@ -73,7 +73,7 @@ export function RecentActivity() {
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
       <div className="space-y-4">
         {activities.length === 0 ? (
-          <ContractorCardHolder label={"There are no activities at the moment"}/>
+          <ContractorCardHolder label={"There are no activities at the moment...."}/>
         ) : (
           activities.map((activity) => {
             const Icon = iconMap[activity.type];

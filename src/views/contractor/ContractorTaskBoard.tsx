@@ -194,16 +194,6 @@ export function TasksBoard() {
           >
             Price Negotiation
           </button>
-          <button
-            onClick={() => setSelectedType('required_documentation')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'required_documentation'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            Required Documentation
-          </button>
         </div>
       </div>
 

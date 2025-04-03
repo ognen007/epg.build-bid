@@ -85,7 +85,7 @@ export function UpcomingDeadlines() {
             </div>
           ))
         ) : (
-          <Deadline label="No Upcoming Deadlines"/>
+          <Deadline label="No Upcoming Deadlines....."/>
         )}
       </div>
     </div>

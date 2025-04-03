@@ -75,7 +75,6 @@ const sampleContractors: Contractor[] = [
 const CLIENT_TASK_TYPES = [
   { value: 'quote_verification', label: 'Quote Verification' },
   { value: 'price_negotiation', label: 'Price Negotiation' },
-  { value: 'required_documentation', label: 'Required Documentation' }
 ] as const;
 
 export interface AddClientTaskModalProps {

@@ -5,7 +5,6 @@ import './index.css';
 import "@radix-ui/themes/styles.css";
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
-import React from 'react';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDZySvF0SYvE4BdU57Of4P1_ekfOCnGvio",
@@ -21,11 +20,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// Register the service worker
-if ("serviceWorker" in navigator) {
+export { messaging };
+
+if ('serviceWorker' in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("/dev-sw.js?dev-sw", { scope: "/", type: "classic" }) // Register your custom service worker
+      .register("/service-worker.js", { scope: "/", type: "classic" }) // Register only one service worker
       .then((registration) => {
         console.log("Service Worker registered with scope:", registration.scope);
 
@@ -82,11 +82,10 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
-
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/service-worker.js')
+      .register('/dev-sw.js?dev-sw.js')
       .then((registration) => {
         console.log('Service Worker registered:', registration);
 

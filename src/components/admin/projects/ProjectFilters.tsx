@@ -8,7 +8,8 @@ const PROJECT_STAGES = [
   { value: 'bid_submitted', label: 'Bid Submitted' },
   { value: 'won', label: 'Won' },
   { value: 'lost', label: 'Lost' },
-  { value: 'abandoned', label: 'Abandoned' }
+  { value: 'abandoned', label: 'Abandoned' },
+  { value: 'denied', label:"Denied"}
 ];
 
 interface ProjectFiltersProps {

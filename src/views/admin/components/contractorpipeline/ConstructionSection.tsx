@@ -140,7 +140,7 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
         })}
       </div>
 
-      {/* Render the RightClickPopup if visible */}
+      {/* Render the RightClickPopup if visible
       {contextMenu.visible && contextMenu.taskId && (
         <RightClickPopup
           position={contextMenu.position}
@@ -148,7 +148,7 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
           onAction={handleContextMenuAction}
           taskId={contextMenu.taskId} // Pass the taskId to the RightClickPopup
         />
-      )}
+      )} */}
     </div>
   );
 }

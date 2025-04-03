@@ -22,13 +22,13 @@ export function RightClickPopup({ position, onClose, onAction, taskId }: RightCl
         className="p-2 hover:bg-gray-100 cursor-pointer"
         onClick={() => handleAction("abandoned")}
       >
-        Change to Abandoned
+        Edit
       </div>
       <div
         className="p-2 hover:bg-gray-100 cursor-pointer"
         onClick={() => handleAction("loss")}
       >
-        Change to Lost
+        Delete
       </div>
     </div>
   );

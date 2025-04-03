@@ -291,6 +291,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }: AddProjectModalProps
                 <option value="abandoned">Abandoned</option>
                 <option value="won">Won</option>
                 <option value="lost">Lost</option>
+                <option value="denied">Denied</option>
               </select>
             </div>
 

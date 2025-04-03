@@ -1,6 +1,5 @@
-// sw.js (or service-worker.js)
-importScripts("https://www.gstatic.com/firebasejs/9.x/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/9.x/firebase-messaging.js");
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging.js");
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -13,6 +12,7 @@ const firebaseConfig = {
   measurementId: "G-V6N9RPV8S5"
 };
 
+// Initialize Firebase app
 const app = firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging(app);
 
@@ -21,10 +21,10 @@ messaging.onBackgroundMessage((payload) => {
   console.log("Background Message Received:", payload);
 
   // Customize notification content
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification?.title || "New Notification";
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/path/to/icon.png", // Replace with your app's icon
+    body: payload.notification?.body || "You have received a new message.",
+    icon: "/favicon.ico", // Replace with your app's icon
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

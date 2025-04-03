@@ -42,8 +42,8 @@ export function EarningsOverview({ stats }: EarningsOverviewProps) {
               <p className="text-sm text-gray-500">{card.title}</p>
               <p className="text-2xl font-bold text-gray-900">
                 {card.title === 'Total Earnings' 
-                  ? `$${card.value.toLocaleString()}`
-                  : `${card.value.toLocaleString()}`}
+                  ? `$${card.value}`
+                  : `${card.value}`}
               </p>
             </div>
             <div className={`p-3 rounded-full ${card.color}`}>

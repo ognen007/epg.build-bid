@@ -19,7 +19,7 @@ messaging.onBackgroundMessage(function(payload) {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/logo192.png', // Optional: Change this to your app's icon
+    icon: '/favicon.ico', // Optional: Change this to your app's icon
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

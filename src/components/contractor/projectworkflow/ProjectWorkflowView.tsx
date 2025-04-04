@@ -5,11 +5,12 @@ import { ConstructionSection } from "./ConstructionSection";
 import { AddCommentModal } from "../../../views/admin/components/contractorpipeline/AddCommentModal";
 import { addComment, fetchComments, fetchProjects, fetchProjectsById } from "../../../services/contractor/workflow/projectWorkflowServiceEndpoint";
 import { sendNotificationToUser } from "../../../services/notificationEndpoints";
+import { Skeleton } from "@radix-ui/themes";
 
 export interface ProjectWorkflowProps {
   contractorId: string; // Add contractorId as a prop
-  tasks: any,
-  setTasks: any
+  tasks: any;
+  setTasks: any;
 }
 
 export interface Task {
@@ -30,15 +31,16 @@ export interface ContractorType {
   email: string;
 }
 
-export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWorkflowProps) {
+export function ProjectWorkflowView({ contractorId, setTasks, tasks }: ProjectWorkflowProps) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [contractor, setContractor] = useState<ContractorType | null>(null);
-  const [contractorName, setContractorName] = useState('')
+  const [contractorName, setContractorName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch projects based on contractor's full name
   useEffect(() => {
     async function loadProjects() {
       if (!contractor?.fullName) return;
@@ -46,7 +48,7 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
       try {
         setLoading(true);
         const fetchedProjects = await fetchProjects(contractor.fullName);
-        setContractorName(contractor.fullName)
+        setContractorName(contractor.fullName);
         setTasks(fetchedProjects);
       } catch (err: any) {
         if (err.message !== "No projects found, continuing without error.") {
@@ -59,7 +61,8 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
 
     loadProjects();
   }, [contractor]);
-  
+
+  // Fetch projects by contractor ID
   useEffect(() => {
     async function loadProjectsById() {
       if (!contractorId) return;
@@ -77,8 +80,9 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
     }
 
     loadProjectsById();
-  }, [contractorId]); 
+  }, [contractorId]);
 
+  // Fetch comments for the selected task
   useEffect(() => {
     async function loadComments() {
       if (!selectedTaskId) return;
@@ -94,18 +98,20 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
     loadComments();
   }, [selectedTaskId, isCommentModalOpen]);
 
-  const handleTaskClick = (taskId: string) => { // Only ONE declaration
+  // Handle task click to open the comment modal
+  const handleTaskClick = (taskId: string) => {
     console.log("Selected Task ID:", taskId);
     setSelectedTaskId(taskId);
     setIsCommentModalOpen(true);
   };
 
+  // Handle adding a new comment
   const handleAddComment = async (comment: string) => {
     if (!selectedTaskId) return;
 
     try {
       await addComment(selectedTaskId, comment);
-      sendNotificationToUser("67e80bc2688450393477aaee", "Contractor Project", `${contractorName} left a comment on his project`)
+      sendNotificationToUser("67e80bc2688450393477aaee", "Contractor Project", `${contractorName} left a comment on his project`);
       const updatedComments = await fetchComments(selectedTaskId);
       setComments(updatedComments);
     } catch (error) {
@@ -113,14 +119,30 @@ export function ProjectWorkflowView({ contractorId,setTasks,tasks }: ProjectWork
     }
   };
 
+  // Show loading state if contractorId is not available
+  if (!contractorId) {
+    return (
+      <Skeleton className="w-full h-10 bg-gray-300 rounded-md" />
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <PreConstructionSection
-        tasks={tasks}
-        onTaskClick={handleTaskClick}
-        fullName={contractorName}
-      />
-      <ConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
+      {loading && (
+        <Skeleton className="w-full h-10 bg-gray-300 rounded-md" />
+      )}
+
+      {/* Render sections only if data is loaded */}
+      {!loading && (
+        <>
+          <PreConstructionSection
+            tasks={tasks}
+            onTaskClick={handleTaskClick}
+            fullName={contractorName}
+          />
+          <ConstructionSection tasks={tasks} onTaskClick={handleTaskClick} />
+        </>
+      )}
 
       {/* Add Comment Modal */}
       <AddCommentModal

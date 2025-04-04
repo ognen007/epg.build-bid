@@ -12,6 +12,18 @@ export async function fetchContractorsProjectModal() {
       throw error; // Re-throw the error for the component to handle
     }
   }
+
+  export async function fetchProject(id: string){
+    try{
+      const response = await fetch(`https://epg-backend.onrender.com/api/project/display/${id}`)
+      if(!response.ok){
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return response.json();
+    } catch(error) {
+      throw error
+    }
+  }
   
   export async function createProjectModal(projectData: Omit<ProjectType, 'id'>, blueprintsFile: File | null) {
     try {

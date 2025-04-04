@@ -9,7 +9,7 @@ export function ProjectStatus({ status }: ProjectStatusProps) {
     awaiting_bid: 'bg-yellow-100 text-yellow-800',
     takeoff_in_progress:"bg-teal-100 text-teal-800",
     takeoff_complete : "bg-orange-100 text-orange-800",
-    bid_recieved :"bg-lime-100 text-orange-800",
+    bid_recieved :"bg-lime-100 text-lime-800",
     bid_submitted: 'bg-blue-100 text-blue-800',
     won: 'bg-green-100 text-green-800',
     lost : "bg-red-100 text-red-800 ",

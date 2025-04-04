@@ -15,6 +15,13 @@ export function ProjectTable({ projects }: ProjectTableProps) {
       } catch (error: any) {
       }
     };
+
+    const handleEditProject = async (projectId: string) => {
+      try {
+        await deleteProject(projectId); 
+      } catch (error: any) {
+      }
+    };
   
 
   return (
@@ -49,7 +56,11 @@ export function ProjectTable({ projects }: ProjectTableProps) {
           <tbody className="bg-white divide-y divide-gray-200">
             {projects.length > 0 ? (
               projects.map((project) => (
-                <ProjectRow key={project.id} project={project} deleteProject={handleDeleteProject}/>
+                <ProjectRow 
+                  key={project.id} 
+                  project={project} 
+                  deleteProject={handleDeleteProject} 
+                  editProject={handleEditProject}/>
               ))
             ) : (
               <tr>

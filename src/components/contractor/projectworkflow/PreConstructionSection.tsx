@@ -7,9 +7,12 @@ export function PreConstructionSection({ tasks, onTaskClick, fullName }: any) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const statuses = [
-    { hold: "takeoff_in_progress", label: "Takeoff in Progress" },
-    { hold: "ready_for_proposal", label: "Ready for Proposal" },
+    { hold: "proposal_in_progress", label: "Proposal in Progress" },
+    { hold: "proposal_uploaded", label: "Proposal Uploaded" },
+    { hold: "bid_submitted", label: "Bid Submitted" },
     { hold: "negotiating", label: "Negotiating" },
+    { hold: "won", label: "Won" },
+    { hold: "lost", label: "Lost" },
   ];
 
   const getStatusIcon = (status: string) => {

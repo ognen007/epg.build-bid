@@ -13,7 +13,7 @@ interface HeaderProps {
 }
 
 interface Notification {
-  id: any;
+  id: string;
   messageTitle: string;
   message: string;
   timestamp: string;

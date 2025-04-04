@@ -8,7 +8,7 @@ interface Notification {
 }
 
 interface NotificationPopoverProps {
-  notifications: Notification[];
+  notifications: any;
   onNotificationClick: (id: string) => void;
 }
 
@@ -27,7 +27,7 @@ export function NotificationPopover({ notifications, onNotificationClick }: Noti
           {notifications.length === 0 ? (
             <p className="py-4 text-sm text-gray-500 text-center">No notifications</p>
           ) : (
-            notifications.map((notification) => (
+            notifications.map((notification:any) => (
               <div
                 key={notification.id}
                 onClick={() => onNotificationClick(notification.id)}

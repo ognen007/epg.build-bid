@@ -1,7 +1,4 @@
-import React, { useState } from "react";
-import { Calendar, Hammer, CheckSquare, Bolt } from "lucide-react";
-import { RightClickPopup } from "./RightClickPopup";
-import { updateTaskStatusEndpoint } from "../../../../services/admin/contractorpipeline/contractorPipeline";
+import { Bolt } from "lucide-react";
 
 export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: any) {
   const statuses = [
@@ -9,67 +6,6 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
     { hold: "ongoing_projects", label: "Ongoing Projects" },
     { hold: "completed_projects", label: "Completed Projects" },
   ];
-
-  // State for the right-click context menu
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean;
-    position: { x: number; y: number };
-    taskId: string | null;
-  }>({
-    visible: false,
-    position: { x: 0, y: 0 },
-    taskId: null,
-  });
-
-  // Handle right-click event
-  const handleRightClick = (e: React.MouseEvent, taskId: string) => {
-    e.preventDefault(); // Prevent the default browser context menu
-    setContextMenu({
-      visible: true,
-      position: { x: e.pageX, y: e.pageY },
-      taskId,
-    });
-  };
-
-  const handleContextMenuAction = async (action: string, taskId: string) => {
-    let newHold = "none";
-    let newStatus = "";
-
-    switch (action) {
-      case "abandoned":
-        newStatus = "abandoned";
-        break;
-      case "loss":
-        newStatus = "lost";
-        break;
-      default:
-        console.error(`Invalid action: ${action}`);
-        return;
-    }
-
-    try {
-      const response = await updateTaskStatusEndpoint(taskId, newHold, newStatus); // Call the service function
-      updateTaskStatus(taskId, newHold, newStatus); // Call the parent's update function to refresh the tasks
-    } catch (error: any) {
-      console.error("Error updating task:", error);
-      // Handle the error appropriately, e.g., display an error message to the user
-      alert(error.message || "Failed to update task.");
-    }
-
-    setContextMenu({ visible: false, position: { x: 0, y: 0 }, taskId: null });
-  };
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "scheduled_projects":
-        return Calendar;
-      case "ongoing_projects":
-        return Hammer;
-      case "completed_projects":
-        return CheckSquare;
-      default:
-        return null;
-    }
-  };
 
   const handleDrop = (e: any, status: string) => {
     e.preventDefault();
@@ -83,7 +19,6 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {statuses.map((status) => {
-          const StatusIcon = getStatusIcon(status.hold);
           const tasksInGroup = tasks.filter(
             (task: any) => task.hold === status.hold
           );
@@ -112,7 +47,6 @@ export function ConstructionSection({ tasks, updateTaskStatus, onTaskClick }: an
                       e.dataTransfer.setData("taskId", task.id);
                     }}
                     onClick={() => onTaskClick(task.id)} // Call onTaskClick when the task is clicked
-                    onContextMenu={(e) => handleRightClick(e, task.id)} // Handle right-click
                     className={`p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 ${
                       task.highIntent ? "border-l-[5px] border-red-500" : ""
                     }`}

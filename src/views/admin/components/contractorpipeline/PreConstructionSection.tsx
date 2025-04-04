@@ -1,80 +1,18 @@
-import React, { useState } from "react";
-import { Clock, FileText, CheckCircle, Bolt, MessageSquare } from "lucide-react";
-import { RightClickPopup } from "./RightClickPopup";
-import { updateTaskStatusEndpoint } from "../../../../services/admin/contractorpipeline/contractorPipeline";
-
+import { Bolt, MessageSquare } from "lucide-react";
 export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick, onCommentClick }: any) {
   const statuses = [
-    { hold: "takeoff_in_progress", label: "Takeoff in Progress" },
-    { hold: "ready_for_proposal", label: "Ready for Proposal" },
+    { hold: "proposal_in_progress", label: "Proposal in Progress" },
+    { hold: "proposal_uploaded", label: "Proposal Uploaded" },
+    { hold: "bid_submitted", label: "Bid Submitted" },
     { hold: "negotiating", label: "Negotiating" },
+    { hold: "won", label: "Won" },
+    { hold: "lost", label: "Lost" },
   ];
-
-  // State for the right-click context menu
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean;
-    position: { x: number; y: number };
-    taskId: string | null;
-  }>({
-    visible: false,
-    position: { x: 0, y: 0 },
-    taskId: null,
-  });
-
-  // Handle right-click event
-  const handleRightClick = (e: React.MouseEvent, taskId: string) => {
-    e.preventDefault(); // Prevent the default browser context menu
-    setContextMenu({
-      visible: true,
-      position: { x: e.pageX, y: e.pageY },
-      taskId,
-    });
-  };
-
-  const handleContextMenuAction = async (action: string, taskId: string) => {
-    let newHold = "none";
-    let newStatus = "";
-
-    switch (action) {
-      case "abandoned":
-        newStatus = "abandoned";
-        break;
-      case "loss":
-        newStatus = "lost";
-        break;
-      default:
-        console.error(`Invalid action: ${action}`);
-        return;
-    }
-
-    try {
-      const response = await updateTaskStatusEndpoint(taskId, newHold, newStatus);
-      updateTaskStatus(taskId, newHold, newStatus);
-    } catch (error: any) {
-      console.error("Error updating task:", error);
-      alert(error.message || "Failed to update task.");
-    }
-
-    setContextMenu({ visible: false, position: { x: 0, y: 0 }, taskId: null });
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "takeoff_in_progress":
-        return Clock;
-      case "ready_for_proposal":
-        return FileText;
-      case "negotiating":
-        return CheckCircle;
-      default:
-        return null;
-    }
-  };
 
   const handleDrop = (e: any, status: string) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
-    updateTaskStatus(taskId, status); // Call the `updateTaskStatus` function
+    updateTaskStatus(taskId, status);
   };
 
   return (
@@ -83,7 +21,6 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick, o
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
         {statuses.map((status) => {
-          const StatusIcon = getStatusIcon(status.hold);
           const tasksInGroup = tasks.filter(
             (task: any) => task.hold === status.hold
           );
@@ -111,8 +48,7 @@ export function PreConstructionSection({ tasks, updateTaskStatus, onTaskClick, o
                     onDragStart={(e) => {
                       e.dataTransfer.setData("taskId", task.id);
                     }}
-                    onClick={() => onTaskClick(task.id)} // Call onTaskClick when the task is clicked
-                    onContextMenu={(e) => handleRightClick(e, task.id)} // Handle right-click
+                    onClick={() => onTaskClick(task.id)}
                     className={`p-3 rounded-lg w-full cursor-pointer ${
                       status.hold === "negotiating"
                         ? "bg-orange-50 border-l-4 border-orange-500 hover:bg-orange-100"

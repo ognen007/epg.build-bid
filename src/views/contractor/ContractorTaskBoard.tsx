@@ -43,31 +43,25 @@ export function TasksBoard() {
     async function loadContractorProfile() {
       try {
         const storedUser = localStorage.getItem("user");
-
         if (!storedUser) {
-          console.error("No user stored")
+          console.error("No user stored");
           return;
         }
-
         const parsedUser = JSON.parse(storedUser);
-
         if (!parsedUser.email) {
           console.error("Email not found in stored user data");
           return;
         }
-
         const profile = await fetchContractorProfile(parsedUser.email);
-
         if (profile) {
           setContractorProfile(profile);
         } else {
-          console.error("Failed to load profile.")
+          console.error("Failed to load profile.");
         }
       } finally {
         setLoading(false);
       }
     }
-
     loadContractorProfile();
   }, []);
 
@@ -89,7 +83,6 @@ export function TasksBoard() {
   useEffect(() => {
     async function loadTasks() {
       if (!contractorId) return;
-
       try {
         const fetchedTasks = await fetchTasks(contractorId);
         setTasks(fetchedTasks);
@@ -99,13 +92,11 @@ export function TasksBoard() {
         setLoading(false); // Set loading to false regardless of success or failure
       }
     }
-
     loadTasks();
-  }, [contractorId]);  
-  
+  }, [contractorId]);
+
   const handleAddComment = async () => {
     if (!selectedTask || !newComment.trim()) return;
-
     try {
       const addedComment = await addComment(selectedTask.id, newComment, contractorProfile.fullName);
       setTasks((prevTasks) =>
@@ -123,15 +114,12 @@ export function TasksBoard() {
   const handleDrop = async (e: React.DragEvent, status: 'todo' | 'done') => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
-
     const task = tasks.find((task) => task.id === taskId);
     if (!task) return;
-
     const updatedTasks = tasks.map((task) =>
       task.id === taskId ? { ...task, status, stand: status === 'done' ? 'done' : '' } : task
     );
     setTasks(updatedTasks);
-
     try {
       await updateTaskStatus(taskId, status); // Call service function
       console.log('Ticket updated successfully:', { status, stand: status === 'done' ? 'done' : '' });
@@ -142,29 +130,23 @@ export function TasksBoard() {
     }
   };
 
-  // Handle drag start
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
   };
 
-  // Handle drag over
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  // Filter tasks based on the selected task type
   const filteredTasks = tasks.filter((task) => task.taskType === selectedType);
 
-  // Separate tasks into "To-Do" and "Done" based on their stand field
   const todoTasks = filteredTasks.filter((task) => task.stand !== 'done');
   const doneTasks = filteredTasks.filter((task) => task.stand === 'done');
 
-  // Debugging: Log tasks whenever they are updated
   useEffect(() => {
     console.log('Tasks updated:', tasks);
   }, [tasks]);
 
-  // Error state
   if (error) {
     return <div className="text-red-600 p-6">Error: {error}</div>;
   }
@@ -172,33 +154,31 @@ export function TasksBoard() {
   return (
     <div className="space-y-6 bg-gray-100 p-6 rounded-xl">
       {/* Task Type Selector */}
-      <div className="flex justify-center">
-        <div className="inline-flex p-1 bg-white rounded-full shadow-sm">
-          <button
-            onClick={() => setSelectedType('quote_verification')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'quote_verification'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            Quote Verification
-          </button>
-          <button
-            onClick={() => setSelectedType('price_negotiation')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedType === 'price_negotiation'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            Price Negotiation
-          </button>
-        </div>
+      <div className="flex justify-center flex-wrap gap-4">
+        <button
+          onClick={() => setSelectedType('quote_verification')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            selectedType === 'quote_verification'
+              ? 'bg-orange-500 text-white shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          Quote Verification
+        </button>
+        <button
+          onClick={() => setSelectedType('price_negotiation')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            selectedType === 'price_negotiation'
+              ? 'bg-orange-500 text-white shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          Price Negotiation
+        </button>
       </div>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2 sm:grid-cols-1">
         {/* To-Do Column */}
         <div
           onDrop={(e) => handleDrop(e, 'todo')}

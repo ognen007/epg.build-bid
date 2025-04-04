@@ -82,26 +82,30 @@ export const ContractorProjectTimeline = () => {
     }
   }
 
-  // Check if any project has a hold of "ready_for_proposal" for exactly 3 days
   useEffect(() => {
-    if (!loading && projects.length > 0) {
+    if (!loading && projects && projects.length > 0) {
       projects.forEach((project) => {
-        project.time.forEach((hold) => {
-          if (hold.hold === "ready_for_proposal") {
-            const holdTimestamp = new Date(hold.timestamp);
-            const currentDate = new Date();
-            const timeDifference = currentDate.getTime() - holdTimestamp.getTime();
-            const daysDifference = timeDifference / (1000 * 60 * 60 * 24); // Convert milliseconds to days
-
-            if (Math.floor(daysDifference) === 3) {
-              sendNotificationToUser(
-                "67e80bc2688450393477aaee",
-                `Proposal from ${contractorFullName}`,
-                "Proposal hasn't been sent in 3 days"
-              );
+        // Ensure `project.time` is an array before iterating
+        if (Array.isArray(project.time)) {
+          project.time.forEach((hold) => {
+            if (hold.hold === "ready_for_proposal") {
+              const holdTimestamp = new Date(hold.timestamp);
+              const currentDate = new Date();
+              const timeDifference = currentDate.getTime() - holdTimestamp.getTime();
+              const daysDifference = timeDifference / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+  
+              if (Math.floor(daysDifference) === 3) {
+                sendNotificationToUser(
+                  "67e80bc2688450393477aaee",
+                  `Proposal from ${contractorFullName}`,
+                  "Proposal hasn't been sent in 3 days"
+                );
+              }
             }
-          }
-        });
+          });
+        } else {
+          console.warn("Invalid or missing 'time' array for project:", project.id);
+        }
       });
     }
   }, [projects, loading]);
@@ -160,77 +164,75 @@ export const ContractorProjectTimeline = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-white rounded-xl shadow-lg p-6 transition-all hover:shadow-xl relative"
-              >
-                {/* Display createdAt date in the top-right corner */}
-                <div className="absolute top-4 right-6 text-sm text-gray-500">
-                  Created on: {formatDate(project.createdAt)}
+{projects.map((project) => (
+  <div key={project.id} className="bg-white rounded-xl shadow-lg p-6">
+    {/* Display createdAt date */}
+    <div className="absolute top-4 right-6 text-sm text-gray-500">
+      Created on: {formatDate(project.createdAt)}
+    </div>
+
+    <h2 className="text-2xl font-semibold text-gray-800 mb-6 pb-4 border-b">
+      {project.name}
+    </h2>
+
+    {/* Check if project.time exists and is an array */}
+    {!Array.isArray(project.time) || project.time.length === 0 ? (
+      <p className="text-gray-600 text-center py-4">
+        No holds recorded for this project.
+      </p>
+    ) : (
+      <div className="space-y-6">
+        {project.time.map((hold, idx) => {
+          const durationInMinutes = Math.floor(hold.counter / 60);
+          const durationInHours = Math.floor(durationInMinutes / 60);
+
+          return (
+            <Fragment key={idx}>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-orange-600" />
                 </div>
 
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6 pb-4 border-b">
-                  {project.name}
-                </h2>
-
-                {!project.time || project.time.length === 0 ? (
-                  <p className="text-gray-600 text-center py-4">
-                    No holds recorded for this project.
-                  </p>
-                ) : (
-                  <div className="space-y-6">
-                    {project.time.map((hold, idx) => {
-                      const durationInMinutes = Math.floor(hold.counter / 60);
-                      const durationInHours = Math.floor(durationInMinutes / 60);
-
-                      return (
-                        <Fragment key={idx}>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                              <Clock className="w-6 h-6 text-orange-600" />
-                            </div>
-
-                            <div className="flex-grow">
-                              <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-lg font-medium text-gray-900">
-                                  {hold.hold}
-                                </h3>
-                                <span className="text-sm font-medium text-gray-500">
-                                  {durationInHours > 0 && `${durationInHours}h `}
-                                  {durationInMinutes % 60}m
-                                </span>
-                              </div>
-
-                              <div className="relative mt-2">
-                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-orange-600 rounded-full transition-all duration-500"
-                                    style={{
-                                      width: `${
-                                        (hold.counter /
-                                          project.time.reduce(
-                                            (acc, h) => acc + h.counter,
-                                            0
-                                          )) *
-                                        100
-                                      }%`,
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          {idx < project.time.length - 1 && (
-                            <div className="ml-6 w-0.5 h-6 bg-gray-200 mx-auto" />
-                          )}
-                        </Fragment>
-                      );
-                    })}
+                <div className="flex-grow">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {hold.hold}
+                    </h3>
+                    <span className="text-sm font-medium text-gray-500">
+                      {durationInHours > 0 && `${durationInHours}h `}
+                      {durationInMinutes % 60}m
+                    </span>
                   </div>
-                )}
+
+                  <div className="relative mt-2">
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-orange-600 rounded-full transition-all duration-500"
+                        style={{
+                          width: `${
+                            (hold.counter /
+                              project.time.reduce(
+                                (acc, h) => acc + h.counter,
+                                0
+                              )) *
+                            100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
+              {idx < project.time.length - 1 && (
+                <div className="ml-6 w-0.5 h-6 bg-gray-200 mx-auto" />
+              )}
+            </Fragment>
+          );
+        })}
+      </div>
+    )}
+  </div>
+))}
           </div>
         )}
       </div>

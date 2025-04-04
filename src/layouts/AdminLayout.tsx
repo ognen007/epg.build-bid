@@ -21,6 +21,8 @@ import { fetchAdminNameByEmail } from '../services/admin/adminInfo/adminInformat
 import { AdminTasks } from '../components/admin/tasks/AdminTasks';
 import { ProjectsOverview } from '../views/admin/components/ProjectsOverview';
 import { ContractorProjectTimeline } from '../components/admin/analytics/ContractorProjectTimeline';
+import axios from 'axios';
+import { getFcmToken, requestNotificationPermission } from '../firebaseConfig';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,7 +47,61 @@ export function AdminLayout() {
   
   
   // Determine which routes to use based on the user's role
-   const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'PROJECTSPECIALIST' ? routes.admin.filter(route => route.roles?.includes('PROJECTSPECIALIST')) : [];
+   const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'PROJECTSPECIALIST' ? routes.admin.filter(route => route.roles?.includes('PROJECTSPECIALIST')) : user?.role === 'CSM' ? routes.admin.filter(route => route.roles?.includes('CSM')): [];
+   const adminId = user?.role === 'ADMIN' ? "677ac938798cfa4e24055d23" : user?.role === 'PROJECTSPECIALIST' ? "67a22d7e2ba533059f313c8e" : user?.role === 'CSM' ? "67e80bc2688450393477aaee": [];
+
+   async function subscribeUserToPushNotifications() {
+    if (!adminId) {
+      console.warn("Cannot subscribe to push notifications: userId is missing");
+      return;
+    }
+
+    try {
+      // Request notification permission
+      await requestNotificationPermission();
+
+      // Get FCM token
+      const fcmToken = await getFcmToken();
+      if (!fcmToken) {
+        throw new Error("Failed to retrieve FCM token");
+      }
+
+      console.log("FCM Token created:", fcmToken);
+
+      // Send the FCM token to the backend
+      const response = await axios.post(
+        `https://epg-backend.onrender.com/api/notify/fcm-tokens/${adminId}`,
+        {
+          fcmToken,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("FCM token stored/updated successfully");
+    } catch (error) {
+      console.error("Error subscribing user to push notifications:", error);
+    }
+  }
+
+  // Refresh subscription every hour
+  useEffect(() => {
+    if (!adminId) {
+      console.warn("Cannot refresh subscription: contractorId is missing");
+      return;
+    }
+
+    subscribeUserToPushNotifications();
+
+    const interval = setInterval(() => {
+      subscribeUserToPushNotifications();
+    }, 60 * 60 * 1000); // Every hour
+
+    return () => clearInterval(interval);
+  }, [adminId]);
 
    useEffect(() => {
     async function loadFullName() {
@@ -94,6 +150,7 @@ export function AdminLayout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <Header
+        userId={adminId}
           userFullName={fullName}
           onMenuClick={() => setIsSidebarOpen(true)}
           onTasksClick={() => {}}

@@ -9,11 +9,11 @@ interface HeaderProps {
   onTasksClick: () => void;
   showTasksButton: boolean;
   userFullName: string;
-  userId: string;
+  userId: any;
 }
 
 interface Notification {
-  id: string;
+  id: any;
   messageTitle: string;
   message: string;
   timestamp: string;

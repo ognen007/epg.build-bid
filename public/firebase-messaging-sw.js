@@ -1,16 +1,16 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
-// Replace these with your actual Firebase config
-firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-});
-
+const firebaseConfig = {
+    apiKey: "AIzaSyDZySvF0SYvE4BdU57Of4P1_ekfOCnGvio",
+    authDomain: "epgghl.firebaseapp.com",
+    projectId: "epgghl",
+    storageBucket: "epgghl.appspot.com",
+    messagingSenderId: "1027773975545",
+    appId: "1:1027773975545:web:721e84a865e1d24874cb28",
+    measurementId: "G-V6N9RPV8S5"
+  };
+  
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {

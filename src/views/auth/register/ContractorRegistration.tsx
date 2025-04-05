@@ -94,20 +94,22 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
     setError('');
     setLoading(true);
   
+    // Password match check
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
       return;
     }
   
+    // Terms acceptance check
     if (!formData.termsAccepted) {
       setError('You must accept the terms and conditions');
       setLoading(false);
       return;
     }
   
+    // Validate file types (only if files are provided)
     const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-
     if (
       formData.businessLicenseFile &&
       !allowedExtensions.includes(formData.businessLicenseFile.name.split('.').pop()?.toLowerCase() || '')
@@ -116,7 +118,6 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
       setLoading(false);
       return;
     }
-    
     if (
       formData.insuranceCertificateFile &&
       !allowedExtensions.includes(formData.insuranceCertificateFile.name.split('.').pop()?.toLowerCase() || '')
@@ -125,20 +126,22 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
       setLoading(false);
       return;
     }
-    
+  
+    // Prepare form payload
     const formPayload = new FormData();
     formPayload.append('fullName', formData.fullName);
     formPayload.append('email', formData.email);
     formPayload.append('password', formData.password);
     formPayload.append('companyName', formData.companyName);
-    formPayload.append('licenseNumber', formData.licenseNumber);
+    formPayload.append('licenseNumber', formData.licenseNumber || ''); // Optional field
     formPayload.append('specialty', formData.specialty);
     formPayload.append('yearsOfExperience', String(formData.yearsExperience));
-    formPayload.append('portfolioLink', formData.portfolioUrl);
+    formPayload.append('portfolioLink', formData.portfolioUrl || ''); // Optional field
     formPayload.append('phoneNumber', formData.phone);
     formPayload.append('officeAddress', formData.address);
     formPayload.append('termsAccepted', String(formData.termsAccepted));
   
+    // Append files only if they exist
     if (formData.businessLicenseFile) {
       formPayload.append('businessLicense', formData.businessLicenseFile);
     }
@@ -149,8 +152,7 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
     try {
       const response = await registerContractor(formPayload);
       console.log(response);
-
-      if (response.status !== 400 || response.status !== 404) {
+      if (response.status !== 400 && response.status !== 404) {
         addTask1();
         addTask2();
         addTask3();
@@ -165,7 +167,7 @@ export function ContractorRegistration({ onBack }: { onBack: () => void }) {
       setLoading(false);
     }
   };
-// 67a22d7e2ba533059f313c8e
+
   const handleChange = (field: string, value: any) => {
     setFormData(prevState => ({
       ...prevState,

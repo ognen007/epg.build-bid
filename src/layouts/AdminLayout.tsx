@@ -53,7 +53,7 @@ export function AdminLayout() {
    if (user?.role === 'ADMIN') {
      adminId = "677ac938798cfa4e24055d23";
    } else if (user?.role === 'PROJECTSPECIALIST') {
-     adminId = fullName === 'Michael Miclat' ? 'chicken nuggets' : '67a22d7e2ba533059f313c8e';
+     adminId = fullName === 'Michael Miclat' ? '67f19911f8178a840cd3ecfe' : '67a22d7e2ba533059f313c8e';
    } else if (user?.role === 'CSM') {
      adminId = "67e80bc2688450393477aaee";
    }
@@ -201,6 +201,7 @@ export function AdminLayout() {
             {user?.role === 'PROJECTSPECIALIST' && (
               <>
                 <Route path="/tasks" element={<AdminTasks />} />
+                <Route path="/projects/" element={<ProjectManagement />} />
                 <Route path="/settings" element={<AdminSettings/>} />
                 <Route path="/pipeline" element={<ContractorPipeline />} />
                 <Route path="/pipeline/:id" element={<ContractorPipeline />} />

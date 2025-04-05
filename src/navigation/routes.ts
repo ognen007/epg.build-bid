@@ -21,7 +21,7 @@ export const routes = {
     { path: '/admin/users', label: 'User Management', icon: Users,  roles: ["ADMIN"] },
     // { path: '/admin/projects', label: 'Projects', icon: Briefcase },
     { path: '/admin/pipeline', label: 'Contractor Pipeline', icon: Layers, roles: ["ADMIN", 'PROJECTSPECIALIST', 'CSM'] },
-    { path: '/admin/projects', label: 'Projects', icon: BetweenHorizontalStart, roles: ["ADMIN"] },
+    { path: '/admin/projects', label: 'Projects', icon: BetweenHorizontalStart, roles: ["ADMIN, PROJECTSPECIALIST"] },
     { path: '/admin/tasks', label: 'Tasks', icon: LayoutList, roles: ["ADMIN", 'PROJECTSPECIALIST', 'CSM'] },
     // { path: '/admin/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN','PROJECTSPECIALIST', "CSM"]  },
     // { path: '/admin/earnings', label: 'Earnings', icon: DollarSign },

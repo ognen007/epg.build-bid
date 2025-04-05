@@ -48,7 +48,17 @@ export function AdminLayout() {
   
   // Determine which routes to use based on the user's role
    const roleRoutes = user?.role === 'ADMIN' ? routes.admin : user?.role === 'PROJECTSPECIALIST' ? routes.admin.filter(route => route.roles?.includes('PROJECTSPECIALIST')) : user?.role === 'CSM' ? routes.admin.filter(route => route.roles?.includes('CSM')): [];
-   const adminId = user?.role === 'ADMIN' ? "677ac938798cfa4e24055d23" : user?.role === 'PROJECTSPECIALIST' ? "67a22d7e2ba533059f313c8e" : user?.role === 'CSM' ? "67e80bc2688450393477aaee": [];
+   let adminId: string | string[] = [];
+
+   if (user?.role === 'ADMIN') {
+     adminId = "677ac938798cfa4e24055d23";
+   } else if (user?.role === 'PROJECTSPECIALIST') {
+     adminId = fullName === 'Michael Miclat' ? 'chicken nuggets' : '67a22d7e2ba533059f313c8e';
+   } else if (user?.role === 'CSM') {
+     adminId = "67e80bc2688450393477aaee";
+   }
+   
+   
 
    async function subscribeUserToPushNotifications() {
     if (!adminId) {

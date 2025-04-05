@@ -7,10 +7,9 @@ import { EditProjectModal } from './EditProjectModal'; // Import the modal compo
 interface ProjectRowProps {
   project: ProjectType;
   deleteProject: (id: string) => void; 
-  editProject: (id:string) => void;
 }
 
-export function ProjectRow({ project, deleteProject, editProject }: ProjectRowProps) {
+export function ProjectRow({ project, deleteProject }: ProjectRowProps) {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
 
   // Handle delete button click (stop event propagation to prevent row click)
@@ -29,14 +28,7 @@ export function ProjectRow({ project, deleteProject, editProject }: ProjectRowPr
   const handleCloseModal = () => {
     setIsModalOpen(false); // Close the modal
   };
-
-  // Handle project update
-  const handleUpdateProject = (updatedProject: Partial<ProjectType>) => {
-    console.log('Project updated:', updatedProject);
-    editProject(project.id)
-    setIsModalOpen(false); // Close the modal after updating
-  };
-
+  
   return (
     <>
       <tr className="hover:bg-gray-50 cursor-pointer">
@@ -92,7 +84,6 @@ export function ProjectRow({ project, deleteProject, editProject }: ProjectRowPr
         <EditProjectModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          onUpdate={handleUpdateProject}
           projectId={project.id} // Pass the project ID to the modal
         />
       )}

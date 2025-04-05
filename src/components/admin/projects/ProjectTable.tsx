@@ -16,14 +16,6 @@ export function ProjectTable({ projects }: ProjectTableProps) {
       }
     };
 
-    const handleEditProject = async (projectId: string) => {
-      try {
-        await deleteProject(projectId); 
-      } catch (error: any) {
-      }
-    };
-  
-
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
@@ -59,9 +51,8 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                 <ProjectRow 
                   key={project.id} 
                   project={project} 
-                  deleteProject={handleDeleteProject} 
-                  editProject={handleEditProject}/>
-              ))
+                  deleteProject={handleDeleteProject} />
+              ))//
             ) : (
               <tr>
                 <td colSpan={5} className="px-6 py-4 text-center text-gray-500">

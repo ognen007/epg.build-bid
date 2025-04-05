@@ -14,6 +14,8 @@ export interface Contractor {
   officeAddress: string;
   createdAt: string;
   role: string;
+  businessLicense: string;
+  insuranceCert:string;
 }
 
 interface EditUserModalProps {
@@ -103,6 +105,14 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
                   value={formData.officeAddress}
                   onChange={(e) => setFormData({ ...formData, officeAddress: e.target.value })}
                 />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Business License</label>
+                <a className='text-blue-700' href={formData.businessLicense}>Install</a>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Insurance Certificate</label>
+                <a className='text-blue-700' href={formData.insuranceCert}>Install</a>
               </div>
             </div>
             <div className="flex justify-end space-x-3 pt-4">
@@ -223,12 +233,15 @@ export function UserGrowthComponent() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.companyName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contractor.specialty}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => setSelectedUser(contractor)}
-                      className="text-orange-600 hover:text-orange-700"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
+                  <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedUser(contractor);
+                  }}
+                  className="text-orange-600 hover:text-orange-700 w-20px"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
                   </td>
                 </tr>
               ))}

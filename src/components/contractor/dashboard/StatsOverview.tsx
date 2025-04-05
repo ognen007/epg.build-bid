@@ -55,7 +55,7 @@ export function StatsOverview() {
           {
             title: 'Total Valuation',
             value: fetchedStats[2]?.value || 0,
-            icon: DollarSign,
+            icon: ArrowUpWideNarrow,
             trend: { value: fetchedStats[2]?.trend?.value || 0, isPositive: fetchedStats[2]?.trend?.isPositive || true },
           },
           {

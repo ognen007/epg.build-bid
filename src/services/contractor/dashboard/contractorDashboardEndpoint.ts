@@ -11,16 +11,15 @@ export async function fetchStats(): Promise<StatCardProps[]> {
     }
     const data = await response.json();
 
-    // Transform the data (important!):
-    const transformedData: StatCardProps[] = data.map((item: any) => ({ // Replace 'any' with the actual type of 'item'
-      title: item.title || '',
-      value: item.value || 0,
-      icon: item.icon || null, // Make sure your StatCard can handle null icons
-      trend: { value: item.trend?.value || 0, isPositive: item.trend?.isPositive || true },
+    // Transform the data to match StatCardProps structure
+    const transformedData: StatCardProps[] = data.map((item: { title: string; value: number }) => ({
+      title: item.title,
+      value: item.value,
+      icon: null, // Default to null since backend doesn't provide icons
+      trend: { value: 0, isPositive: true }, // Default trend values
     }));
 
     return transformedData;
-
   } catch (error) {
     console.error('Error fetching stats:', error);
     throw error;

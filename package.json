@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@awesome-cordova-plugins/firebase-x": "^6.16.0",
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@radix-ui/themes": "^3.2.0",
     "@stitches/react": "^1.2.8",
     "@xyflow/react": "^12.4.2",

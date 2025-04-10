@@ -1,0 +1,6 @@
+{
+	"appId": "app.epg.build",
+	"appName": "EPG",
+	"webDir": "dist",
+	"packageClassList": []
+}

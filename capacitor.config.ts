@@ -2,8 +2,12 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.epg.build',
-  appName: 'EPG',
-  webDir: 'dist'
+  appName: 'EPG Pulse',
+  webDir: 'dist',
+  ios: {
+    contentInset: "always",
+    backgroundColor: "#ffffff"
+  },
 };
 
 export default config;

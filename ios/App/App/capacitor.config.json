@@ -1,6 +1,10 @@
 {
 	"appId": "app.epg.build",
-	"appName": "EPG",
+	"appName": "EPG Pulse",
 	"webDir": "dist",
+	"ios": {
+		"contentInset": "always",
+		"backgroundColor": "#ffffff"
+	},
 	"packageClassList": []
 }

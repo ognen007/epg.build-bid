@@ -1,46 +1,57 @@
 workflows:
-  android:
+  android_build:
     name: Android Build
     max_build_duration: 60
     environment:
-      vars:
-        - key: ANDROID_HOME
-          value: /opt/android-sdk-linux
-    steps:
-      - checkout
-      - run:
-          name: Install NPM dependencies
-          command: |
-            npm install
-      - run:
-          name: Install Android dependencies
-          command: |
-            npx cap sync android
-            cd android && ./gradlew clean
-      - run:
-          name: Build Android App
-          command: |
-            cd android && ./gradlew assembleRelease
+      groups:
+        - android_credentials # Define this in Codemagic UI or CLI for signing
+      node: latest
+    scripts:
+      - name: Install NPM dependencies
+        script: |
+          npm install
+      - name: Install Android dependencies
+        script: |
+          npx cap sync android
+          cd android && ./gradlew clean
+      - name: Build Android App
+        script: |
+          cd android && ./gradlew assembleRelease
+    artifacts:
+      - android/app/build/outputs/apk/release/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com # Replace with your email
+        notify:
+          success: true
+          failure: true
 
-  ios:
+  ios_build:
     name: iOS Build
     max_build_duration: 60
     environment:
-      vars:
-        - key: XCODE_WORKSPACE
-          value: ios/App.xcworkspace
-    steps:
-      - checkout
-      - run:
-          name: Install NPM dependencies
-          command: |
-            npm install
-      - run:
-          name: Install iOS dependencies
-          command: |
-            npx cap sync ios
-            cd ios && pod install
-      - run:
-          name: Build iOS App
-          command: |
-            xcodebuild -workspace ios/App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $CI_BUILD_DIR/App.xcarchive
+      groups:
+        - ios_credentials # Define this in Codemagic UI or CLI for signing
+      node: latest
+      xcode: latest
+    scripts:
+      - name: Install NPM dependencies
+        script: |
+          npm install
+      - name: Install iOS dependencies
+        script: |
+          npx cap sync ios
+          cd ios && pod install
+      - name: Build iOS App
+        script: |
+          xcodebuild -workspace ios/App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $CM_BUILD_DIR/App.xcarchive
+    artifacts:
+      - ios/build/App.xcarchive/Products/Applications/App.app
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com # Replace with your email
+        notify:
+          success: true
+          failure: true

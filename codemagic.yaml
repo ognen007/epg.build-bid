@@ -2,45 +2,45 @@ workflows:
   android:
     name: Android Build
     max_build_duration: 60
+    environment:
+      vars:
+        - key: ANDROID_HOME
+          value: /opt/android-sdk-linux
     steps:
       - checkout
-      - install:
-          cocoapods: true
-          android_dependencies: true
       - run:
           name: Install NPM dependencies
           command: |
             npm install
       - run:
-          name: Build Android App
+          name: Install Android dependencies
           command: |
             npx cap sync android
-            cd android && ./gradlew assembleRelease
-      - deploy:
-          name: Upload to Google Play
+            cd android && ./gradlew clean
+      - run:
+          name: Build Android App
           command: |
-            # Example Fastlane command to upload to Google Play
-            fastlane android beta
+            cd android && ./gradlew assembleRelease
 
   ios:
     name: iOS Build
     max_build_duration: 60
+    environment:
+      vars:
+        - key: XCODE_WORKSPACE
+          value: ios/App.xcworkspace
     steps:
       - checkout
-      - install:
-          cocoapods: true
       - run:
           name: Install NPM dependencies
           command: |
             npm install
       - run:
-          name: Build iOS App
+          name: Install iOS dependencies
           command: |
             npx cap sync ios
             cd ios && pod install
-            xcodebuild -workspace App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $CI_BUILD_DIR/App.xcarchive
-      - deploy:
-          name: Upload to TestFlight
+      - run:
+          name: Build iOS App
           command: |
-            # Example Fastlane command to upload to TestFlight
-            fastlane ios beta
+            xcodebuild -workspace ios/App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $CI_BUILD_DIR/App.xcarchive

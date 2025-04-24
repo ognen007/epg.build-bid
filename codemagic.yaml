@@ -27,35 +27,41 @@ workflows:
           success: true
           failure: true
 
-  ios_build:
-    name: iOS Build
-    max_build_duration: 60
-    environment:
-      groups:
-        - ios_credentials
-      node: latest
-      xcode: latest
-    scripts:
-      - name: Install NPM dependencies
-        script: |
-          npm install
-      - name: Install iOS dependencies
-        script: |
-          npx cap sync ios
-          cd ios && pod install
-      - name: Set up signing files
-        script: |
-          mkdir -p ~/certs
-          cp certificate.p12 ~/certs/certificate.p12
-          cp auth.p8 ~/certs/auth.p8
-          cp epg_pulse.mobileprovision ~/certs/epg_pulse.mobileprovision
-      - name: Build iOS App
-        script: |
-          xcodebuild -workspace ios/App.xcworkspace \
-            -scheme App \
-            -sdk iphoneos \
-            -configuration Release \
-            archive -archivePath $CM_BUILD_DIR/App.xcarchive
+ios_build:
+  name: iOS Build
+  max_build_duration: 60
+  environment:
+    groups:
+      - ios_credentials
+    node: latest
+    xcode: latest
+  scripts:
+    - name: Install NPM dependencies
+      script: |
+        npm install
+    - name: Build Web Assets
+      script: |
+        npm run build
+    - name: Build Web Assets
+      script: |
+        npm run build  # Ensure this step is in place to build the web assets
+    - name: Install iOS dependencies
+      script: |
+        npx cap sync ios
+        cd ios && pod install
+    - name: Set up signing files
+      script: |
+        mkdir -p ~/certs
+        cp certificate.p12 ~/certs/certificate.p12
+        cp auth.p8 ~/certs/auth.p8
+        cp epg_pulse.mobileprovision ~/certs/epg_pulse.mobileprovision
+    - name: Build iOS App
+      script: |
+        xcodebuild -workspace ios/App.xcworkspace \
+          -scheme App \
+          -sdk iphoneos \
+          -configuration Release \
+          archive -archivePath $CM_BUILD_DIR/App.xcarchive
     artifacts:
       - ios/build/App.xcarchive/Products/Applications/App.app
     publishing:

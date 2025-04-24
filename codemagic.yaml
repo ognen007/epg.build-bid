@@ -21,6 +21,9 @@ workflows:
       - name: Set up signing files
         script: |
           ls -l ./certificate.p12 ./auth.p8 ./epg_pulse.mobileprovision
+          # Log provisioning profile details for debugging
+          security cms -D -i ./epg_pulse.mobileprovision > profile_details.plist
+          cat profile_details.plist
       - name: Build iOS App
         script: |
           # Create a temporary keychain for CI
@@ -30,13 +33,16 @@ workflows:
 
           # Import the certificate with password
           security import ./certificate.p12 -k build.keychain -P "EPG!!build89" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,       security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
 
-          # Copy provisioning profile
+          # Copy provisioning profile to the correct location
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp ./epg_pulse.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/epg_pulse.mobileprovision
+          # Use UUID from profile to avoid name conflicts
+          PROFILE_UUID=$(security cms -D -i ./epg_pulse.mobileprovision | grep -A1 '<key>UUID</key>' | grep '<string>' | sed -E 's/.*<string>(.*)</string>.*/\1/')
+          cp ./epg_pulse.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
+          ls -l ~/Library/MobileDevice/Provisioning\ Profiles
 
-          # Build and archive
+          # Build and archive (manual signing for App target only)
           xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -sdk iphoneos \
@@ -44,18 +50,12 @@ workflows:
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=P58Q6F64US \
-            PROVISIONING_PROFILE_SPECIFIER=epg_pulse \
+            PROVISIONING_PROFILE_SPECIFIER=$PROFILE_UUID \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
             archive
-
-          # Export the IPA
-          xcodebuild -exportArchive \
-            -archivePath $CM_BUILD_DIR/App.xcarchive \
-            -exportOptionsPlist ./exportOptions.plist \
-            -exportPath $CM_BUILD_DIR
     artifacts:
       - $CM_BUILD_DIR/App.xcarchive
-      - $CM_BUILD_DIR/App.ipa
+      - profile_details.plist
     publishing:
       email:
         recipients:

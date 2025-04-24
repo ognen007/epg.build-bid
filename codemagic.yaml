@@ -13,36 +13,26 @@ workflows:
           npm install
       - name: Build web assets
         script: |
-          npm run build  # Ensure web assets are built (creates ./dist)
+          npm run build
       - name: Install iOS dependencies
         script: |
-          npx cap sync ios  # Syncs web assets and generates Podfile
-          cd ios/App && pod install  # Run pod install in the correct directory
+          npx cap sync ios
+          cd ios/App && pod install
       - name: Set up signing files
         script: |
           ls -l ./certificate.p12 ./auth.p8 ./epg_pulse.mobileprovision
-          # Log provisioning profile details for debugging
           security cms -D -i ./epg_pulse.mobileprovision > profile_details.plist
           cat profile_details.plist
       - name: Build iOS App
         script: |
-          # Create a temporary keychain for CI
           security create-keychain -p "" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
-
-          # Import the certificate with password
           security import ./certificate.p12 -k build.keychain -P "EPG!!build89" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-
-          # Copy provisioning profile to the correct location
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          # Use UUID from profile to avoid name conflicts
-          PROFILE_UUID=$(security cms -D -i ./epg_pulse.mobileprovision | grep -A1 '<key>UUID</key>' | grep '<string>' | sed -E 's/.*<string>(.*)</string>.*/\1/')
+          PROFILE_UUID=$(security cms -D -i ./epg_pulse.mobileprovision | grep -A1 '<key>UUID</key>' | grep '<string>' | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
           cp ./epg_pulse.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
-          ls -l ~/Library/MobileDevice/Provisioning\ Profiles
-
-          # Build and archive (manual signing for App target only)
           xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -sdk iphoneos \

@@ -42,6 +42,8 @@ export function ProjectWorkflowView({ contractorId, setTasks, tasks }: ProjectWo
 
   // Fetch projects based on contractor's full name
   useEffect(() => {
+    if (!contractor?.fullName) return;
+    
     async function loadProjects() {
       if (!contractor?.fullName) return;
 

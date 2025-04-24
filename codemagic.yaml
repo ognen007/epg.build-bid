@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
     environment:
       groups:
-        - android_credentials # Define this in Codemagic UI or CLI for signing
+        - android_credentials
       node: latest
     scripts:
       - name: Install NPM dependencies
@@ -22,7 +22,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com # Replace with your email
+          - rob@epg.build
         notify:
           success: true
           failure: true
@@ -32,7 +32,7 @@ workflows:
     max_build_duration: 60
     environment:
       groups:
-        - ios_credentials # Define this in Codemagic UI or CLI for signing
+        - ios_credentials
       node: latest
       xcode: latest
     scripts:
@@ -43,15 +43,25 @@ workflows:
         script: |
           npx cap sync ios
           cd ios && pod install
+      - name: Set up signing files
+        script: |
+          mkdir -p ~/certs
+          cp certificate.p12 ~/certs/certificate.p12
+          cp auth.p8 ~/certs/auth.p8
+          cp epg_pulse.mobileprovision ~/certs/epg_pulse.mobileprovision
       - name: Build iOS App
         script: |
-          xcodebuild -workspace ios/App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $CM_BUILD_DIR/App.xcarchive
+          xcodebuild -workspace ios/App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            archive -archivePath $CM_BUILD_DIR/App.xcarchive
     artifacts:
       - ios/build/App.xcarchive/Products/Applications/App.app
     publishing:
       email:
         recipients:
-          - your-email@example.com # Replace with your email
+          - rob@epg.build
         notify:
           success: true
           failure: true

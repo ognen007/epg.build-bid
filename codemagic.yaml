@@ -20,19 +20,42 @@ workflows:
           cd ios/App && pod install  # Run pod install in the correct directory
       - name: Set up signing files
         script: |
-          mkdir -p ~/certs
-          cp certificate.p12 ~/certs/certificate.p12
-          cp auth.p8 ~/certs/auth.p8
-          cp epg_pulse.mobileprovision ~/certs/epg_pulse.mobileprovision
+          ls -l ./certificate.p12 ./auth.p8 ./epg_pulse.mobileprovision
       - name: Build iOS App
         script: |
+          # Create a temporary keychain for CI
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+
+          # Import the certificate with password
+          security import ./certificate.p12 -k build.keychain -P "EPG!!build89" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,       security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+
+          # Copy provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp ./epg_pulse.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/epg_pulse.mobileprovision
+
+          # Build and archive
           xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -sdk iphoneos \
             -configuration Release \
-            archive -archivePath $CM_BUILD_DIR/App.xcarchive
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=P58Q6F64US \
+            PROVISIONING_PROFILE_SPECIFIER=epg_pulse \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            archive
+
+          # Export the IPA
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            -exportOptionsPlist ./exportOptions.plist \
+            -exportPath $CM_BUILD_DIR
     artifacts:
-      - ios/build/App.xcarchive/Products/Applications/App.app
+      - $CM_BUILD_DIR/App.xcarchive
+      - $CM_BUILD_DIR/App.ipa
     publishing:
       email:
         recipients:

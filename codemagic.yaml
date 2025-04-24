@@ -1,67 +1,36 @@
 workflows:
-  android_build:
-    name: Android Build
+  ios_build:
+    name: iOS Build
     max_build_duration: 60
     environment:
       groups:
-        - android_credentials
+        - ios_credentials
       node: latest
+      xcode: latest
     scripts:
       - name: Install NPM dependencies
         script: |
           npm install
-      - name: Install Android dependencies
+      - name: Build web assets
         script: |
-          npx cap sync android
-          cd android && ./gradlew clean
-      - name: Build Android App
+          npm run build  # Ensure web assets are built (creates ./dist)
+      - name: Install iOS dependencies
         script: |
-          cd android && ./gradlew assembleRelease
-    artifacts:
-      - android/app/build/outputs/apk/release/app-release.apk
-    publishing:
-      email:
-        recipients:
-          - rob@epg.build
-        notify:
-          success: true
-          failure: true
-
-ios_build:
-  name: iOS Build
-  max_build_duration: 60
-  environment:
-    groups:
-      - ios_credentials
-    node: latest
-    xcode: latest
-  scripts:
-    - name: Install NPM dependencies
-      script: |
-        npm install
-    - name: Build Web Assets
-      script: |
-        npm run build
-    - name: Build Web Assets
-      script: |
-        npm run build  # Ensure this step is in place to build the web assets
-    - name: Install iOS dependencies
-      script: |
-        npx cap sync ios
-        cd ios && pod install
-    - name: Set up signing files
-      script: |
-        mkdir -p ~/certs
-        cp certificate.p12 ~/certs/certificate.p12
-        cp auth.p8 ~/certs/auth.p8
-        cp epg_pulse.mobileprovision ~/certs/epg_pulse.mobileprovision
-    - name: Build iOS App
-      script: |
-        xcodebuild -workspace ios/App.xcworkspace \
-          -scheme App \
-          -sdk iphoneos \
-          -configuration Release \
-          archive -archivePath $CM_BUILD_DIR/App.xcarchive
+          npx cap sync ios  # Syncs web assets and generates Podfile
+          cd ios/App && pod install  # Run pod install in the correct directory
+      - name: Set up signing files
+        script: |
+          mkdir -p ~/certs
+          cp certificate.p12 ~/certs/certificate.p12
+          cp auth.p8 ~/certs/auth.p8
+          cp epg_pulse.mobileprovision ~/certs/epg_pulse.mobileprovision
+      - name: Build iOS App
+        script: |
+          xcodebuild -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            archive -archivePath $CM_BUILD_DIR/App.xcarchive
     artifacts:
       - ios/build/App.xcarchive/Products/Applications/App.app
     publishing:

@@ -1,57 +1,78 @@
 workflows:
-  ios_build:
+  ionic-capacitor-ios-workflow:
     name: iOS Build
-    max_build_duration: 60
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
     environment:
-      groups:
-        - ios_credentials  # Still good to keep this for other values like API key if needed
-      node: latest
-      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: io.codemagic.ionicsample
+      vars:
+        # Ionic Xcode worskspace and scheme
+        XCODE_WORKSPACE: "App.xcworkspace"
+        XCODE_SCHEME: "App"
+        APP_STORE_APP_ID: 6744694610 # <-- Put the app id number here. This is found in App Store Connect > App > General > App Information
+      node: v16.11.1
+      xcode: latest # <-- set to specific version e.g. 14.3, 15.0 to avoid unexpected updates.
+      cocoapods: default
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: develop
+          include: true
+          source: true
     scripts:
-      - name: Install NPM dependencies
+      - name: Install npm dependencies for Ionic project
         script: |
           npm install
-      - name: Build web assets
+      - name: Cocoapods installation
         script: |
-          npm run build
-      - name: Install iOS dependencies
-        script: |
-          npx cap sync ios
           cd ios/App && pod install
-      - name: Set up signing files
+      - name: Compile web code to dist folder
+        script: npm run build
+      - name: Update dependencies and copy web assets to native project
         script: |
-          ls -l ./certificate.p12 ./auth.p8 ./epg_pulse.mobileprovision
-          security cms -D -i ./epg_pulse.mobileprovision > profile_details.plist
-          cat profile_details.plist
-      - name: Set up keychain and import certificate
+          # npx cap copy # <- use this is you don't need to update native dependencies
+          npx cap sync # <- update native dependencies and copy web assets to native project
+      - name: Set up code signing settings on Xcode project
         script: |
-          security create-keychain -p "" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
-          security import ./certificate.p12 -k build.keychain -P "EPG!!build89" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          PROFILE_UUID=$(security cms -D -i ./epg_pulse.mobileprovision | grep -A1 '<key>UUID</key>' | grep '<string>' | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
-          cp ./epg_pulse.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
-      - name: Build iOS App
+          xcode-project use-profiles
+      - name: Increment build number
         script: |
-          xcodebuild -workspace ios/App/App.xcworkspace \
-            -scheme App \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath $CM_BUILD_DIR/App.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=P58Q6F64US \
-            PROVISIONING_PROFILE_SPECIFIER=$PROFILE_UUID \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            archive
+          cd $CM_BUILD_DIR/ios/App
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID")
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+      - name: Build ipa for distribution
+        script: |
+          cd $CM_BUILD_DIR/ios/App
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
     artifacts:
-      - $CM_BUILD_DIR/App.xcarchive
-      - profile_details.plist
+      - ios/App/build/ios/ipa/App.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
     publishing:
       email:
         recipients:
           - ognen@brand-boost.agency
         notify:
-          success: true
-          failure: true
+          success: false     # To not receive a notification when a build succeeds
+          failure: false     # To not receive a notification when a build fails
+      app_store_connect:
+        auth: integration
+
+        # Configuration related to TestFlight (optional)
+        # Note: This action is performed during post-processing.
+        # submit_to_testflight: true
+        # beta_groups: # Specify the names of beta tester groups that will get access to the build once it has passed beta review.
+        #   - group name 1
+        #   - group name 2
+
+        # Configuration related to App Store (optional)
+        # Note: This action is performed during post-processing.
+        submit_to_app_store: false

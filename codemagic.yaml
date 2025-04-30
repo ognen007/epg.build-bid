@@ -7,7 +7,7 @@ workflows:
       app_store_connect: codemagic
     environment:
       ios_signing:
-        distribution_type: distribution
+        distribution_type: app_store       # ✅ valid value
         bundle_identifier: com.epg.build
       vars:
         XCODE_WORKSPACE: "App.xcworkspace"
@@ -16,11 +16,6 @@ workflows:
       node: v16.11.1
       xcode: latest
       cocoapods: default
-    code_signing:
-      certificates:
-        - certificate: certificate
-      provisioning_profiles:
-        - mobileprovision
     triggering:
       events:
         - push

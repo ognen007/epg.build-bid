@@ -10,6 +10,7 @@ workflows:
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
         APP_STORE_APP_ID: 6744694610
+        PROVISIONING_PROFILE_PATH: "ios/provisioning/EPG_Pulse_App_Store.mobileprovision"
       node: 20.11.1
       xcode: latest
       cocoapods: default
@@ -32,9 +33,11 @@ workflows:
       - name: Update dependencies and copy web assets to native project
         script: |
           npx cap sync
-      - name: Set up code signing settings on Xcode project
+      - name: Set up provisioning profile
         script: |
-          xcode-project use-profiles
+          echo "Setting up provisioning profile..."
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PROVISIONING_PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
       - name: Increment build number
         script: |
           cd $CM_BUILD_DIR/ios/App
@@ -43,9 +46,13 @@ workflows:
       - name: Build ipa for distribution
         script: |
           cd $CM_BUILD_DIR/ios/App
+          PROVISIONING_PROFILE_UUID=$(grep -a -E 'UUID' "$PROVISIONING_PROFILE_PATH" | grep -o "[0-9A-F-]\{36\}")
+          echo "Using provisioning profile UUID: $PROVISIONING_PROFILE_UUID"
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --code-sign-style Manual \
+            --provisioning-profile-uuid "$PROVISIONING_PROFILE_UUID"
     artifacts:
       - ios/App/build/ios/ipa/App.ipa
       - /tmp/xcodebuild_logs/*.log

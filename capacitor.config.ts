@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.epg.build',
+  appId: 'com.epg.build',
   appName: 'EPG Pulse',
   webDir: 'dist',
   ios: {

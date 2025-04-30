@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "app.epg.build"
+    namespace "com.epg.build"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.epg.build"
+        applicationId "com.epg.build"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,7 +1,7 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8' ?>
 <resources>
     <string name="app_name">EPG</string>
     <string name="title_activity_main">EPG</string>
-    <string name="package_name">app.epg.build</string>
-    <string name="custom_url_scheme">app.epg.build</string>
+    <string name="package_name">com.epg.build</string>
+    <string name="custom_url_scheme">com.epg.build</string>
 </resources>

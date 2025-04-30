@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1027773975545:android:762f0cb82e61c37974cb28",
         "android_client_info": {
-          "package_name": "app.epg.build"
+          "package_name": "com.epg.build"
         }
       },
       "oauth_client": [],

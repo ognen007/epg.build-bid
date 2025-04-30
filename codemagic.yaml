@@ -10,7 +10,7 @@ workflows:
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
         APP_STORE_APP_ID: 6744694610
-      node: v16.11.1
+      node: 20.11.1
       xcode: latest
       cocoapods: default
     triggering:

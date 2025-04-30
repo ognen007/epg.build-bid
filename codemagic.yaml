@@ -6,9 +6,10 @@ workflows:
     integrations:
       app_store_connect: Codemagic Key
     environment:
-      ios_signing:
-        distribution_type: app_store       # ✅ valid value
-        bundle_identifier: com.epg.build
+    ios_signing:
+      automatic_code_signing:
+      provisioning_profile_type: app_store
+      bundle_identifier: com.epg.build
       vars:
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"

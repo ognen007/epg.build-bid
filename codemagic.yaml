@@ -10,9 +10,16 @@ workflows:
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
         APP_STORE_APP_ID: 6744694610
+        CERTIFICATE_PASSWORD: "EPG!!build89"  # Replace with your .p12 password (or remove if no password)
       node: 20.11.1
       xcode: latest
       cocoapods: default
+    ios_signing:
+      certificates:
+        - path: ios/certs/distribution.p12
+          password: EPG!!build89
+      provisioning_profiles:
+        - path: ios/provisioning/EPG_Pulse_App_Store.mobileprovision
     triggering:
       events:
         - push
@@ -45,7 +52,8 @@ workflows:
           cd $CM_BUILD_DIR/ios/App
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --code-sign-style Manual
     artifacts:
       - ios/App/build/ios/ipa/App.ipa
       - /tmp/xcodebuild_logs/*.log

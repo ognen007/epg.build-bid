@@ -1,5 +1,5 @@
 {
-	"appId": "app.epg.build",
+	"appId": "com.epg.build",
 	"appName": "EPG Pulse",
 	"webDir": "dist",
 	"ios": {

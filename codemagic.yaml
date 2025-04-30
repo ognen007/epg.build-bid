@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: Codemagic Key
+      app_store_connect: EPG LLC
     environment:
       vars:
         XCODE_WORKSPACE: "App.xcworkspace"

@@ -47,10 +47,10 @@ workflows:
       - name: Extract provisioning profile UUID
         script: |
           echo "Extracting provisioning profile UUID..."
-          PROVISIONING_PROFILE_UUID=$(grep -a -E 'UUID' "$PROVISIONING_PROFILE_PATH" | grep -o "[0-9A-F-]\{36\}")
+          PROVISIONING_PROFILE_UUID=$(security cms -D -i "$PROVISIONING_PROFILE_PATH" | plutil -extract UUID xml1 -o - - | grep -o "[0-9A-F-]\{36\}")
           if [ -z "$PROVISIONING_PROFILE_UUID" ]; then
-            echo "Failed to extract UUID from $PROVISIONING_PROFILE_PATH"
-            exit 1
+          echo "Failed to extract UUID from $PROVISIONING_PROFILE_PATH"
+          exit 1
           fi
           echo "Extracted UUID: $PROVISIONING_PROFILE_UUID"
       - name: Increment build number

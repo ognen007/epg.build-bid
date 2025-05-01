@@ -48,16 +48,12 @@ workflows:
         script: |
           echo "Checking provisioning profile details..."
           for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-            security cms -D -i "$profile" | grep -A 1 "Name\|TeamIdentifier\|Entitlements"
+            security cms -D -i "$profile" | grep -A 1 "Name\|TeamIdentifier\|Entitlements\|UUID"
           done
       - name: Debug bundle ID in Xcode project
         script: |
           echo "Checking bundle ID in Xcode project..."
           xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -showBuildSettings | grep PRODUCT_BUNDLE_IDENTIFIER
-      - name: Debug export_options.plist
-        script: |
-          echo "Checking for export_options.plist..."
-          ls -l $CM_BUILD_DIR/ios/export_options.plist || echo "File not found"
       - name: Show build settings
         script: |
           xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -showBuildSettings
@@ -66,18 +62,23 @@ workflows:
           cd ios/App
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
-      - name: Debug build ipa command
-        script: |
-          echo "Build ipa command to be executed:"
-          echo "xcode-project build-ipa --workspace \"$XCODE_WORKSPACE\" --scheme \"$XCODE_SCHEME\" --export-options-plist \"$CM_BUILD_DIR/ios/export_options.plist\""
       - name: Build ipa for distribution
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME" \
-            --export-options-plist "$CM_BUILD_DIR/ios/export_options.plist"
+          cd ios/App
+          xcodebuild -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -archivePath "build/App.xcarchive" \
+            -configuration Release \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=P5806F64US \
+            PROVISIONING_PROFILE=y3rr_xs_ \
+            archive
+          xcodebuild -exportArchive \
+            -archivePath "build/App.xcarchive" \
+            -exportPath "build/ipa" \
+            -allowProvisioningUpdates
     artifacts:
-      - build/ios/ipa/*.ipa
+      - ios/App/build/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM

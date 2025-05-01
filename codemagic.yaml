@@ -42,6 +42,17 @@ workflows:
           echo "Setting up provisioning profile..."
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp "$PROVISIONING_PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "Listing provisioning profiles after copying..."
+          ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
+      - name: Extract provisioning profile UUID
+        script: |
+          echo "Extracting provisioning profile UUID..."
+          PROVISIONING_PROFILE_UUID=$(grep -a -E 'UUID' "$PROVISIONING_PROFILE_PATH" | grep -o "[0-9A-F-]\{36\}")
+          if [ -z "$PROVISIONING_PROFILE_UUID" ]; then
+            echo "Failed to extract UUID from $PROVISIONING_PROFILE_PATH"
+            exit 1
+          fi
+          echo "Extracted UUID: $PROVISIONING_PROFILE_UUID"
       - name: Increment build number
         script: |
           cd $CM_BUILD_DIR/ios/App
@@ -57,6 +68,7 @@ workflows:
             -archivePath "build/App.xcarchive" \
             -configuration Release \
             CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution: Estim8te LLC (P5806F64US)" \
             PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID" \
             archive
           xcodebuild -exportArchive \

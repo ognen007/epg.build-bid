@@ -62,6 +62,21 @@ workflows:
           cd ios/App
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID")
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+      - name: Create export_options.plist for App Store distribution
+        script: |
+          cd ios/App
+          cat <<EOF > export_options.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>P5806F64US</string>
+          </dict>
+          </plist>
+          EOF
       - name: Build ipa for distribution
         script: |
           cd ios/App
@@ -76,7 +91,7 @@ workflows:
           xcodebuild -exportArchive \
             -archivePath "build/App.xcarchive" \
             -exportPath "build/ipa" \
-            -allowProvisioningUpdates
+            -exportOptionsPlist "export_options.plist"
     artifacts:
       - ios/App/build/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log

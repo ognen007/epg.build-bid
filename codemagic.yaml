@@ -55,12 +55,13 @@ workflows:
       - name: Debug build ipa command
         script: |
           echo "Build ipa command to be executed:"
-          echo "xcode-project build-ipa --workspace \"$XCODE_WORKSPACE\" --scheme \"$XCODE_SCHEME\""
+          echo "xcode-project build-ipa --workspace \"$XCODE_WORKSPACE\" --scheme \"$XCODE_SCHEME\" --export-options-plist \"$CM_BUILD_DIR/ios/export_options.plist\""
       - name: Build ipa for distribution
         script: |
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --export-options-plist "$CM_BUILD_DIR/ios/export_options.plist"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log

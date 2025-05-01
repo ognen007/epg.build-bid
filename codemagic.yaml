@@ -7,7 +7,7 @@ workflows:
       app_store_connect: EPG LLC
     environment:
       vars:
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_WORKSPACE: "App.xcworkspace"  # Updated to be relative to ios/App directory
         XCODE_SCHEME: "App"
         APP_STORE_APP_ID: 6744694610
       node: 20.11.1
@@ -46,6 +46,7 @@ workflows:
           security find-identity -v -p codesigning
       - name: Show build settings
         script: |
+          cd ios/App
           xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -showBuildSettings
       - name: Increment build number
         script: |

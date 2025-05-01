@@ -7,10 +7,5 @@
   <string>app-store</string>
   <key>teamID</key>
   <string>P5806F64US</string>
-  <key>provisioningProfiles</key>
-  <dict>
-    <key>com.epg.build</key>
-    <string>CM_PULSEPROFILE</string>
-  </dict>
 </dict>
 </plist>

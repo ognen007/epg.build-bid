@@ -44,6 +44,20 @@ workflows:
           ls -l ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
           echo "Listing available certificates in keychain..."
           security find-identity -v -p codesigning
+      - name: Debug provisioning profile details
+        script: |
+          echo "Checking provisioning profile details..."
+          for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            security cms -D -i "$profile" | grep -A 1 "Name\|TeamIdentifier\|Entitlements"
+          done
+      - name: Debug bundle ID in Xcode project
+        script: |
+          echo "Checking bundle ID in Xcode project..."
+          xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -showBuildSettings | grep PRODUCT_BUNDLE_IDENTIFIER
+      - name: Debug export_options.plist
+        script: |
+          echo "Checking for export_options.plist..."
+          ls -l $CM_BUILD_DIR/ios/export_options.plist || echo "File not found"
       - name: Show build settings
         script: |
           xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -showBuildSettings

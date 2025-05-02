@@ -26,9 +26,15 @@ workflows:
           include: true
           source: true
     scripts:
+      - name: Clean npm dependencies
+        script: |
+          rm -rf node_modules package-lock.json
       - name: Install npm dependencies for Ionic project
         script: |
           npm install
+      - name: Copy node_modules to ios/App for consistent path
+        script: |
+          cp -r ../../node_modules ios/App/node_modules_local
       - name: Clean Pods cache
         script: |
           cd ios/App && rm -rf Pods && rm -f Podfile.lock
@@ -48,7 +54,7 @@ workflows:
       - name: Debug podspec file for CapacitorDevice
         script: |
           echo "Checking for CapacitorDevice podspec..."
-          ls -l ../../node_modules/@capacitor/device/ios/CapacitorDevice.podspec || echo "CapacitorDevice podspec not found"
+          ls -l node_modules_local/@capacitor/device/ios/CapacitorDevice.podspec || echo "CapacitorDevice podspec not found"
       - name: Debug provisioning profiles and certificates
         script: |
           echo "Listing provisioning profiles..."

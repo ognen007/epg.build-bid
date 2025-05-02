@@ -6,5 +6,7 @@
 		"contentInset": "always",
 		"backgroundColor": "#ffffff"
 	},
-	"packageClassList": []
+	"packageClassList": [
+		"DevicePlugin"
+	]
 }

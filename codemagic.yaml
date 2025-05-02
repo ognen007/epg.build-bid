@@ -29,9 +29,12 @@ workflows:
       - name: Install npm dependencies for Ionic project
         script: |
           npm install
+      - name: Clean Pods cache
+        script: |
+          cd ios/App && rm -rf Pods && rm -f Podfile.lock
       - name: Cocoapods installation
         script: |
-          cd ios/App && pod install
+          cd ios/App && pod install --verbose
       - name: Compile web code to dist folder
         script: |
           npm run build
@@ -42,6 +45,10 @@ workflows:
         script: |
           echo "Checking for Xcode workspace file..."
           ls -l $XCODE_WORKSPACE || echo "Xcode workspace file not found"
+      - name: Debug podspec file for CapacitorDevice
+        script: |
+          echo "Checking for CapacitorDevice podspec..."
+          ls -l ../../node_modules/@capacitor/device/ios/CapacitorDevice.podspec || echo "CapacitorDevice podspec not found"
       - name: Debug provisioning profiles and certificates
         script: |
           echo "Listing provisioning profiles..."

@@ -1,10 +1,13 @@
 {
-	"appId": "com.epg.build",
-	"appName": "EPG Pulse",
+	"appId": "app.epg.build",
+	"appName": "EPG",
 	"webDir": "dist",
-	"ios": {
-		"contentInset": "always",
-		"backgroundColor": "#ffffff"
+	"plugins": {
+		"Device": {},
+		"Haptics": {}
 	},
-	"packageClassList": []
+	"packageClassList": [
+		"DevicePlugin",
+		"HapticsPlugin"
+	]
 }

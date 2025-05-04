@@ -106,7 +106,7 @@ workflows:
       - name: Build ipa for distribution
         script: |
           cd ios/App
-          PROVISIONING_PROFILE_UUID="NEW_UUID_HERE"  # Replace with the new UUID
+          PROVISIONING_PROFILE_UUID="NEW_UUID_HERE"  # Replace with the new UUID after extraction
           echo "Using Provisioning Profile UUID: $PROVISIONING_PROFILE_UUID"
           xcodebuild -workspace App.xcworkspace \
             -scheme "$XCODE_SCHEME" \

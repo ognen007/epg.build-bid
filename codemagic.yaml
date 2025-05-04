@@ -61,35 +61,17 @@ workflows:
       - name: Debug provisioning profile details
         script: |
           echo "Checking provisioning profile details..."
-          # Find the provisioning profile file (there should only be one based on the log)
           PROFILE_FILE=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision)
           if [ -f "$PROFILE_FILE" ]; then
-            # Extract the UUID using security command and grep
             UUID=$(security cms -D -i "$PROFILE_FILE" | grep -A 1 UUID | grep string | sed -E 's/.*<string>(.*)<\/string>/\1/')
             if [ -n "$UUID" ]; then
               echo "Found UUID: $UUID"
-              # Export the UUID as an environment variable
-              echo "export PROVISIONING_PROFILE_UUID=$UUID" >> $CM_ENV
-              # Debug: Confirm the variable is written to CM_ENV
-              echo "Contents of CM_ENV after export:"
-              cat $CM_ENV
-              # Debug: Confirm the variable is available in the current shell
-              export PROVISIONING_PROFILE_UUID=$UUID
-              echo "Current shell PROVISIONING_PROFILE_UUID: $PROVISIONING_PROFILE_UUID"
             else
               echo "Failed to extract UUID from $PROFILE_FILE"
               exit 1
             fi
           else
             echo "No provisioning profile found in ~/Library/MobileDevice/Provisioning Profiles/"
-            exit 1
-          fi
-      - name: Debug environment variables
-        script: |
-          echo "Checking environment variables..."
-          echo "PROVISIONING_PROFILE_UUID from environment: $PROVISIONING_PROFILE_UUID"
-          if [ -z "$PROVISIONING_PROFILE_UUID" ]; then
-            echo "Error: PROVISIONING_PROFILE_UUID is not set in environment"
             exit 1
           fi
       - name: Debug bundle ID in Xcode project
@@ -122,12 +104,8 @@ workflows:
       - name: Build ipa for distribution
         script: |
           cd ios/App
-          # Debug: Confirm the UUID is available
+          PROVISIONING_PROFILE_UUID="31a55146-9598-4c99-ae7f-749fa71fa3c5"
           echo "Using Provisioning Profile UUID: $PROVISIONING_PROFILE_UUID"
-          if [ -z "$PROVISIONING_PROFILE_UUID" ]; then
-            echo "Error: PROVISIONING_PROFILE_UUID is not set"
-            exit 1
-          fi
           xcodebuild -workspace App.xcworkspace \
             -scheme "$XCODE_SCHEME" \
             -archivePath "build/App.xcarchive" \

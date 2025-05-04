@@ -18,7 +18,6 @@ workflows:
           - CM_PULSEPROFILE
         certificates:
           - CM_CERTIFICATE
-        certificate_password: "EPG!!build89"  # Add the certificate password here
     triggering:
       events:
         - push
@@ -64,7 +63,7 @@ workflows:
           echo "Checking provisioning profile details..."
           PROFILE_FILE=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision)
           if [ -f "$PROFILE_FILE" ]; then
-            UUID=$(security cms -D -i "$PROFILE_FILE" | grep -A 1 UUID | grep string | sed -E 's/.*<string>(.*)<\/string>/\1/')
+            UUID=$(security cms -D -i "$PROFILE_FILE" | grep -A 1 UUID | grep string | sed -E 's/.*<string>(.*)</string>/\1/')
             if [ -n "$UUID" ]; then
               echo "Found UUID: $UUID"
             else
@@ -98,7 +97,7 @@ workflows:
             <key>method</key>
             <string>app-store</string>
             <key>teamID</key>
-            <string>P58Q6F64US</string>  # Replace with the correct team ID from the Apple Developer Portal if different
+            <string>P58Q6F64US</string>  # Updated to the correct Team ID
             <key>bundleIdentifier</key>
             <string>com.epg.build</string>
           </dict>
@@ -113,7 +112,7 @@ workflows:
             -scheme "$XCODE_SCHEME" \
             -archivePath "build/App.xcarchive" \
             -configuration Release \
-            DEVELOPMENT_TEAM=P58Q6F64US \  # Replace with the correct team ID if different
+            DEVELOPMENT_TEAM=P58Q6F64US \  # Updated to the correct Team ID
             PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID" \
             archive
           xcodebuild -exportArchive \

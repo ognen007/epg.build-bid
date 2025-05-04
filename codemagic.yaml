@@ -63,7 +63,7 @@ workflows:
           echo "Checking provisioning profile details..."
           PROFILE_FILE=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision)
           if [ -f "$PROFILE_FILE" ]; then
-            UUID=$(security cms -D -i "$PROFILE_FILE" | grep -A 1 UUID | grep string | sed -E 's/.*<string>(.*)</string>/\1/')
+            UUID=$(security cms -D -i "$PROFILE_FILE" | grep -A 1 UUID | grep string | sed -E 's/.*<string>(.*)<\/string>/\1')
             if [ -n "$UUID" ]; then
               echo "Found UUID: $UUID"
             else

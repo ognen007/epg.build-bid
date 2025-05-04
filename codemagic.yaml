@@ -61,9 +61,23 @@ workflows:
       - name: Debug provisioning profile details
         script: |
           echo "Checking provisioning profile details..."
-          for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-            security cms -D -i "$profile" | grep -A 1 "Name\|TeamIdentifier\|Entitlements\|UUID"
-          done
+          # Find the provisioning profile file (there should only be one based on the log)
+          PROFILE_FILE=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision)
+          if [ -f "$PROFILE_FILE" ]; then
+            # Extract the UUID using security command and grep
+            UUID=$(security cms -D -i "$PROFILE_FILE" | grep -A 1 UUID | grep string | sed -E 's/.*<string>(.*)<\/string>/\1/')
+            if [ -n "$UUID" ]; then
+              echo "Found UUID: $UUID"
+              # Export the UUID as an environment variable for use in later steps
+              echo "export PROVISIONING_PROFILE_UUID=$UUID" >> $CM_ENV
+            else
+              echo "Failed to extract UUID from $PROFILE_FILE"
+              exit 1
+            fi
+          else
+            echo "No provisioning profile found in ~/Library/MobileDevice/Provisioning Profiles/"
+            exit 1
+          fi
       - name: Debug bundle ID in Xcode project
         script: |
           echo "Checking bundle ID in Xcode project..."
@@ -94,13 +108,19 @@ workflows:
       - name: Build ipa for distribution
         script: |
           cd ios/App
+          # Use the dynamically extracted UUID
+          if [ -z "$PROVISIONING_PROFILE_UUID" ]; then
+            echo "Error: PROVISIONING_PROFILE_UUID is not set"
+            exit 1
+          fi
+          echo "Using Provisioning Profile UUID: $PROVISIONING_PROFILE_UUID"
           xcodebuild -workspace App.xcworkspace \
             -scheme "$XCODE_SCHEME" \
             -archivePath "build/App.xcarchive" \
             -configuration Release \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=P5806F64US \
-            PROVISIONING_PROFILE=y3rr_xs_ \
+            PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID" \
             archive
           xcodebuild -exportArchive \
             -archivePath "build/App.xcarchive" \

@@ -18,6 +18,7 @@ workflows:
           - CM_PULSEPROFILE
         certificates:
           - CM_CERTIFICATE
+        certificate_password: "EPG!!build89"  # Add the certificate password here
     triggering:
       events:
         - push
@@ -97,7 +98,9 @@ workflows:
             <key>method</key>
             <string>app-store</string>
             <key>teamID</key>
-            <string>P5806F64US</string>
+            <string>P58Q6F64US</string>  # Replace with the correct team ID from the Apple Developer Portal if different
+            <key>bundleIdentifier</key>
+            <string>com.epg.build</string>
           </dict>
           </plist>
           EOF
@@ -110,8 +113,7 @@ workflows:
             -scheme "$XCODE_SCHEME" \
             -archivePath "build/App.xcarchive" \
             -configuration Release \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=P5806F64US \
+            DEVELOPMENT_TEAM=P58Q6F64US \  # Replace with the correct team ID if different
             PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID" \
             archive
           xcodebuild -exportArchive \

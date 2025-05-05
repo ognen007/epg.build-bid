@@ -16,7 +16,6 @@ end
 
 target 'App' do
   capacitor_pods
-  # Remove the duplicate entry since it's already in capacitor_pods
   # Add your Pods here
 end
 

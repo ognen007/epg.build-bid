@@ -3,8 +3,8 @@
 	"appName": "EPG Pulse",
 	"webDir": "dist",
 	"ios": {
-		"contentInset": "always",
-		"backgroundColor": "#ffffff"
+		"backgroundColor": "#ffffff",
+		"preferredContentMode": "recommended"
 	},
 	"packageClassList": [
 		"DevicePlugin"
